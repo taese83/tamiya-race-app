@@ -55,7 +55,9 @@ function parseInquirySegments(text: string): PhoneSegment[] {
 }
 
 function googleMapsUrl(venue: string): string {
-  return `https://maps.google.com/maps?q=${encodeURIComponent(venue)}`
+  // 장소명에 '타미야'가 없으면 앞에 붙여 검색 정확도를 높인다
+  const query = venue.includes('타미야') ? venue : `타미야 ${venue}`
+  return `https://maps.google.com/maps?q=${encodeURIComponent(query)}`
 }
 
 // ─── 기본 정보 행 (레이블 고정 너비 + 값 정렬) ───────────────────────────────
@@ -88,10 +90,9 @@ const InquiryText = ({text}: {text: string}) => {
             href={`tel:${seg.value.replace(/[-\s]/g, '')}`}
             sx={{
               color: 'primary.main', fontWeight: 600, textDecoration: 'none',
-              display: 'inline-flex', alignItems: 'center', gap: 0.25,
+              verticalAlign: 'baseline',
               '&:hover': {textDecoration: 'underline'},
             }}>
-            <PhoneIcon sx={{fontSize: 13}} />
             {seg.value}
           </Box>
         ) : (
