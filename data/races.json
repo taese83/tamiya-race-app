@@ -7,6 +7,7 @@
       "date": "2026.07.31",
       "time": "19:30",
       "category": "M3 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=723"
     },
     {
@@ -16,6 +17,7 @@
       "date": "2026.07.28",
       "time": "21:00",
       "category": "M1 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=696"
     },
     {
@@ -25,6 +27,7 @@
       "date": "2026.07.26",
       "time": "18:30",
       "category": "M2 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=725"
     },
     {
@@ -34,6 +37,7 @@
       "date": "2026.07.26",
       "time": "11:30",
       "category": "M2B 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=689"
     },
     {
@@ -43,6 +47,7 @@
       "date": "2026.07.26",
       "time": "13:00",
       "category": "M3 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=689"
     },
     {
@@ -52,6 +57,7 @@
       "date": "2026.07.26",
       "time": "15:00",
       "category": "M2 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=689"
     },
     {
@@ -61,6 +67,7 @@
       "date": "2026.07.26",
       "time": "16:30",
       "category": "M1 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=689"
     },
     {
@@ -70,6 +77,7 @@
       "date": "2026.07.26",
       "time": "18:00",
       "category": "OPEN 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=689"
     },
     {
@@ -78,7 +86,8 @@
       "venue": "수원VXR경기장",
       "date": "2026.07.26",
       "time": "11:00",
-      "category": "M3 클래스(선착순 50명)",
+      "category": "M3 클래스",
+      "note": "선착순 50명",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=691"
     },
     {
@@ -87,7 +96,8 @@
       "venue": "수원VXR경기장",
       "date": "2026.07.26",
       "time": "13:00",
-      "category": "M2B 클래스(선착순 70명)",
+      "category": "M2B 클래스",
+      "note": "선착순 70명",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=691"
     },
     {
@@ -96,7 +106,8 @@
       "venue": "수원VXR경기장",
       "date": "2026.07.26",
       "time": "15:00",
-      "category": "M2 클래스(선착순 70명)",
+      "category": "M2 클래스",
+      "note": "선착순 70명",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=691"
     },
     {
@@ -105,7 +116,8 @@
       "venue": "수원VXR경기장",
       "date": "2026.07.26",
       "time": "17:00",
-      "category": "M1 클래스(선착순 70명)",
+      "category": "M1 클래스",
+      "note": "선착순 70명",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=691"
     },
     {
@@ -115,6 +127,7 @@
       "date": "2026.07.26",
       "time": "16:00",
       "category": "M1 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=704"
     },
     {
@@ -124,6 +137,7 @@
       "date": "2026.07.26",
       "time": "13:00",
       "category": "M2 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=709"
     },
     {
@@ -132,7 +146,8 @@
       "venue": "하남점",
       "date": "2026.07.26",
       "time": "15:00",
-      "category": "M3 클래스(각 선착순 20명)",
+      "category": "M3 클래스",
+      "note": "각 선착순 20명",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=709"
     },
     {
@@ -142,6 +157,7 @@
       "date": "2026.07.26",
       "time": "13:00",
       "category": "M3 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=526"
     },
     {
@@ -150,16 +166,8 @@
       "venue": "부산경기장",
       "date": "2026.07.26",
       "time": "14:00",
-      "category": "OPEN 클래스 (선착순 45명",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=715"
-    },
-    {
-      "id": "715-1",
-      "title": "TMWC 예선",
-      "venue": "부산경기장",
-      "date": "2026.07.26",
-      "time": "",
-      "category": "매장 오픈 10:30)",
+      "category": "OPEN 클래스",
+      "note": "선착순 45명 / 매장 오픈 10:30",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=715"
     },
     {
@@ -169,6 +177,7 @@
       "date": "2026.07.25",
       "time": "11:00",
       "category": "M2B 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=637"
     },
     {
@@ -178,6 +187,7 @@
       "date": "2026.07.25",
       "time": "13:30",
       "category": "M2 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=637"
     },
     {
@@ -187,6 +197,7 @@
       "date": "2026.07.25",
       "time": "14:30",
       "category": "M1 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=637"
     },
     {
@@ -196,6 +207,7 @@
       "date": "2026.07.25",
       "time": "21:00",
       "category": "OPEN 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=680"
     },
     {
@@ -205,6 +217,7 @@
       "date": "2026.07.24",
       "time": "19:30",
       "category": "M2 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=721"
     },
     {
@@ -214,6 +227,7 @@
       "date": "2026.07.24",
       "time": "21:30",
       "category": "M1 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=679"
     },
     {
@@ -223,6 +237,7 @@
       "date": "2026.07.21",
       "time": "21:00",
       "category": "M3 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=630"
     },
     {
@@ -232,6 +247,7 @@
       "date": "2026.07.19",
       "time": "13:00",
       "category": "M1 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=587"
     },
     {
@@ -241,6 +257,7 @@
       "date": "2026.07.19",
       "time": "16:00",
       "category": "M2 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=590"
     },
     {
@@ -250,6 +267,7 @@
       "date": "2026.07.19",
       "time": "18:30",
       "category": "M2B 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=724"
     },
     {
@@ -259,6 +277,7 @@
       "date": "2026.07.19",
       "time": "13:00",
       "category": "M2 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=669"
     },
     {
@@ -267,7 +286,8 @@
       "venue": "용산점",
       "date": "2026.07.19",
       "time": "15:00",
-      "category": "M3 클래스(각 선착순 20명)",
+      "category": "M3 클래스",
+      "note": "각 선착순 20명",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=669"
     },
     {
@@ -276,7 +296,8 @@
       "venue": "수원VXR경기장",
       "date": "2026.07.19",
       "time": "11:30",
-      "category": "OPEN 클래스(선착순 80명)",
+      "category": "OPEN 클래스",
+      "note": "선착순 80명",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=675"
     },
     {
@@ -286,6 +307,7 @@
       "date": "2026.07.19",
       "time": "19:00",
       "category": "M.SPEED 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=678"
     },
     {
@@ -295,6 +317,7 @@
       "date": "2026.07.18",
       "time": "14:00",
       "category": "M1 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=700"
     },
     {
@@ -304,6 +327,7 @@
       "date": "2026.07.18",
       "time": "17:00",
       "category": "M2 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=708"
     },
     {
@@ -313,6 +337,7 @@
       "date": "2026.07.18",
       "time": "21:00",
       "category": "M1 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=708"
     },
     {
@@ -322,6 +347,7 @@
       "date": "2026.07.17",
       "time": "14:00",
       "category": "M3 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=726"
     },
     {
@@ -331,6 +357,7 @@
       "date": "2026.07.17",
       "time": "15:00",
       "category": "M3 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=722"
     },
     {
@@ -340,6 +367,7 @@
       "date": "2026.07.16",
       "time": "19:30",
       "category": "M1 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=641"
     },
     {
@@ -349,6 +377,7 @@
       "date": "2026.07.16",
       "time": "21:00",
       "category": "M2 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=695"
     },
     {
@@ -358,6 +387,7 @@
       "date": "2026.07.12",
       "time": "11:30",
       "category": "M.SPEED 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=623"
     },
     {
@@ -367,6 +397,7 @@
       "date": "2026.07.12",
       "time": "12:30",
       "category": "M2 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=623"
     },
     {
@@ -376,6 +407,7 @@
       "date": "2026.07.12",
       "time": "14:00",
       "category": "M2B 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=623"
     },
     {
@@ -385,6 +417,7 @@
       "date": "2026.07.12",
       "time": "15:30",
       "category": "M3 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=623"
     },
     {
@@ -394,6 +427,7 @@
       "date": "2026.07.12",
       "time": "17:00",
       "category": "M1 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=623"
     },
     {
@@ -403,6 +437,7 @@
       "date": "2026.07.12",
       "time": "16:00",
       "category": "OPEN 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=482"
     },
     {
@@ -412,6 +447,7 @@
       "date": "2026.07.12",
       "time": "13:00",
       "category": "M2 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=686"
     },
     {
@@ -421,6 +457,7 @@
       "date": "2026.07.12",
       "time": "16:00",
       "category": "M2B 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=686"
     },
     {
@@ -430,6 +467,7 @@
       "date": "2026.07.12",
       "time": "14:00",
       "category": "M3 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=693"
     },
     {
@@ -439,6 +477,7 @@
       "date": "2026.07.12",
       "time": "16:00",
       "category": "M2B 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=693"
     },
     {
@@ -448,6 +487,7 @@
       "date": "2026.07.12",
       "time": "18:00",
       "category": "M2 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=693"
     },
     {
@@ -457,6 +497,7 @@
       "date": "2026.07.12",
       "time": "13:00",
       "category": "M2 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=685"
     },
     {
@@ -466,6 +507,7 @@
       "date": "2026.07.12",
       "time": "18:30",
       "category": "M1 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=717"
     },
     {
@@ -474,7 +516,8 @@
       "venue": "인천SN미니카경기장",
       "date": "2026.07.11",
       "time": "18:00",
-      "category": "OPEN 클래스(선착순 40명)",
+      "category": "OPEN 클래스",
+      "note": "선착순 40명",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=690"
     },
     {
@@ -484,6 +527,7 @@
       "date": "2026.07.11",
       "time": "11:00",
       "category": "M.SPEED 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=702"
     },
     {
@@ -493,6 +537,7 @@
       "date": "2026.07.11",
       "time": "13:30",
       "category": "M3 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=702"
     },
     {
@@ -502,6 +547,7 @@
       "date": "2026.07.11",
       "time": "14:30",
       "category": "OPEN 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=702"
     },
     {
@@ -511,6 +557,7 @@
       "date": "2026.07.11",
       "time": "15:00",
       "category": "M2 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=716"
     },
     {
@@ -520,6 +567,7 @@
       "date": "2026.07.11",
       "time": "18:00",
       "category": "M1 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=716"
     },
     {
@@ -529,6 +577,7 @@
       "date": "2026.07.11",
       "time": "13:00",
       "category": "M2 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=668"
     },
     {
@@ -537,7 +586,8 @@
       "venue": "양재본점",
       "date": "2026.07.11",
       "time": "15:00",
-      "category": "M3 클래스(각 선착순 20명)",
+      "category": "M3 클래스",
+      "note": "각 선착순 20명",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=668"
     },
     {
@@ -547,6 +597,7 @@
       "date": "2026.07.11",
       "time": "15:00",
       "category": "M.SPEED 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=676"
     },
     {
@@ -556,6 +607,7 @@
       "date": "2026.07.10",
       "time": "21:30",
       "category": "OPEN 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=692"
     },
     {
@@ -565,6 +617,7 @@
       "date": "2026.07.07",
       "time": "21:00",
       "category": "M2B 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=697"
     },
     {
@@ -574,6 +627,7 @@
       "date": "2026.07.05",
       "time": "18:30",
       "category": "M3 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=684"
     },
     {
@@ -583,6 +637,7 @@
       "date": "2026.07.05",
       "time": "16:00",
       "category": "M2B 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=706"
     },
     {
@@ -592,6 +647,7 @@
       "date": "2026.07.05",
       "time": "13:00",
       "category": "M1 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=519"
     },
     {
@@ -601,6 +657,7 @@
       "date": "2026.07.05",
       "time": "16:00",
       "category": "OPEN 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=519"
     },
     {
@@ -610,6 +667,7 @@
       "date": "2026.07.05",
       "time": "13:00",
       "category": "M2B 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=694"
     },
     {
@@ -618,16 +676,8 @@
       "venue": "부산경기장",
       "date": "2026.07.04",
       "time": "19:00",
-      "category": "OPEN 클래스 (선착순 45명",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=687"
-    },
-    {
-      "id": "687-1",
-      "title": "TMWC 예선",
-      "venue": "부산경기장",
-      "date": "2026.07.04",
-      "time": "",
-      "category": "매장 오픈 10:30)",
+      "category": "OPEN 클래스",
+      "note": "선착순 45명 / 매장 오픈 10:30",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=687"
     },
     {
@@ -637,6 +687,7 @@
       "date": "2026.07.04",
       "time": "14:00",
       "category": "M2B 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=698"
     },
     {
@@ -646,6 +697,7 @@
       "date": "2026.07.04",
       "time": "21:00",
       "category": "M2B 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=707"
     },
     {
@@ -654,7 +706,8 @@
       "venue": "수원VXR경기장",
       "date": "2026.07.04",
       "time": "21:00",
-      "category": "OPEN 클래스(선착순 50명)",
+      "category": "OPEN 클래스",
+      "note": "선착순 50명",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=674"
     },
     {
@@ -664,6 +717,7 @@
       "date": "2026.07.03",
       "time": "21:00",
       "category": "OPEN 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=577"
     },
     {
@@ -673,6 +727,7 @@
       "date": "2026.07.01",
       "time": "21:00",
       "category": "M2B 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=635"
     },
     {
@@ -682,6 +737,7 @@
       "date": "2026.06.30",
       "time": "21:00",
       "category": "OPEN 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=720"
     },
     {
@@ -690,7 +746,8 @@
       "venue": "수원VXR경기장",
       "date": "2026.06.28",
       "time": "11:00",
-      "category": "M.SPEED 클래스(선착순 40명)",
+      "category": "M.SPEED 클래스",
+      "note": "선착순 40명",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=663"
     },
     {
@@ -699,7 +756,8 @@
       "venue": "수원VXR경기장",
       "date": "2026.06.28",
       "time": "13:00",
-      "category": "M2B 클래스(선착순 70명)",
+      "category": "M2B 클래스",
+      "note": "선착순 70명",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=663"
     },
     {
@@ -708,7 +766,8 @@
       "venue": "수원VXR경기장",
       "date": "2026.06.28",
       "time": "15:00",
-      "category": "M2 클래스(선착순 70명)",
+      "category": "M2 클래스",
+      "note": "선착순 70명",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=663"
     },
     {
@@ -717,7 +776,8 @@
       "venue": "수원VXR경기장",
       "date": "2026.06.28",
       "time": "17:00",
-      "category": "M1 클래스(선착순 70명)",
+      "category": "M1 클래스",
+      "note": "선착순 70명",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=663"
     },
     {
@@ -727,6 +787,7 @@
       "date": "2026.06.28",
       "time": "16:00",
       "category": "OPEN 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=705"
     },
     {
@@ -736,6 +797,7 @@
       "date": "2026.06.28",
       "time": "13:00",
       "category": "M3 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=509"
     },
     {
@@ -745,6 +807,7 @@
       "date": "2026.06.28",
       "time": "15:00",
       "category": "M2B 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=718"
     },
     {
@@ -754,6 +817,7 @@
       "date": "2026.06.28",
       "time": "18:30",
       "category": "M3",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=718"
     },
     {
@@ -763,6 +827,7 @@
       "date": "2026.06.27",
       "time": "16:00",
       "category": "M.SPEED 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=497"
     },
     {
@@ -772,6 +837,7 @@
       "date": "2026.06.27",
       "time": "21:00",
       "category": "OPEN 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=711"
     },
     {
@@ -781,6 +847,7 @@
       "date": "2026.06.27",
       "time": "11:00",
       "category": "M2B 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=701"
     },
     {
@@ -790,6 +857,7 @@
       "date": "2026.06.27",
       "time": "13:30",
       "category": "M2 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=701"
     },
     {
@@ -799,6 +867,7 @@
       "date": "2026.06.27",
       "time": "14:30",
       "category": "M1 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=701"
     },
     {
@@ -808,6 +877,7 @@
       "date": "2026.06.27",
       "time": "12:00",
       "category": "M2B 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=672"
     },
     {
@@ -817,6 +887,7 @@
       "date": "2026.06.27",
       "time": "14:00",
       "category": "M3 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=672"
     },
     {
@@ -826,6 +897,7 @@
       "date": "2026.06.27",
       "time": "16:00",
       "category": "M2 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=672"
     },
     {
@@ -835,6 +907,7 @@
       "date": "2026.06.27",
       "time": "18:00",
       "category": "M1 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=672"
     },
     {
@@ -844,6 +917,7 @@
       "date": "2026.06.27",
       "time": "13:00",
       "category": "OPEN 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=714"
     },
     {
@@ -853,6 +927,7 @@
       "date": "2026.06.26",
       "time": "19:30",
       "category": "M3 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=683"
     },
     {
@@ -862,6 +937,7 @@
       "date": "2026.06.26",
       "time": "21:30",
       "category": "M1 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=677"
     },
     {
@@ -871,6 +947,7 @@
       "date": "2026.06.26",
       "time": "21:00",
       "category": "OPEN 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=682"
     },
     {
@@ -880,6 +957,7 @@
       "date": "2026.06.23",
       "time": "21:00",
       "category": "M1 클래스",
+      "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=719"
     }
   ],
@@ -1452,6 +1530,6 @@
       "applyButtonText": null
     }
   },
-  "count": 98,
-  "cachedAt": "2026-07-14T03:19:39.473Z"
+  "count": 96,
+  "cachedAt": "2026-07-14T04:49:58.700Z"
 }
