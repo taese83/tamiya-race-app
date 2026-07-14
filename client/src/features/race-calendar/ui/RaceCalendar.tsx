@@ -1,28 +1,29 @@
-import {useState} from 'react'
 import {Box, ToggleButtonGroup, ToggleButton, useMediaQuery} from '@mui/material'
 import {useTheme} from '@mui/material/styles'
 import ViewDayIcon from '@mui/icons-material/ViewDay'
 import ViewWeekIcon from '@mui/icons-material/ViewWeek'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import type {RaceEntry} from '@/entities/race'
+import type {CalendarViewType} from '@/shared/lib/raceSettings'
 import {CalendarDay} from './CalendarDay'
 import {CalendarWeek} from './CalendarWeek'
 import {CalendarMonth} from './CalendarMonth'
 
-export type CalendarViewType = 'day' | 'week' | 'month'
+export type {CalendarViewType}
 
 interface RaceCalendarProps {
   races: RaceEntry[]
+  view: CalendarViewType
+  onViewChange: (v: CalendarViewType) => void
   onRaceClick: (race: RaceEntry) => void
 }
 
-export const RaceCalendar = ({races, onRaceClick}: RaceCalendarProps) => {
-  const [view, setView] = useState<CalendarViewType>('month')
+export const RaceCalendar = ({races, view, onViewChange, onRaceClick}: RaceCalendarProps) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   const handleViewChange = (_: React.MouseEvent, v: CalendarViewType | null) => {
-    if (v != null) setView(v)
+    if (v != null) onViewChange(v)
   }
 
   return (

@@ -2,20 +2,31 @@ import {useState} from 'react'
 import {IconButton, Tooltip, Snackbar, Alert} from '@mui/material'
 import ShareIcon from '@mui/icons-material/Share'
 import CheckIcon from '@mui/icons-material/Check'
+import {encodeSettings} from '@/shared/lib/raceSettings'
+import type {SavedSettings} from '@/shared/lib/raceSettings'
 
 interface ShareButtonProps {
-  /** 공유할 URL — 생략 시 window.location.href */
-  url?: string
+  settings?: SavedSettings
 }
 
-export const ShareButton = ({url}: ShareButtonProps) => {
+function buildShareUrl(settings: SavedSettings | undefined): string {
+  const base = `${window.location.protocol}//${window.location.host}${window.location.pathname}`
+  if (!settings) return base
+  const hasContent = settings.view || settings.cview
+    || (settings.venues?.length ?? 0) > 0
+    || (settings.cats?.length ?? 0) > 0
+  if (!hasContent) return base
+  const encoded = encodeSettings(settings)
+  return encoded ? `${base}?s=${encoded}` : base
+}
+
+export const ShareButton = ({settings}: ShareButtonProps) => {
   const [copied, setCopied] = useState(false)
   const [open, setOpen] = useState(false)
 
   const handleShare = async () => {
-    const shareUrl = url ?? window.location.href
+    const shareUrl = buildShareUrl(settings)
 
-    // Web Share API 지원 환경 (모바일)
     if (navigator.share) {
       try {
         await navigator.share({
@@ -29,31 +40,19 @@ export const ShareButton = ({url}: ShareButtonProps) => {
       }
     }
 
-    // 클립보드 복사
     try {
       await navigator.clipboard.writeText(shareUrl)
-      setCopied(true)
-      setOpen(true)
-      setTimeout(() => setCopied(false), 2000)
     } catch {
-      // clipboard API 실패 시 execCommand fallback
-      const textarea = document.createElement('textarea')
-      textarea.value = shareUrl
-      textarea.style.position = 'fixed'
-      textarea.style.opacity = '0'
-      document.body.appendChild(textarea)
-      textarea.select()
-      document.execCommand('copy')
-      document.body.removeChild(textarea)
-      setCopied(true)
-      setOpen(true)
-      setTimeout(() => setCopied(false), 2000)
+      // clipboard API 미지원 환경 — silent fail (execCommand는 deprecated)
     }
+    setCopied(true)
+    setOpen(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   return (
     <>
-      <Tooltip title={copied ? '링크 복사됨!' : '현재 필터 상태 공유'}>
+      <Tooltip title={copied ? '링크 복사됨!' : '현재 설정 상태 공유'}>
         <IconButton
           size="small"
           onClick={handleShare}

@@ -105,7 +105,14 @@ export const CalendarWeek = ({races, onRaceClick}: CalendarWeekProps) => {
               <Stack spacing={0.5}>
                 {dayRaces.map(race => (
                   <Tooltip key={race.id} title={`${race.venue} — ${race.category}`} placement="top">
-                    <Box onClick={() => onRaceClick(race)} sx={{cursor: 'pointer'}}>
+                    <Box
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`${race.category} ${race.time} ${race.venue}`}
+                      onClick={() => onRaceClick(race)}
+                      onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); onRaceClick(race) } }}
+                      sx={{cursor: 'pointer'}}>
+
                       <Stack spacing={0.25}>
                         {race.time && (
                           <Typography variant="caption" sx={{fontSize: '0.65rem', color: 'text.secondary', lineHeight: 1}}>

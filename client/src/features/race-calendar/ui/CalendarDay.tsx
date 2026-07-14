@@ -71,7 +71,12 @@ export const CalendarDay = ({races, onRaceClick}: CalendarDayProps) => {
           return (
             <Box
               key={item.key}
+              role="button"
+              tabIndex={0}
+              aria-label={format(item.date, 'M월 d일 EEE', {locale: ko})}
+              aria-pressed={isActive}
               onClick={() => setCurrent(item.date)}
+              onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); setCurrent(item.date) } }}
               sx={{
                 minWidth: 40, px: 0.75, py: 0.5, borderRadius: 1, cursor: 'pointer', textAlign: 'center',
                 bgcolor: isActive ? 'primary.main' : isT ? 'action.selected' : 'transparent',
@@ -109,8 +114,12 @@ export const CalendarDay = ({races, onRaceClick}: CalendarDayProps) => {
             <Paper
               key={race.id}
               variant="outlined"
+              role="button"
+              tabIndex={0}
+              aria-label={`${race.category} ${race.time} ${race.venue}`}
               onClick={() => onRaceClick(race)}
-              sx={{p: 1.5, cursor: 'pointer', '&:hover': {borderColor: 'primary.main', bgcolor: 'action.hover'}, transition: 'border-color 0.15s'}}>
+              onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); onRaceClick(race) } }}
+              sx={{p: 1.5, cursor: 'pointer', '&:hover': {borderColor: 'primary.main', bgcolor: 'action.hover'}, '&:focus-visible': {outline: '2px solid', outlineColor: 'primary.main'}, transition: 'border-color 0.15s'}}>
               <Stack direction="row" alignItems="flex-start" spacing={1.5}>
                 {/* 시간 */}
                 <Box sx={{minWidth: 46, textAlign: 'center'}}>

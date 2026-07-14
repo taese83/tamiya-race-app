@@ -7,10 +7,6 @@ import {useTheme} from '@mui/material/styles'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import HowToRegIcon from '@mui/icons-material/HowToReg'
-import LocationOnIcon from '@mui/icons-material/LocationOn'
-import AccessTimeIcon from '@mui/icons-material/AccessTime'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import CloseIcon from '@mui/icons-material/Close'
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents'
 import {
@@ -42,7 +38,7 @@ function sortByTime(races: RaceEntry[]): RaceEntry[] {
   })
 }
 
-// ─── 데스크탑: 상세 대회 행 ────────────────────────────────────────────────────
+// ─── 데스크탑: 셀 내 종목 칩 (모바일과 동일한 색상 배경 + 장소 + 시간 형태) ──
 
 interface RaceRowProps {
   race: RaceEntry
@@ -50,7 +46,7 @@ interface RaceRowProps {
 }
 
 const RaceRow = ({race, onClick}: RaceRowProps) => {
-  const hasDetail = Boolean(race.detailUrl)
+  const color = getCategoryColor(race.category)
   return (
     <Tooltip
       placement="top"
@@ -62,33 +58,41 @@ const RaceRow = ({race, onClick}: RaceRowProps) => {
         </Stack>
       }>
       <Box
-        onClick={onClick}
+        role="button"
+        tabIndex={0}
+        onClick={e => { e.stopPropagation(); onClick() }}
+        onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); onClick() } }}
+        aria-label={`${race.category} ${race.time} ${race.venue}`}
         sx={{
-          cursor: 'pointer', mb: 0.3, px: 0.5, py: 0.2,
-          borderRadius: 0.75, bgcolor: 'action.hover',
-          '&:hover': {bgcolor: 'action.selected'},
-          transition: 'background-color 0.1s',
+          cursor: 'pointer', mb: 0.3,
+          px: 0.5, py: 0.3, borderRadius: 0.75,
+          bgcolor: color,
+          '&:hover': {opacity: 0.85},
+          transition: 'opacity 0.1s',
+          overflow: 'hidden',
         }}>
-        <Stack direction="row" alignItems="center" spacing={0.5} sx={{mb: 0.2}}>
-          <CategoryChip category={race.category} />
-          {hasDetail && <HowToRegIcon sx={{fontSize: 11, color: 'text.disabled', flexShrink: 0}} />}
-        </Stack>
-        <Stack direction="row" alignItems="center" spacing={0.3} sx={{overflow: 'hidden'}}>
-          {race.time && (
-            <Stack direction="row" alignItems="center" spacing={0.2} sx={{flexShrink: 0}}>
-              <AccessTimeIcon sx={{fontSize: 9, color: 'text.disabled'}} />
-              <Typography variant="caption" sx={{fontSize: '0.62rem', color: 'text.secondary', lineHeight: 1}}>
-                {race.time}
-              </Typography>
-            </Stack>
-          )}
-          <Stack direction="row" alignItems="center" spacing={0.2} sx={{overflow: 'hidden', minWidth: 0}}>
-            <LocationOnIcon sx={{fontSize: 9, color: 'text.disabled', flexShrink: 0}} />
-            <Typography variant="caption" sx={{fontSize: '0.62rem', color: 'text.disabled', lineHeight: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
-              {race.venue}
-            </Typography>
-          </Stack>
-        </Stack>
+        {/* 장소 — 최대 2줄 */}
+        {race.venue && (
+          <Typography sx={{
+            fontSize: '0.6rem', fontWeight: 600, color: '#fff',
+            lineHeight: 1.25,
+            display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+          }}>
+            {race.venue}
+          </Typography>
+        )}
+        {/* 시간 */}
+        {race.time && (
+          <Typography sx={{
+            fontSize: '0.55rem', color: 'rgba(255,255,255,0.85)',
+            lineHeight: 1.2, whiteSpace: 'nowrap',
+            overflow: 'hidden', textOverflow: 'ellipsis',
+            mt: race.venue ? 0.2 : 0,
+          }}>
+            {race.time}
+          </Typography>
+        )}
       </Box>
     </Tooltip>
   )
@@ -98,11 +102,16 @@ const RaceRow = ({race, onClick}: RaceRowProps) => {
 
 const MobileRaceRow = ({race, onClick}: RaceRowProps) => (
   <Box
+    role="button"
+    tabIndex={0}
+    aria-label={`${race.category} ${race.time} ${race.venue}`}
     onClick={onClick}
+    onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); onClick() } }}
     sx={{
       display: 'flex', alignItems: 'center', gap: 1.5,
       px: 2, py: 1.25, cursor: 'pointer',
       '&:hover': {bgcolor: 'action.hover'},
+      '&:focus-visible': {outline: '2px solid', outlineColor: 'primary.main', outlineOffset: -2},
       borderBottom: '1px solid', borderColor: 'divider',
     }}>
     <Box sx={{minWidth: 40, textAlign: 'center'}}>
@@ -298,8 +307,8 @@ interface DayCellDesktopProps {
   todayFlag: boolean
   isPastDay: boolean
   dayNum: number
-  expanded: boolean
-  onToggleExpand: () => void
+  isSelected: boolean
+  onSelect: () => void
   onRaceClick: (race: RaceEntry) => void
 }
 
@@ -307,24 +316,34 @@ const CELL_HEIGHT_DESKTOP = 140
 
 const DayCellDesktop = ({
   day, dayRaces, inMonth, todayFlag, isPastDay, dayNum,
-  expanded, onToggleExpand, onRaceClick,
+  isSelected, onSelect, onRaceClick,
 }: DayCellDesktopProps) => {
+  const visibleRaces = dayRaces.slice(0, MAX_SHOW)
   const overCount = dayRaces.length - MAX_SHOW
   const hasMore = overCount > 0
-  const visibleRaces = expanded ? dayRaces : dayRaces.slice(0, MAX_SHOW)
 
   return (
     <Paper
       square
       elevation={0}
+      role={inMonth ? 'button' : undefined}
+      tabIndex={inMonth ? 0 : undefined}
+      aria-label={inMonth ? `${format(day, 'M월 d일')} ${dayRaces.length}개 일정` : undefined}
+      onClick={inMonth ? onSelect : undefined}
+      onKeyDown={inMonth ? e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); onSelect() } } : undefined}
       sx={{
-        height: expanded ? 'auto' : CELL_HEIGHT_DESKTOP,
-        minHeight: expanded ? CELL_HEIGHT_DESKTOP : undefined,
+        height: CELL_HEIGHT_DESKTOP,
         p: 0.5, display: 'flex', flexDirection: 'column',
-        bgcolor: todayFlag ? 'action.selected' : inMonth ? 'background.paper' : 'action.disabledBackground',
+        bgcolor: isSelected ? 'action.selected' : todayFlag ? 'action.selected' : inMonth ? 'background.paper' : 'action.disabledBackground',
         borderRight: '1px solid', borderBottom: '1px solid', borderColor: 'divider',
         opacity: !inMonth ? 0.35 : isPastDay ? 0.45 : 1,
         overflow: 'hidden', position: 'relative',
+        cursor: inMonth ? 'pointer' : 'default',
+        outline: isSelected ? '2px solid' : 'none',
+        outlineColor: 'primary.main',
+        transition: 'background-color 0.1s',
+        '&:hover': inMonth ? {bgcolor: isSelected ? 'action.selected' : 'action.hover'} : {},
+        '&:focus-visible': inMonth ? {outline: '2px solid', outlineColor: 'primary.main', outlineOffset: -2} : {},
       }}>
       <Typography
         variant="caption"
@@ -341,14 +360,9 @@ const DayCellDesktop = ({
         ))}
       </Box>
       {hasMore && (
-        <Box
-          onClick={e => {e.stopPropagation(); onToggleExpand()}}
-          sx={{display: 'flex', alignItems: 'center', gap: 0.25, cursor: 'pointer', mt: 0.25, flexShrink: 0, '&:hover .more-text': {textDecoration: 'underline'}}}>
-          {expanded ? <ExpandLessIcon sx={{fontSize: 12, color: 'primary.main'}} /> : <ExpandMoreIcon sx={{fontSize: 12, color: 'primary.main'}} />}
-          <Typography className="more-text" variant="caption" sx={{fontSize: '0.65rem', color: 'primary.main', lineHeight: 1}}>
-            {expanded ? '접기' : `+${overCount}건 더보기`}
-          </Typography>
-        </Box>
+        <Typography variant="caption" sx={{fontSize: '0.65rem', color: 'primary.main', lineHeight: 1, flexShrink: 0, mt: 0.25}}>
+          +{overCount}건 더보기
+        </Typography>
       )}
     </Paper>
   )
@@ -379,17 +393,25 @@ const DayCellMobile = ({
     <Paper
       square
       elevation={0}
+      role={inMonth ? 'button' : undefined}
+      tabIndex={inMonth ? 0 : undefined}
+      aria-label={inMonth ? `${format(day, 'M월 d일')} ${dayRaces.length}개 일정` : undefined}
       onClick={inMonth ? onSelect : undefined}
+      onKeyDown={inMonth ? e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); onSelect() } } : undefined}
       sx={{
         minHeight: 56, height: '100%', boxSizing: 'border-box',
         px: '3px', pt: '4px', pb: '4px',
         display: 'flex', flexDirection: 'column', alignItems: 'stretch',
-        bgcolor: isSelected ? 'primary.main' : todayFlag ? 'action.selected' : inMonth ? 'background.paper' : 'action.disabledBackground',
+        bgcolor: isSelected ? 'action.focus' : todayFlag ? 'action.selected' : inMonth ? 'background.paper' : 'action.disabledBackground',
         borderRight: '1px solid', borderBottom: '1px solid', borderColor: 'divider',
+        outline: isSelected ? '2px solid' : 'none',
+        outlineColor: 'primary.main',
+        outlineOffset: -2,
         opacity: !inMonth ? 0.3 : isPastDay ? 0.45 : 1,
         cursor: inMonth ? 'pointer' : 'default',
         transition: 'background-color 0.1s',
-        '&:hover': inMonth ? {bgcolor: isSelected ? 'primary.dark' : 'action.hover'} : {},
+        '&:hover': inMonth ? {bgcolor: isSelected ? 'action.focus' : 'action.hover'} : {},
+        '&:focus-visible': inMonth ? {outline: '2px solid', outlineColor: 'primary.main', outlineOffset: -2} : {},
       }}>
 
       {/* 날짜 숫자 — 오늘은 원형 배경 */}
@@ -397,16 +419,14 @@ const DayCellMobile = ({
         <Box sx={{
           width: 22, height: 22,
           borderRadius: todayFlag ? '50%' : 0,
-          bgcolor: todayFlag && !isSelected ? 'primary.main' : 'transparent',
+          bgcolor: todayFlag ? 'primary.main' : 'transparent',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
           <Typography
             variant="caption"
             sx={{
               fontSize: '0.72rem', fontWeight: todayFlag || isSelected ? 800 : 400, lineHeight: 1,
-              color: isSelected
-                ? '#fff'
-                : todayFlag ? '#fff'
+              color: todayFlag ? '#fff'
                 : dayNum === 0 ? 'error.main'
                 : dayNum === 6 ? 'primary.light'
                 : 'text.primary',
@@ -424,7 +444,7 @@ const DayCellMobile = ({
         {extra > 0 && (
           <Typography sx={{
             fontSize: '0.52rem', lineHeight: 1.2, textAlign: 'center',
-            color: isSelected ? 'rgba(255,255,255,0.8)' : 'text.disabled',
+            color: 'text.disabled',
           }}>
             +{extra}
           </Typography>
@@ -456,7 +476,11 @@ const TodayRaceHeader = ({todayRaces, onRaceClick}: TodayRaceHeaderProps) => (
         return (
           <Box
             key={cls.key}
+            role={isActive ? 'button' : undefined}
+            tabIndex={isActive ? 0 : undefined}
+            aria-label={isActive && race ? `${race.category} ${race.time} ${race.venue}` : undefined}
             onClick={race ? () => onRaceClick(race) : undefined}
+            onKeyDown={isActive && race ? e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); onRaceClick(race) } } : undefined}
             sx={{
               display: 'flex', alignItems: 'center', gap: 0.5,
               opacity: isActive ? 1 : 0.28,
@@ -520,7 +544,6 @@ export const CalendarMonth = ({races, onRaceClick}: CalendarMonthProps) => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   const [current, setCurrent] = useState(() => new Date())
-  const [expandedDates, setExpandedDates] = useState<Set<string>>(new Set())
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
 
   const monthStart = startOfMonth(current)
@@ -541,27 +564,15 @@ export const CalendarMonth = ({races, onRaceClick}: CalendarMonthProps) => {
   const todayKey = format(new Date(), 'yyyy.MM.dd')
   const todayRaces = racesByDate.get(todayKey) ?? []
 
-  const toggleExpand = (dateKey: string) => {
-    setExpandedDates(prev => {
-      const next = new Set(prev)
-      if (next.has(dateKey)) next.delete(dateKey)
-      else next.add(dateKey)
-      return next
-    })
-  }
-
   const prev = () => {
-    setExpandedDates(new Set())
     setSelectedDate(null)
     setCurrent(d => new Date(d.getFullYear(), d.getMonth() - 1, 1))
   }
   const next = () => {
-    setExpandedDates(new Set())
     setSelectedDate(null)
     setCurrent(d => new Date(d.getFullYear(), d.getMonth() + 1, 1))
   }
   const today = () => {
-    setExpandedDates(new Set())
     setSelectedDate(null)
     setCurrent(new Date())
   }
@@ -645,8 +656,16 @@ export const CalendarMonth = ({races, onRaceClick}: CalendarMonthProps) => {
               todayFlag={todayFlag}
               isPastDay={isPastDay}
               dayNum={day.getDay()}
-              expanded={expandedDates.has(dateKey)}
-              onToggleExpand={() => toggleExpand(dateKey)}
+              isSelected={selectedDate === dateKey}
+              onSelect={() => {
+                if (dayRaces.length === 1 && dayRaces[0]) {
+                  // 단일 대회: 바로 상세 오픈
+                  onRaceClick(dayRaces[0])
+                } else if (dayRaces.length > 1) {
+                  // 복수 대회: 드로어로 목록 표시
+                  setSelectedDate(selectedDate === dateKey ? null : dateKey)
+                }
+              }}
               onRaceClick={onRaceClick}
             />
           )
@@ -656,8 +675,8 @@ export const CalendarMonth = ({races, onRaceClick}: CalendarMonthProps) => {
       {/* 색상 가이드 */}
       <ColorLegend />
 
-      {/* 모바일: 선택 날짜 하단 드로어 (Google Calendar 스타일) */}
-      {isMobile && (
+      {/* 날짜 선택 시 하단 드로어 — 모바일: 항상, 데스크탑: 같은 날짜에 복수 경기장이 있을 때만 */}
+      {(isMobile || (!isMobile && selectedRaces.length > 1)) && (
         <Drawer
           anchor="bottom"
           open={Boolean(selectedDate && selectedRaces.length > 0)}
@@ -689,7 +708,7 @@ export const CalendarMonth = ({races, onRaceClick}: CalendarMonthProps) => {
           <Box sx={{overflowY: 'auto'}}>
             <DrawerRaceMatrix
               races={selectedRaces}
-              onRaceClick={race => {onRaceClick(race); setSelectedDate(null)}}
+              onRaceClick={onRaceClick}
             />
           </Box>
         </Drawer>

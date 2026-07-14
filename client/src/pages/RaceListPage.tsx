@@ -1,6 +1,5 @@
-import {useMemo} from 'react'
+import {useMemo, useState} from 'react'
 import {useQuery} from '@tanstack/react-query'
-import {useSearchParams} from 'react-router'
 import {
   Box, Typography, AppBar, Toolbar, IconButton,
   CircularProgress, Alert, Stack, Chip,
@@ -18,21 +17,22 @@ import {RaceDetailDrawer} from '@/features/race-list/ui/RaceDetailDrawer'
 import {RaceCalendar} from '@/features/race-calendar/ui/RaceCalendar'
 import {RaceFilter} from '@/features/race-filter/ui/RaceFilter'
 import {ShareButton} from '@/features/race-share/ui/ShareButton'
-import {useState} from 'react'
-
-type ViewMode = 'list' | 'calendar'
+import {usePageSettings} from '@/features/race-filter/model/usePageSettings'
 
 function matchCategory(category: string, filter: string): boolean {
   return category.includes(filter.replace(' 클래스', ''))
 }
 
 export const RaceListPage = () => {
-  // ── URL 쿼리 파라미터로 필터 + 뷰 상태 관리 (공유 가능) ─────────────────────
-  const [searchParams, setSearchParams] = useSearchParams()
-
-  const viewMode = (searchParams.get('view') as ViewMode | null) ?? 'list'
-  const selectedVenues = searchParams.getAll('venue')
-  const selectedCategories = searchParams.getAll('cat')
+  // ── 통합 설정 상태 (URL params + localStorage) ───────────────────────────
+  const {
+    viewMode, setViewMode,
+    calendarView, setCalendarView,
+    selectedVenues, setSelectedVenues,
+    selectedCategories, setSelectedCategories,
+    clearAllFilters,
+    currentSettings,
+  } = usePageSettings()
 
   const [showFilter, setShowFilter] = useState(false)
   const [calendarSelectedRace, setCalendarSelectedRace] = useState<RaceEntry | null>(null)
@@ -43,43 +43,6 @@ export const RaceListPage = () => {
     staleTime: Infinity,
     retry: 1,
   })
-
-  // ── 필터 변경 핸들러 ─────────────────────────────────────────────────────────
-  const setViewMode = (v: ViewMode) => {
-    setSearchParams((prev: URLSearchParams) => {
-      const next = new URLSearchParams(prev)
-      if (v === 'list') next.delete('view')
-      else next.set('view', v)
-      return next
-    }, {replace: true})
-  }
-
-  const setSelectedVenues = (venues: string[]) => {
-    setSearchParams((prev: URLSearchParams) => {
-      const next = new URLSearchParams(prev)
-      next.delete('venue')
-      venues.forEach(venue => next.append('venue', venue))
-      return next
-    }, {replace: true})
-  }
-
-  const setSelectedCategories = (cats: string[]) => {
-    setSearchParams((prev: URLSearchParams) => {
-      const next = new URLSearchParams(prev)
-      next.delete('cat')
-      cats.forEach(cat => next.append('cat', cat))
-      return next
-    }, {replace: true})
-  }
-
-  const clearAllFilters = () => {
-    setSearchParams((prev: URLSearchParams) => {
-      const next = new URLSearchParams(prev)
-      next.delete('venue')
-      next.delete('cat')
-      return next
-    }, {replace: true})
-  }
 
   // ── 필터 적용 ────────────────────────────────────────────────────────────────
   const filteredRaces = useMemo(() => {
@@ -95,7 +58,7 @@ export const RaceListPage = () => {
     ? format(new Date(data.cachedAt), 'yyyy.MM.dd HH:mm')
     : null
 
-  const handleViewChange = (_: React.MouseEvent, v: ViewMode | null) => {
+  const handleViewChange = (_: React.MouseEvent, v: 'list' | 'calendar' | null) => {
     if (v != null) setViewMode(v)
   }
 
@@ -120,7 +83,6 @@ export const RaceListPage = () => {
             alt="TAMIYA"
             sx={{height: 26, flexShrink: 0, mr: 0.5}}
           />
-          {/* 제목: 모바일에서 줄어들되 최소 너비 유지 */}
           <Typography
             variant="h6"
             noWrap
@@ -128,7 +90,6 @@ export const RaceListPage = () => {
             매장·경기장 대회 일정
           </Typography>
 
-          {/* 업데이트 시각: sm 이상에서만 표시 */}
           {updatedAt != null && (
             <Tooltip title="매일 자정 자동 업데이트됩니다">
               <Chip
@@ -143,12 +104,11 @@ export const RaceListPage = () => {
             </Tooltip>
           )}
 
-          {/* 필터 토글 */}
           <Tooltip title={showFilter ? '필터 닫기' : '필터 열기'}>
             <IconButton
               size="small"
               onClick={() => setShowFilter(v => !v)}
-              aria-label="필터 열기"
+              aria-label={showFilter ? '필터 닫기' : '필터 열기'}
               color={activeFilterCount > 0 ? 'primary' : 'default'}>
               <Badge
                 badgeContent={activeFilterCount}
@@ -159,7 +119,6 @@ export const RaceListPage = () => {
             </IconButton>
           </Tooltip>
 
-          {/* 리스트 / 캘린더 전환 */}
           <ToggleButtonGroup
             value={viewMode}
             exclusive
@@ -174,11 +133,9 @@ export const RaceListPage = () => {
             </ToggleButton>
           </ToggleButtonGroup>
 
-          {/* 공유 버튼 */}
-          <ShareButton />
+          <ShareButton settings={currentSettings} />
         </Toolbar>
 
-        {/* 통합 필터 패널 */}
         <Collapse in={showFilter}>
           <Paper
             square
@@ -239,7 +196,12 @@ export const RaceListPage = () => {
 
         {data != null && viewMode === 'calendar' && (
           <>
-            <RaceCalendar races={filteredRaces} onRaceClick={setCalendarSelectedRace} />
+            <RaceCalendar
+              races={filteredRaces}
+              view={calendarView}
+              onViewChange={setCalendarView}
+              onRaceClick={setCalendarSelectedRace}
+            />
             <RaceDetailDrawer race={calendarSelectedRace} onClose={() => setCalendarSelectedRace(null)} />
           </>
         )}
