@@ -2,7 +2,7 @@
 // M3=주황, M2B=노랑, M2=초록, M1=파랑, OPEN=빨강, M-SPEED=보라
 // M2B를 M2보다 앞에 두어 includes() 매칭 순서를 보장한다
 export const CLASS_LIST = [
-  {key: 'M-SPEED', label: 'M-SPEED 클래스', color: '#7b1fa2'},
+  {key: 'M.SPEED', label: 'M.SPEED 클래스', color: '#7b1fa2'},
   {key: 'M1',      label: 'M1 클래스',      color: '#1565c0'},
   {key: 'M2B',     label: 'M2B 클래스',     color: '#f9a825'},
   {key: 'M2',      label: 'M2 클래스',      color: '#2e7d32'},
