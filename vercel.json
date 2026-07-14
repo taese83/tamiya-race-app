@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "cp data/races.json client/public/races.json && pnpm --filter client build",
+  "buildCommand": "node scripts/prepare-build.cjs && pnpm --filter client build",
   "outputDirectory": "client/dist",
   "installCommand": "pnpm install --frozen-lockfile",
   "framework": null,
