@@ -16,7 +16,8 @@ export interface RaceEntry {
   venue: string
   date: string       // YYYY.MM.DD
   time: string       // HH:MM
-  category: string
+  category: string   // () 제거된 순수 클래스명
+  note: string       // () 안 부연설명 (예: 선착순 45명 / 매장 오픈 10:30)
   detailUrl: string
 }
 
@@ -30,15 +31,34 @@ export interface RaceDetail {
   applyButtonText: string | null
 }
 
-function parseEvents(eventText: string): Array<{time: string; category: string}> {
-  return eventText
-    .split(/\s*\/\s*/)
+function parseEvents(eventText: string): Array<{time: string; category: string; note: string}> {
+  // () 안의 /는 분리 대상이 아니므로 괄호 밖의 / 만 분리
+  const parts: string[] = []
+  let depth = 0
+  let buf = ''
+  for (const ch of eventText) {
+    if (ch === '(') { depth++; buf += ch }
+    else if (ch === ')') { depth--; buf += ch }
+    else if (ch === '/' && depth === 0) {
+      if (buf.trim()) parts.push(buf.trim())
+      buf = ''
+    } else {
+      buf += ch
+    }
+  }
+  if (buf.trim()) parts.push(buf.trim())
+
+  return parts
     .map(part => {
-      const trimmed = part.trim()
-      const m = trimmed.match(/^(\d{1,2}:\d{2})\s+(.+)$/)
+      // "19:00 OPEN 클래스 (선착순 45명 / 매장 오픈 10:30)" 파싱
+      const noteMatch = part.match(/^(.*?)\s*\((.+)\)\s*$/)
+      const withoutNote = noteMatch ? noteMatch[1]?.trim() ?? part : part.trim()
+      const note = noteMatch ? noteMatch[2]?.trim() ?? '' : ''
+
+      const m = withoutNote.match(/^(\d{1,2}:\d{2})\s+(.+)$/)
       return m
-        ? {time: m[1] ?? '', category: m[2]?.trim() ?? trimmed}
-        : {time: '', category: trimmed}
+        ? {time: m[1] ?? '', category: m[2]?.trim() ?? withoutNote, note}
+        : {time: '', category: withoutNote, note}
     })
     .filter(e => e.category.length > 0)
 }
@@ -126,11 +146,11 @@ export async function fetchRaces(): Promise<RaceEntry[]> {
 
     const events = parseEvents(eventText)
     if (events.length === 0) {
-      entries.push({id: `${wrId}-0`, title, venue, date, time: '', category: eventText, detailUrl})
+      entries.push({id: `${wrId}-0`, title, venue, date, time: '', category: eventText, note: '', detailUrl})
       return
     }
     events.forEach((ev, idx) => {
-      entries.push({id: `${wrId}-${idx}`, title, venue, date, time: ev.time, category: ev.category, detailUrl})
+      entries.push({id: `${wrId}-${idx}`, title, venue, date, time: ev.time, category: ev.category, note: ev.note, detailUrl})
     })
   })
 

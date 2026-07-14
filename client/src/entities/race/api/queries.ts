@@ -25,7 +25,8 @@ async function loadData(): Promise<RacesResponse> {
 
   cached = {
     ok: true,
-    data: raw.data ?? [],
+    // 구버전 races.json(note 필드 없음) 호환: note 없으면 빈 문자열로 정규화
+    data: (raw.data ?? []).map(r => ({...r, note: r.note ?? ''})),
     details: raw.details ?? {},
     count: raw.count ?? 0,
     cachedAt: raw.cachedAt ?? new Date().toISOString(),

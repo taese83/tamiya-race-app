@@ -4,7 +4,8 @@ export interface RaceEntry {
   venue: string
   date: string       // YYYY.MM.DD
   time: string       // HH:MM
-  category: string
+  category: string   // () 제거된 순수 클래스명
+  note: string       // () 안 부연설명 (예: 선착순 45명 / 매장 오픈 10:30)
   detailUrl: string
 }
 

@@ -10,6 +10,7 @@ import PaidIcon from '@mui/icons-material/Paid'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import HowToRegIcon from '@mui/icons-material/HowToReg'
 import PhoneIcon from '@mui/icons-material/Phone'
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import {format, isPast, parseISO} from 'date-fns'
 import {ko} from 'date-fns/locale'
 import {fetchRaceDetail, raceDetailQueryKey} from '@/entities/race'
@@ -88,6 +89,15 @@ export const RaceDetailDrawer = ({race, onClose}: RaceDetailDrawerProps) => {
                 />
               </ListItem>
             </List>
+            {/* 선착순 / 매장 오픈 시간 등 부연설명 */}
+            {race.note && (
+              <Stack direction="row" spacing={0.75} alignItems="flex-start" sx={{mt: 1.5, px: 1.5, py: 1, bgcolor: 'warning.light', borderRadius: 1.5, opacity: 0.9}}>
+                <InfoOutlinedIcon sx={{fontSize: 15, color: 'warning.dark', mt: 0.1, flexShrink: 0}} />
+                <Typography variant="caption" sx={{fontSize: '0.78rem', color: 'warning.dark', fontWeight: 500, lineHeight: 1.5}}>
+                  {race.note}
+                </Typography>
+              </Stack>
+            )}
           </Box>
         )}
 
