@@ -5,7 +5,7 @@ import {
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
-import {format, isToday, parseISO, addDays, subDays} from 'date-fns'
+import {format, isToday, isPast, startOfDay, addDays, subDays} from 'date-fns'
 import {ko} from 'date-fns/locale'
 import type {RaceEntry} from '@/entities/race'
 import {CategoryChip} from '@/features/race-list/ui/CategoryChip'
@@ -27,6 +27,7 @@ export const CalendarDay = ({races, onRaceClick}: CalendarDayProps) => {
   const next = () => setCurrent(d => addDays(d, 1))
   const today = () => setCurrent(new Date())
   const todayFlag = isToday(current)
+  const isPastDay = !todayFlag && isPast(startOfDay(current))
 
   // 앞뒤 5일 빠른 탐색
   const nearbyDays = Array.from({length: 11}, (_, i) => {
@@ -44,7 +45,7 @@ export const CalendarDay = ({races, onRaceClick}: CalendarDayProps) => {
         <IconButton size="small" onClick={prev} aria-label="전날"><ChevronLeftIcon /></IconButton>
         <Typography
           variant="subtitle1"
-          sx={{fontWeight: 700, mx: 1, minWidth: 160, textAlign: 'center', color: todayFlag ? 'primary.main' : 'text.primary'}}>
+          sx={{fontWeight: 700, mx: 1, minWidth: 160, textAlign: 'center', color: todayFlag ? 'primary.main' : isPastDay ? 'text.secondary' : 'text.primary'}}>
           {format(current, 'yyyy년 M월 d일 (EEE)', {locale: ko})}
           {todayFlag && (
             <Chip label="오늘" size="small" color="primary" sx={{ml: 0.75, height: 18, fontSize: '0.65rem'}} />
@@ -103,7 +104,7 @@ export const CalendarDay = ({races, onRaceClick}: CalendarDayProps) => {
           <Typography color="text.secondary">이 날 대회 일정이 없습니다</Typography>
         </Box>
       ) : (
-        <Stack spacing={1.5}>
+        <Stack spacing={1.5} sx={{opacity: isPastDay ? 0.45 : 1}}>
           {dayRaces.map(race => (
             <Paper
               key={race.id}

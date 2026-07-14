@@ -1,5 +1,6 @@
-import {useState, useMemo} from 'react'
+import {useMemo} from 'react'
 import {useQuery} from '@tanstack/react-query'
+import {useSearchParams} from 'react-router'
 import {
   Box, Typography, AppBar, Toolbar, IconButton,
   CircularProgress, Alert, Stack, Chip,
@@ -16,6 +17,8 @@ import {RaceTable} from '@/features/race-list/ui/RaceTable'
 import {RaceDetailDrawer} from '@/features/race-list/ui/RaceDetailDrawer'
 import {RaceCalendar} from '@/features/race-calendar/ui/RaceCalendar'
 import {RaceFilter} from '@/features/race-filter/ui/RaceFilter'
+import {ShareButton} from '@/features/race-share/ui/ShareButton'
+import {useState} from 'react'
 
 type ViewMode = 'list' | 'calendar'
 
@@ -24,10 +27,14 @@ function matchCategory(category: string, filter: string): boolean {
 }
 
 export const RaceListPage = () => {
-  const [viewMode, setViewMode] = useState<ViewMode>('list')
+  // ── URL 쿼리 파라미터로 필터 + 뷰 상태 관리 (공유 가능) ─────────────────────
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  const viewMode = (searchParams.get('view') as ViewMode | null) ?? 'list'
+  const selectedVenues = searchParams.getAll('venue')
+  const selectedCategories = searchParams.getAll('cat')
+
   const [showFilter, setShowFilter] = useState(false)
-  const [selectedVenues, setSelectedVenues] = useState<string[]>([])
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [calendarSelectedRace, setCalendarSelectedRace] = useState<RaceEntry | null>(null)
 
   const {data, isLoading, isError, error} = useQuery<RacesResponse, Error>({
@@ -37,11 +44,49 @@ export const RaceListPage = () => {
     retry: 1,
   })
 
+  // ── 필터 변경 핸들러 ─────────────────────────────────────────────────────────
+  const setViewMode = (v: ViewMode) => {
+    setSearchParams((prev: URLSearchParams) => {
+      const next = new URLSearchParams(prev)
+      if (v === 'list') next.delete('view')
+      else next.set('view', v)
+      return next
+    }, {replace: true})
+  }
+
+  const setSelectedVenues = (venues: string[]) => {
+    setSearchParams((prev: URLSearchParams) => {
+      const next = new URLSearchParams(prev)
+      next.delete('venue')
+      venues.forEach(venue => next.append('venue', venue))
+      return next
+    }, {replace: true})
+  }
+
+  const setSelectedCategories = (cats: string[]) => {
+    setSearchParams((prev: URLSearchParams) => {
+      const next = new URLSearchParams(prev)
+      next.delete('cat')
+      cats.forEach(cat => next.append('cat', cat))
+      return next
+    }, {replace: true})
+  }
+
+  const clearAllFilters = () => {
+    setSearchParams((prev: URLSearchParams) => {
+      const next = new URLSearchParams(prev)
+      next.delete('venue')
+      next.delete('cat')
+      return next
+    }, {replace: true})
+  }
+
+  // ── 필터 적용 ────────────────────────────────────────────────────────────────
   const filteredRaces = useMemo(() => {
     if (!data?.data) return []
     return data.data.filter(r => {
       const venueOk = selectedVenues.length === 0 || selectedVenues.includes(r.venue)
-      const catOk = selectedCategories.length === 0 || selectedCategories.some(c => matchCategory(r.category, c))
+      const catOk = selectedCategories.length === 0 || selectedCategories.some((c: string) => matchCategory(r.category, c))
       return venueOk && catOk
     })
   }, [data, selectedVenues, selectedCategories])
@@ -73,7 +118,6 @@ export const RaceListPage = () => {
             매장·경기장 대회 일정
           </Typography>
 
-          {/* 업데이트 시각 — 새로고침 버튼 대신 표시 */}
           {updatedAt != null && (
             <Tooltip title="매일 자정 자동 업데이트됩니다">
               <Chip
@@ -115,6 +159,9 @@ export const RaceListPage = () => {
               <CalendarMonthIcon fontSize="small" />
             </ToggleButton>
           </ToggleButtonGroup>
+
+          {/* 공유 버튼 */}
+          <ShareButton />
         </Toolbar>
 
         {/* 통합 필터 패널 */}
@@ -147,7 +194,7 @@ export const RaceListPage = () => {
                   <Button
                     size="small"
                     variant="text"
-                    onClick={() => {setSelectedVenues([]); setSelectedCategories([])}}
+                    onClick={clearAllFilters}
                     sx={{fontSize: '0.72rem', py: 0, color: 'text.secondary', minWidth: 0}}>
                     전체 보기
                   </Button>

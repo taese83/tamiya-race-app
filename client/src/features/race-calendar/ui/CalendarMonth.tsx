@@ -11,7 +11,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import {
   format, startOfMonth, endOfMonth, startOfWeek, endOfWeek,
-  eachDayOfInterval, isSameMonth, isToday, parseISO,
+  eachDayOfInterval, isSameMonth, isToday, isPast, startOfDay, parseISO,
 } from 'date-fns'
 import {ko} from 'date-fns/locale'
 import type {RaceEntry} from '@/entities/race'
@@ -102,6 +102,7 @@ interface DayCellProps {
   dayRaces: RaceEntry[]
   inMonth: boolean
   todayFlag: boolean
+  isPastDay: boolean
   dayNum: number
   expanded: boolean
   onToggleExpand: () => void
@@ -111,7 +112,7 @@ interface DayCellProps {
 const CELL_HEIGHT = 140  // px — 모든 셀 동일 높이
 
 const DayCell = ({
-  day, dayRaces, inMonth, todayFlag, dayNum,
+  day, dayRaces, inMonth, todayFlag, isPastDay, dayNum,
   expanded, onToggleExpand, onRaceClick,
 }: DayCellProps) => {
   const overCount = dayRaces.length - MAX_SHOW
@@ -131,7 +132,8 @@ const DayCell = ({
         flexDirection: 'column',
         bgcolor: todayFlag ? 'action.selected' : inMonth ? 'background.paper' : 'action.disabledBackground',
         borderRight: '1px solid', borderBottom: '1px solid', borderColor: 'divider',
-        opacity: inMonth ? 1 : 0.35,
+        // 당월 외: 0.35 / 지난 날짜: 0.45 / 오늘 이후: 1
+        opacity: !inMonth ? 0.35 : isPastDay ? 0.45 : 1,
         overflow: 'hidden',
         position: 'relative',
       }}>
@@ -289,6 +291,7 @@ export const CalendarMonth = ({races, onRaceClick}: CalendarMonthProps) => {
               dayRaces={dayRaces}
               inMonth={isSameMonth(day, current)}
               todayFlag={isToday(day)}
+              isPastDay={!isToday(day) && isPast(startOfDay(day))}
               dayNum={day.getDay()}
               expanded={expandedDates.has(dateKey)}
               onToggleExpand={() => toggleExpand(dateKey)}

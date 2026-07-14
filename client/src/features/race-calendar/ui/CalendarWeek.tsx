@@ -6,7 +6,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import {
   format, startOfWeek, endOfWeek, eachDayOfInterval,
-  isToday, parseISO, addWeeks, subWeeks,
+  isToday, isPast, startOfDay, parseISO, addWeeks, subWeeks,
 } from 'date-fns'
 import {ko} from 'date-fns/locale'
 import type {RaceEntry} from '@/entities/race'
@@ -65,6 +65,7 @@ export const CalendarWeek = ({races, onRaceClick}: CalendarWeekProps) => {
           const dateKey = format(day, 'yyyy.MM.dd')
           const dayRaces = racesByDate.get(dateKey) ?? []
           const todayFlag = isToday(day)
+          const isPastDay = !todayFlag && isPast(startOfDay(day))
           const dayNum = day.getDay()
 
           return (
@@ -76,6 +77,7 @@ export const CalendarWeek = ({races, onRaceClick}: CalendarWeekProps) => {
                 minHeight: 120,
                 bgcolor: todayFlag ? 'action.selected' : 'background.paper',
                 borderColor: todayFlag ? 'primary.main' : 'divider',
+                opacity: isPastDay ? 0.45 : 1,
               }}>
               {/* 날짜 헤더 */}
               <Stack direction="column" alignItems="center" sx={{mb: 0.75}}>

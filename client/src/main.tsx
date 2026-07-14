@@ -1,5 +1,6 @@
 import {StrictMode} from 'react'
 import {createRoot} from 'react-dom/client'
+import {BrowserRouter} from 'react-router'
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
 import {ThemeProvider, CssBaseline, createTheme} from '@mui/material'
 import {RaceListPage} from './pages/RaceListPage'
@@ -23,11 +24,13 @@ if (!root) throw new Error('root not found')
 
 createRoot(root).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <RaceListPage />
-      </ThemeProvider>
-    </QueryClientProvider>
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <RaceListPage />
+        </ThemeProvider>
+      </QueryClientProvider>
+    </BrowserRouter>
   </StrictMode>,
 )
