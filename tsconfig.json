@@ -9,6 +9,6 @@
     "esModuleInterop": true,
     "types": ["node"]
   },
-  "include": ["api/**/*.ts", "lib/**/*.ts"],
-  "exclude": ["node_modules", "client", "server"]
+  "include": ["api/**/*.ts", "lib/**/*.ts", "scripts/**/*.ts"],
+  "exclude": ["node_modules", "client", "server", "data"]
 }
