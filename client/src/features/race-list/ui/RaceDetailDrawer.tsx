@@ -17,7 +17,7 @@ import {format, isPast, parseISO} from 'date-fns'
 import {ko} from 'date-fns/locale'
 import {fetchRaceDetail, raceDetailQueryKey} from '@/entities/race'
 import type {RaceEntry} from '@/entities/race'
-import {CategoryChip} from './CategoryChip'
+import {CategoryChip} from '@/entities/race'
 
 interface RaceDetailDrawerProps {
   race: RaceEntry | null

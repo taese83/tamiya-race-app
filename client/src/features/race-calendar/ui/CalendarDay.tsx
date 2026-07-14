@@ -8,7 +8,7 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import {format, isToday, isPast, startOfDay, addDays, subDays} from 'date-fns'
 import {ko} from 'date-fns/locale'
 import type {RaceEntry} from '@/entities/race'
-import {CategoryChip} from '@/features/race-list/ui/CategoryChip'
+import {CategoryChip} from '@/entities/race'
 
 interface CalendarDayProps {
   races: RaceEntry[]

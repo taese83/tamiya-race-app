@@ -2,3 +2,4 @@ export type {RaceEntry, RaceDetail, RacesResponse, RaceDetailResponse} from './m
 export {RACES_QUERY_KEY, raceDetailQueryKey, fetchRaces, fetchRaceDetail, refreshRaces} from './api/queries'
 export {CLASS_LIST, getCategoryColor} from './model/categoryColors'
 export type {ClassKey} from './model/categoryColors'
+export {CategoryChip} from './ui/CategoryChip'

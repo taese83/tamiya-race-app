@@ -20,7 +20,7 @@ import {
 import {ko} from 'date-fns/locale'
 import type {RaceEntry} from '@/entities/race'
 import {CLASS_LIST, getCategoryColor} from '@/entities/race'
-import {CategoryChip} from '@/features/race-list/ui/CategoryChip'
+import {CategoryChip} from '@/entities/race'
 
 interface CalendarMonthProps {
   races: RaceEntry[]
@@ -120,6 +120,120 @@ const MobileRaceRow = ({race, onClick}: RaceRowProps) => (
     </Box>
   </Box>
 )
+
+// ─── 모바일: 하단 드로어 — 시간대 × 경기장 매트릭스 ─────────────────────────
+
+interface DrawerRaceMatrixProps {
+  races: RaceEntry[]
+  onRaceClick: (race: RaceEntry) => void
+}
+
+const DrawerRaceMatrix = ({races, onRaceClick}: DrawerRaceMatrixProps) => {
+  // 시간대 목록 (정렬됨, 빈 시간은 "-" 로 통합)
+  const times = [...new Set(races.map(r => r.time || '-'))].sort((a, b) => {
+    if (a === '-') return 1
+    if (b === '-') return -1
+    return a.localeCompare(b)
+  })
+
+  // 경기장 목록 (등장 순서 유지)
+  const venues = [...new Set(races.map(r => r.venue))]
+
+  // 경기장이 1개거나 시간대가 1개면 단순 리스트로 폴백
+  if (venues.length <= 1 || times.length <= 1) {
+    return (
+      <>
+        {races.map(race => (
+          <MobileRaceRow key={race.id} race={race} onClick={() => onRaceClick(race)} />
+        ))}
+      </>
+    )
+  }
+
+  // 빠른 조회용 맵: "time|venue" → RaceEntry[]
+  const index = new Map<string, RaceEntry[]>()
+  races.forEach(r => {
+    const key = `${r.time || '-'}|${r.venue}`
+    const arr = index.get(key) ?? []
+    arr.push(r)
+    index.set(key, arr)
+  })
+
+  // 경기장 6개 이상이면 고정 열 너비, 이하면 1fr 균등 분할
+  const colWidth = venues.length > 5 ? '64px' : '1fr'
+  const gridCols = `48px repeat(${venues.length}, ${colWidth})`
+
+  return (
+    // 경기장이 많으면 가로 스크롤
+    <Box sx={{px: 1.5, py: 1, overflowX: venues.length > 5 ? 'auto' : 'visible'}}>
+      {/* 경기장 헤더 행 */}
+      <Box sx={{display: 'grid', gridTemplateColumns: gridCols, gap: 0.5, mb: 0.5}}>
+        <Box /> {/* 시간 열 헤더 (빈 칸) */}
+        {venues.map(venue => (
+          <Typography key={venue} sx={{
+            fontSize: '0.6rem', fontWeight: 700, color: 'text.secondary',
+            textAlign: 'center', lineHeight: 1.3,
+            overflow: 'hidden', textOverflow: 'ellipsis',
+            display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+          }}>
+            {venue}
+          </Typography>
+        ))}
+      </Box>
+
+      {/* 시간대별 행 */}
+      {times.map(time => (
+        <Box key={time} sx={{display: 'grid', gridTemplateColumns: gridCols, gap: 0.5, mb: 0.5, alignItems: 'center'}}>
+          {/* 시간 열 */}
+          <Typography sx={{
+            fontSize: '0.7rem', fontWeight: 700, color: 'primary.main',
+            textAlign: 'center', lineHeight: 1.2,
+          }}>
+            {time}
+          </Typography>
+
+          {/* 경기장별 셀 */}
+          {venues.map(venue => {
+            const key = `${time}|${venue}`
+            const cell = index.get(key) ?? []
+            return (
+              <Box key={venue} sx={{display: 'flex', flexDirection: 'column', gap: 0.3}}>
+                {cell.length > 0 ? (
+                  cell.map(race => (
+                    <Box
+                      key={race.id}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`${race.category} ${race.time} ${race.venue}`}
+                      onClick={() => onRaceClick(race)}
+                      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onRaceClick(race) } }}
+                      sx={{
+                        px: 0.5, py: 0.4, borderRadius: 0.75, cursor: 'pointer',
+                        bgcolor: getCategoryColor(race.category),
+                        '&:hover': {opacity: 0.85},
+                        '&:focus-visible': {outline: '2px solid', outlineColor: 'primary.main', outlineOffset: 1},
+                        transition: 'opacity 0.1s',
+                      }}>
+                      <Typography sx={{
+                        fontSize: '0.6rem', fontWeight: 700, color: '#fff',
+                        lineHeight: 1.3, textAlign: 'center',
+                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                      }}>
+                        {race.category.replace(' 클래스', '')}
+                      </Typography>
+                    </Box>
+                  ))
+                ) : (
+                  <Box sx={{height: 24}} />
+                )}
+              </Box>
+            )
+          })}
+        </Box>
+      ))}
+    </Box>
+  )
+}
 
 // ─── 모바일: 셀 내 소형 종목 칩 (장소 + 시간 포함) ──────────────────────────
 
@@ -547,15 +661,12 @@ export const CalendarMonth = ({races, onRaceClick}: CalendarMonthProps) => {
 
           <Divider />
 
-          {/* 대회 목록 */}
+          {/* 대회 목록 — 시간대 그룹 × 경기장 열 매트릭스 */}
           <Box sx={{overflowY: 'auto'}}>
-            {selectedRaces.map(race => (
-              <MobileRaceRow
-                key={race.id}
-                race={race}
-                onClick={() => {onRaceClick(race); setSelectedDate(null)}}
-              />
-            ))}
+            <DrawerRaceMatrix
+              races={selectedRaces}
+              onRaceClick={race => {onRaceClick(race); setSelectedDate(null)}}
+            />
           </Box>
         </Drawer>
       )}

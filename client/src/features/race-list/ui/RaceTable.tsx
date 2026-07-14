@@ -9,7 +9,7 @@ import {format, isPast, parseISO} from 'date-fns'
 import {ko} from 'date-fns/locale'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import type {RaceEntry} from '@/entities/race'
-import {CategoryChip} from './CategoryChip'
+import {CategoryChip} from '@/entities/race'
 import {RaceDetailDrawer} from './RaceDetailDrawer'
 
 interface RaceTableProps {

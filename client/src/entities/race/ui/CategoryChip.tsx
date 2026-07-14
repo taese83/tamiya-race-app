@@ -1,5 +1,5 @@
 import {Chip} from '@mui/material'
-import {getCategoryColor} from '@/entities/race'
+import {getCategoryColor} from '../model/categoryColors'
 
 interface CategoryChipProps {
   category: string
