@@ -159,78 +159,88 @@ const DrawerRaceMatrix = ({races, onRaceClick}: DrawerRaceMatrixProps) => {
     index.set(key, arr)
   })
 
-  // 경기장 6개 이상이면 고정 열 너비, 이하면 1fr 균등 분할
-  const colWidth = venues.length > 5 ? '64px' : '1fr'
+  // 경기장 열 너비: 균등 분할하되 최소 72px 보장
+  const colWidth = `minmax(72px, 1fr)`
   const gridCols = `48px repeat(${venues.length}, ${colWidth})`
 
+  // 시간 열 sticky 스타일 — overflow 컨테이너 기준으로 왼쪽에 고정
+  const timeCellSx = {
+    position: 'sticky' as const,
+    left: 0,
+    zIndex: 1,
+    bgcolor: 'background.paper',
+    fontSize: '0.7rem', fontWeight: 700, color: 'primary.main',
+    textAlign: 'center', lineHeight: 1.2,
+    // 헤더 행의 빈 칸도 같은 스타일 적용을 위해 재사용
+  }
+
   return (
-    // 경기장이 많으면 가로 스크롤
-    <Box sx={{px: 1.5, py: 1, overflowX: venues.length > 5 ? 'auto' : 'visible'}}>
-      {/* 경기장 헤더 행 */}
-      <Box sx={{display: 'grid', gridTemplateColumns: gridCols, gap: 0.5, mb: 0.5}}>
-        <Box /> {/* 시간 열 헤더 (빈 칸) */}
-        {venues.map(venue => (
-          <Typography key={venue} sx={{
-            fontSize: '0.6rem', fontWeight: 700, color: 'text.secondary',
-            textAlign: 'center', lineHeight: 1.3,
-            overflow: 'hidden', textOverflow: 'ellipsis',
-            display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-          }}>
-            {venue}
-          </Typography>
+    // 항상 overflow-x: auto — sticky 동작에 필요
+    <Box sx={{px: 0, py: 1, overflowX: 'auto'}}>
+      {/* 최소 너비: 시간열 + 경기장 수 × 72px */}
+      <Box sx={{minWidth: 48 + venues.length * 72, px: 1.5}}>
+        {/* 경기장 헤더 행 */}
+        <Box sx={{display: 'grid', gridTemplateColumns: gridCols, gap: 0.5, mb: 0.5}}>
+          {/* 시간 열 헤더 — sticky */}
+          <Box sx={timeCellSx} />
+          {venues.map(venue => (
+            <Typography key={venue} sx={{
+              fontSize: '0.6rem', fontWeight: 700, color: 'text.secondary',
+              textAlign: 'center', lineHeight: 1.3,
+              overflow: 'hidden', textOverflow: 'ellipsis',
+              display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+            }}>
+              {venue}
+            </Typography>
+          ))}
+        </Box>
+
+        {/* 시간대별 행 */}
+        {times.map(time => (
+          <Box key={time} sx={{display: 'grid', gridTemplateColumns: gridCols, gap: 0.5, mb: 0.5, alignItems: 'center'}}>
+            {/* 시간 열 — sticky left */}
+            <Typography sx={timeCellSx}>{time}</Typography>
+
+            {/* 경기장별 셀 */}
+            {venues.map(venue => {
+              const key = `${time}|${venue}`
+              const cell = index.get(key) ?? []
+              return (
+                <Box key={venue} sx={{display: 'flex', flexDirection: 'column', gap: 0.3}}>
+                  {cell.length > 0 ? (
+                    cell.map(race => (
+                      <Box
+                        key={race.id}
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`${race.category} ${race.time} ${race.venue}`}
+                        onClick={() => onRaceClick(race)}
+                        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onRaceClick(race) } }}
+                        sx={{
+                          px: 0.5, py: 0.4, borderRadius: 0.75, cursor: 'pointer',
+                          bgcolor: getCategoryColor(race.category),
+                          '&:hover': {opacity: 0.85},
+                          '&:focus-visible': {outline: '2px solid', outlineColor: 'primary.main', outlineOffset: 1},
+                          transition: 'opacity 0.1s',
+                        }}>
+                        <Typography sx={{
+                          fontSize: '0.6rem', fontWeight: 700, color: '#fff',
+                          lineHeight: 1.3, textAlign: 'center',
+                          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                        }}>
+                          {race.category.replace(' 클래스', '')}
+                        </Typography>
+                      </Box>
+                    ))
+                  ) : (
+                    <Box sx={{height: 24}} />
+                  )}
+                </Box>
+              )
+            })}
+          </Box>
         ))}
       </Box>
-
-      {/* 시간대별 행 */}
-      {times.map(time => (
-        <Box key={time} sx={{display: 'grid', gridTemplateColumns: gridCols, gap: 0.5, mb: 0.5, alignItems: 'center'}}>
-          {/* 시간 열 */}
-          <Typography sx={{
-            fontSize: '0.7rem', fontWeight: 700, color: 'primary.main',
-            textAlign: 'center', lineHeight: 1.2,
-          }}>
-            {time}
-          </Typography>
-
-          {/* 경기장별 셀 */}
-          {venues.map(venue => {
-            const key = `${time}|${venue}`
-            const cell = index.get(key) ?? []
-            return (
-              <Box key={venue} sx={{display: 'flex', flexDirection: 'column', gap: 0.3}}>
-                {cell.length > 0 ? (
-                  cell.map(race => (
-                    <Box
-                      key={race.id}
-                      role="button"
-                      tabIndex={0}
-                      aria-label={`${race.category} ${race.time} ${race.venue}`}
-                      onClick={() => onRaceClick(race)}
-                      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onRaceClick(race) } }}
-                      sx={{
-                        px: 0.5, py: 0.4, borderRadius: 0.75, cursor: 'pointer',
-                        bgcolor: getCategoryColor(race.category),
-                        '&:hover': {opacity: 0.85},
-                        '&:focus-visible': {outline: '2px solid', outlineColor: 'primary.main', outlineOffset: 1},
-                        transition: 'opacity 0.1s',
-                      }}>
-                      <Typography sx={{
-                        fontSize: '0.6rem', fontWeight: 700, color: '#fff',
-                        lineHeight: 1.3, textAlign: 'center',
-                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                      }}>
-                        {race.category.replace(' 클래스', '')}
-                      </Typography>
-                    </Box>
-                  ))
-                ) : (
-                  <Box sx={{height: 24}} />
-                )}
-              </Box>
-            )
-          })}
-        </Box>
-      ))}
     </Box>
   )
 }
