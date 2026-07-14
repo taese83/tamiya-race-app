@@ -1,26 +1,27 @@
 export interface RaceEntry {
   id: string
-  title: string       // 대회명
-  venue: string       // 장소
-  date: string        // YYYY.MM.DD
-  time: string        // HH:MM
-  category: string    // 종목명 (단일 종목)
+  title: string
+  venue: string
+  date: string       // YYYY.MM.DD
+  time: string       // HH:MM
+  category: string
   detailUrl: string
 }
 
 export interface RaceDetail {
   wrId: string
-  entranceFee: string           // 참가비
-  registrationDeadline: string  // 접수 기한
-  registrationMethod: string    // 접수 방법
-  inquiry: string               // 문의
-  applyUrl: string | null       // 온라인 접수 URL
+  entranceFee: string
+  registrationDeadline: string
+  registrationMethod: string
+  inquiry: string
+  applyUrl: string | null
   applyButtonText: string | null
 }
 
 export interface RacesResponse {
   ok: boolean
   data: RaceEntry[]
+  details: Record<string, RaceDetail>  // wrId → 상세 정보
   count: number
   cachedAt: string
 }
