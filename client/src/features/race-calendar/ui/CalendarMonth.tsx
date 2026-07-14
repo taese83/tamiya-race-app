@@ -168,13 +168,17 @@ const DrawerRaceMatrix = ({races, onRaceClick}: DrawerRaceMatrixProps) => {
     position: 'sticky' as const,
     left: 0,
     zIndex: 1,
+    height: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     bgcolor: 'background.paper', // 스크롤 시 뒤 콘텐츠 차단 — 반드시 불투명해야 함
     borderRight: '1px solid',
     borderColor: 'divider',
-    pl: 1.5, // 컨테이너 px 제거 대신 시간 열 자체에 왼쪽 여백
+    pl: 1.5,
     pr: 0.5,
     fontSize: '0.7rem', fontWeight: 700, color: 'primary.main',
-    textAlign: 'center', lineHeight: 1.2,
+    lineHeight: 1.2,
   }
 
   return (
