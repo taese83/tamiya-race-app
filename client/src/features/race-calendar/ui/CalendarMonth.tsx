@@ -168,10 +168,12 @@ const DrawerRaceMatrix = ({races, onRaceClick}: DrawerRaceMatrixProps) => {
     position: 'sticky' as const,
     left: 0,
     zIndex: 1,
-    bgcolor: 'background.paper',
+    bgcolor: 'background.paper', // 스크롤 시 뒤 콘텐츠 차단 — 반드시 불투명해야 함
+    borderRight: '1px solid',
+    borderColor: 'divider',
+    pr: 0.5,
     fontSize: '0.7rem', fontWeight: 700, color: 'primary.main',
     textAlign: 'center', lineHeight: 1.2,
-    // 헤더 행의 빈 칸도 같은 스타일 적용을 위해 재사용
   }
 
   return (
