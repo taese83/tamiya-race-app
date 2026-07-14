@@ -107,24 +107,38 @@ export const RaceListPage = () => {
         position="sticky"
         elevation={0}
         sx={{bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider'}}>
-        <Toolbar sx={{minHeight: '52px !important', gap: 1}}>
+        <Toolbar sx={{
+          minHeight: '52px !important',
+          height: 52,
+          gap: 0.75,
+          flexWrap: 'nowrap',
+          overflow: 'hidden',
+        }}>
           <Box
             component="img"
             src="https://tamiya.co.kr/img/main/site_logo.png"
             alt="TAMIYA"
-            sx={{height: 28, mr: 1}}
+            sx={{height: 26, flexShrink: 0, mr: 0.5}}
           />
-          <Typography variant="h6" sx={{fontWeight: 700, fontSize: '1rem', flex: 1}}>
+          {/* 제목: 모바일에서 줄어들되 최소 너비 유지 */}
+          <Typography
+            variant="h6"
+            noWrap
+            sx={{fontWeight: 700, fontSize: {xs: '0.85rem', sm: '1rem'}, flex: 1, minWidth: 0}}>
             매장·경기장 대회 일정
           </Typography>
 
+          {/* 업데이트 시각: sm 이상에서만 표시 */}
           {updatedAt != null && (
             <Tooltip title="매일 자정 자동 업데이트됩니다">
               <Chip
                 label={`${updatedAt} 기준`}
                 size="small"
                 variant="outlined"
-                sx={{fontSize: '0.7rem', height: 22, cursor: 'default'}}
+                sx={{
+                  fontSize: '0.7rem', height: 22, cursor: 'default', flexShrink: 0,
+                  display: {xs: 'none', sm: 'inline-flex'},
+                }}
               />
             </Tooltip>
           )}
