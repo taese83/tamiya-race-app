@@ -29,6 +29,18 @@ interface CalendarMonthProps {
 const MAX_SHOW = 3
 const DAY_HEADERS = ['일', '월', '화', '수', '목', '금', '토']
 
+// ─── 시간순 정렬 ──────────────────────────────────────────────────────────────
+
+function sortByTime(races: RaceEntry[]): RaceEntry[] {
+  return [...races].sort((a, b) => {
+    // 시간 없으면 맨 뒤
+    if (!a.time && !b.time) return 0
+    if (!a.time) return 1
+    if (!b.time) return -1
+    return a.time.localeCompare(b.time)
+  })
+}
+
 // ─── 종목 색상 팔레트 (CategoryChip 색상과 공유) ──────────────────────────────
 
 // M2B를 M2보다 먼저 두어 includes() 매칭 순서를 보장한다
@@ -124,20 +136,40 @@ const MobileRaceRow = ({race, onClick}: RaceRowProps) => (
   </Box>
 )
 
-// ─── 모바일: 셀 내 소형 종목 칩 ──────────────────────────────────────────────
+// ─── 모바일: 셀 내 소형 종목 칩 (장소 + 시간 포함) ──────────────────────────
 
-const MobileRaceChip = ({category}: {category: string}) => {
+interface MobileRaceChipProps {
+  category: string
+  time: string
+  venue: string
+}
+
+const MobileRaceChip = ({category, time, venue}: MobileRaceChipProps) => {
   const color = getCategoryColor(category)
-  const abbrev = category.replace(' 클래스', '')
   return (
-    <Box sx={{px: 0.4, py: 0.15, borderRadius: 0.5, bgcolor: color, overflow: 'hidden'}}>
-      <Typography sx={{
-        fontSize: '0.55rem', fontWeight: 700, color: '#fff',
-        lineHeight: 1.2, whiteSpace: 'nowrap',
-        overflow: 'hidden', textOverflow: 'ellipsis',
-      }}>
-        {abbrev}
-      </Typography>
+    <Box sx={{px: 0.4, py: 0.2, borderRadius: 0.5, bgcolor: color, overflow: 'hidden'}}>
+      {/* 장소 — 최대 2줄 */}
+      {venue && (
+        <Typography sx={{
+          fontSize: '0.5rem', fontWeight: 600, color: '#fff',
+          lineHeight: 1.25,
+          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+        }}>
+          {venue}
+        </Typography>
+      )}
+      {/* 시간 */}
+      {time && (
+        <Typography sx={{
+          fontSize: '0.48rem', color: 'rgba(255,255,255,0.85)',
+          lineHeight: 1.2, whiteSpace: 'nowrap',
+          overflow: 'hidden', textOverflow: 'ellipsis',
+          mt: venue ? 0.2 : 0,
+        }}>
+          {time}
+        </Typography>
+      )}
     </Box>
   )
 }
@@ -220,13 +252,11 @@ interface DayCellMobileProps {
   onSelect: () => void
 }
 
-const CELL_HEIGHT_MOBILE = 80
-
 const DayCellMobile = ({
   day, dayRaces, inMonth, todayFlag, isPastDay, dayNum,
   isSelected, onSelect,
 }: DayCellMobileProps) => {
-  const MAX_VISIBLE = 2
+  const MAX_VISIBLE = 3
   const visible = dayRaces.slice(0, MAX_VISIBLE)
   const extra = dayRaces.length - MAX_VISIBLE
 
@@ -236,8 +266,8 @@ const DayCellMobile = ({
       elevation={0}
       onClick={inMonth ? onSelect : undefined}
       sx={{
-        height: CELL_HEIGHT_MOBILE,
-        px: '3px', pt: '4px', pb: '3px',
+        minHeight: 56, height: '100%', boxSizing: 'border-box',
+        px: '3px', pt: '4px', pb: '4px',
         display: 'flex', flexDirection: 'column', alignItems: 'stretch',
         bgcolor: isSelected ? 'primary.main' : todayFlag ? 'action.selected' : inMonth ? 'background.paper' : 'action.disabledBackground',
         borderRight: '1px solid', borderBottom: '1px solid', borderColor: 'divider',
@@ -271,14 +301,14 @@ const DayCellMobile = ({
         </Box>
       </Box>
 
-      {/* 종목 칩 — 색상 배경에 축약 이름 */}
-      <Box sx={{flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: 0.3}}>
+      {/* 종목 칩 — 가변 높이, 최대 3개 */}
+      <Box sx={{display: 'flex', flexDirection: 'column', gap: 0.3}}>
         {visible.map(race => (
-          <MobileRaceChip key={race.id} category={race.category} />
+          <MobileRaceChip key={race.id} category={race.category} time={race.time} venue={race.venue} />
         ))}
         {extra > 0 && (
           <Typography sx={{
-            fontSize: '0.55rem', lineHeight: 1, textAlign: 'center',
+            fontSize: '0.52rem', lineHeight: 1.2, textAlign: 'center',
             color: isSelected ? 'rgba(255,255,255,0.8)' : 'text.disabled',
           }}>
             +{extra}
@@ -390,6 +420,8 @@ export const CalendarMonth = ({races, onRaceClick}: CalendarMonthProps) => {
     arr.push(r)
     racesByDate.set(r.date, arr)
   })
+  // 날짜별 시간순 정렬
+  racesByDate.forEach((arr, key) => racesByDate.set(key, sortByTime(arr)))
 
   const todayKey = format(new Date(), 'yyyy.MM.dd')
   const todayRaces = racesByDate.get(todayKey) ?? []
@@ -457,7 +489,7 @@ export const CalendarMonth = ({races, onRaceClick}: CalendarMonthProps) => {
       </Box>
 
       {/* 날짜 그리드 */}
-      <Box sx={{display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', alignItems: 'start', border: '1px solid', borderColor: 'divider', borderRadius: 1, overflow: 'hidden'}}>
+      <Box sx={{display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', alignItems: 'stretch', border: '1px solid', borderColor: 'divider', borderRadius: 1, overflow: 'hidden'}}>
         {days.map(day => {
           const dateKey = format(day, 'yyyy.MM.dd')
           const dayRaces = racesByDate.get(dateKey) ?? []
