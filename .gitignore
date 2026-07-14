@@ -8,6 +8,9 @@ dist-ssr/
 client/dist/
 *.local
 
+# 빌드 시 자동 복사되는 파일 (data/races.json에서 생성)
+client/public/races.json
+
 # TypeScript 빌드 캐시
 cache/
 *.tsbuildinfo

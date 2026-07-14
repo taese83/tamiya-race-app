@@ -1,38 +1,25 @@
 /**
- * GET /api/races/:wrId/detail — 대회 상세 (참가비·접수기한·접수방법·접수URL)
- * KV에 캐시된 상세 데이터가 있으면 반환, 없으면 크롤링 후 KV에 저장 (TTL 1일)
+ * GET /api/races/:wrId/detail
+ * 상세 정보는 빌드 번들에 포함되지 않아 요청 시 직접 크롤링
+ * (상세는 클릭 시에만 로드되므로 빈도가 낮음)
  */
 import type {VercelRequest, VercelResponse} from '@vercel/node'
-import {kv} from '@vercel/kv'
 import {fetchRaceDetail} from '../../../lib/crawler.js'
 
-const DETAIL_TTL_SECONDS = 60 * 60 * 24  // 1일
+export const maxDuration = 15
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Cache-Control', 'public, max-age=86400')  // 1일 캐시
 
   const {wrId} = req.query
   if (typeof wrId !== 'string' || !/^\d+$/.test(wrId)) {
     return res.status(400).json({ok: false, error: '유효하지 않은 wrId입니다.'})
   }
 
-  const kvKey = `race:detail:${wrId}`
-
   try {
-    // KV 캐시 확인
-    const cached = await kv.get<string>(kvKey)
-    if (cached) {
-      const data = typeof cached === 'string' ? JSON.parse(cached) : cached
-      return res.json({ok: true, data, fromCache: true})
-    }
-
-    // 캐시 없으면 크롤링
-    console.log(`[detail] 크롤링: wrId=${wrId}`)
     const detail = await fetchRaceDetail(wrId)
-
-    await kv.set(kvKey, JSON.stringify(detail), {ex: DETAIL_TTL_SECONDS})
-
-    return res.json({ok: true, data: detail, fromCache: false})
+    return res.json({ok: true, data: detail})
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     console.error(`[detail] 오류 wrId=${wrId}:`, message)

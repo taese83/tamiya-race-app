@@ -4,12 +4,6 @@
   "outputDirectory": "client/dist",
   "installCommand": "pnpm install",
   "framework": null,
-  "crons": [
-    {
-      "path": "/api/cron/crawl",
-      "schedule": "0 15 * * *"
-    }
-  ],
   "rewrites": [
     {
       "source": "/api/(.*)",

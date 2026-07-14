@@ -7,6 +7,8 @@ export default defineConfig({
   resolve: {
     alias: {'@': fileURLToPath(new URL('src', import.meta.url))},
   },
+  // data/races.json을 프로젝트 루트 기준으로 접근 가능하게
+  root: '.',
   server: {
     host: '127.0.0.1',
     port: 5173,

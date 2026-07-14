@@ -1,14 +1,14 @@
 /**
- * POST /api/races/refresh — 수동 재크롤링 트리거
- * 앱 내 "새로고침" 버튼이 이 엔드포인트를 호출
+ * POST /api/races/refresh
+ * 파일 기반 방식에서 "새로고침"은 GitHub Actions를 수동 트리거하는 것으로 대체.
+ * 이 엔드포인트는 현재 캐시된 데이터를 그대로 반환하며,
+ * 실제 재크롤링은 GitHub Actions > "Run workflow"로 수행.
  */
 import type {VercelRequest, VercelResponse} from '@vercel/node'
-import {kv} from '@vercel/kv'
-import {fetchRaces} from '../../lib/crawler.js'
+import {readFileSync} from 'node:fs'
+import {resolve} from 'node:path'
 
-export const maxDuration = 60
-
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*')
 
   if (req.method === 'OPTIONS') {
@@ -21,18 +21,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    console.log('[refresh] 수동 재크롤링 시작')
-    const races = await fetchRaces()
-
-    await kv.set('races:list', JSON.stringify(races))
-    const cachedAt = new Date().toISOString()
-    await kv.set('races:cachedAt', cachedAt)
-
-    console.log(`[refresh] 완료: ${races.length}건`)
-    return res.json({ok: true, data: races, count: races.length, cachedAt})
+    const filePath = resolve(process.cwd(), 'data/races.json')
+    const raw = readFileSync(filePath, 'utf-8')
+    const payload = JSON.parse(raw) as {data: unknown; count: number; cachedAt: string}
+    return res.json({ok: true, ...payload})
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
-    console.error('[refresh] 오류:', message)
-    return res.status(502).json({ok: false, error: '크롤링에 실패했습니다.', detail: message})
+    return res.status(503).json({ok: false, error: '데이터 준비 중입니다.', detail: message})
   }
 }

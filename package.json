@@ -7,12 +7,12 @@
   "engines": {"node": ">=22.11.0"},
   "scripts": {
     "dev": "concurrently \"pnpm --filter server dev\" \"pnpm --filter client dev\"",
-    "build": "pnpm --filter client build",
+    "build": "cp data/races.json client/public/races.json && pnpm --filter client build",
     "server": "pnpm --filter server dev",
-    "client": "pnpm --filter client dev"
+    "client": "pnpm --filter client dev",
+    "crawl": "tsx scripts/crawl.ts"
   },
   "dependencies": {
-    "@vercel/kv": "^3.0.0",
     "@vercel/node": "^5.0.0",
     "axios": "^1.7.0",
     "cheerio": "^1.0.0"
@@ -20,6 +20,7 @@
   "devDependencies": {
     "@types/node": "^22.0.0",
     "concurrently": "^9.0.0",
+    "tsx": "^4.19.0",
     "typescript": "^6.0.0"
   }
 }
