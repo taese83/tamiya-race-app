@@ -171,16 +171,16 @@ const DrawerRaceMatrix = ({races, onRaceClick}: DrawerRaceMatrixProps) => {
     bgcolor: 'background.paper', // 스크롤 시 뒤 콘텐츠 차단 — 반드시 불투명해야 함
     borderRight: '1px solid',
     borderColor: 'divider',
+    pl: 1.5, // 컨테이너 px 제거 대신 시간 열 자체에 왼쪽 여백
     pr: 0.5,
     fontSize: '0.7rem', fontWeight: 700, color: 'primary.main',
     textAlign: 'center', lineHeight: 1.2,
   }
 
   return (
-    // 항상 overflow-x: auto — sticky 동작에 필요
+    // px: 0 필수 — 패딩이 있으면 sticky left:0이 패딩 안쪽에서 동작해 스크롤 시 겹침 발생
     <Box sx={{px: 0, py: 1, overflowX: 'auto'}}>
-      {/* 최소 너비: 시간열 + 경기장 수 × 72px */}
-      <Box sx={{minWidth: 48 + venues.length * 72, px: 1.5}}>
+      <Box sx={{minWidth: 48 + venues.length * 72, pr: 1.5}}>
         {/* 경기장 헤더 행 */}
         <Box sx={{display: 'grid', gridTemplateColumns: gridCols, gap: 0.5, mb: 0.5}}>
           {/* 시간 열 헤더 — sticky */}
@@ -217,7 +217,7 @@ const DrawerRaceMatrix = ({races, onRaceClick}: DrawerRaceMatrixProps) => {
                         tabIndex={0}
                         aria-label={`${race.category} ${race.time} ${race.venue}`}
                         onClick={() => onRaceClick(race)}
-                        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onRaceClick(race) } }}
+                        onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); onRaceClick(race) } }}
                         sx={{
                           px: 0.5, py: 0.4, borderRadius: 0.75, cursor: 'pointer',
                           bgcolor: getCategoryColor(race.category),
@@ -579,7 +579,15 @@ export const CalendarMonth = ({races, onRaceClick}: CalendarMonthProps) => {
           {format(current, 'yyyy년 M월', {locale: ko})}
         </Typography>
         <IconButton size="small" onClick={next} aria-label="다음 달"><ChevronRightIcon /></IconButton>
-        <Typography variant="caption" onClick={today} sx={{ml: 1, cursor: 'pointer', color: 'primary.main', '&:hover': {textDecoration: 'underline'}}}>
+        <Typography
+          component="button"
+          variant="caption"
+          onClick={today}
+          sx={{
+            ml: 1, cursor: 'pointer', color: 'primary.main',
+            background: 'none', border: 'none', p: 0, font: 'inherit',
+            '&:hover': {textDecoration: 'underline'},
+          }}>
           오늘
         </Typography>
         {!isMobile && (
