@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-14T01:12:22.036Z",
+  "projectRoot": ".",
+  "releaseStatus": "PASS",
+  "reports": [
+    {
+      "id": "code",
+      "path": "_workspace/04_qa/qa-code.md",
+      "sha256": "0c49c36922aaf14ea9806544a406986b1afdeb56896bf5fbfdadcec91f6814be",
+      "status": "PASS"
+    },
+    {
+      "id": "ux",
+      "path": "_workspace/04_qa/qa-ux.md",
+      "sha256": "b16899b9a209b1111ca2ebc2bd5d427a3a55fcdadf06663c9e26f7c722c982f4",
+      "status": "PASS"
+    },
+    {
+      "id": "integration",
+      "path": "_workspace/04_qa/qa-integration.md",
+      "sha256": "6e9b32cee97ee92d42f4790b28a1d8f4498aa173533e7cbaf13d40c22e9e7a2d",
+      "status": "PASS"
+    },
+    {
+      "id": "security",
+      "path": "_workspace/04_qa/qa-security.md",
+      "sha256": "7cd507bfe21ee3fe6f7c8b9c0ee3beae9ba0faaea8cf504d63357a90023d13e2",
+      "status": "PASS"
+    },
+    {
+      "id": "api-contract",
+      "path": "_workspace/04_qa/qa-api-contract.md",
+      "sha256": "5172ae8eae83dfc4a84021da3e5a2b01980d362fa38c989a999584a0a650ed36",
+      "status": "PASS"
+    },
+    {
+      "id": "test",
+      "path": "_workspace/04_qa/qa-test.md",
+      "sha256": "a07e9bbb92c82a5460cb6916fd4b85c6878d6c249543ff4df06a693da89d3480",
+      "status": "WARN"
+    },
+    {
+      "id": "browser",
+      "path": "_workspace/04_qa/qa-browser.md",
+      "sha256": "fcee44c219edce627cd03cf842cbb607fcf920187e32d48a908b14f21b7ae92c",
+      "status": "PASS"
+    }
+  ],
+  "checks": [
+    {
+      "id": "typecheck",
+      "reportId": "code",
+      "command": "pnpm typecheck",
+      "exitCode": 0,
+      "status": "PASS"
+    },
+    {
+      "id": "lint",
+      "reportId": "code",
+      "command": "pnpm lint",
+      "exitCode": 0,
+      "status": "PASS"
+    },
+    {
+      "id": "build",
+      "reportId": "integration",
+      "command": "pnpm build",
+      "exitCode": 0,
+      "status": "PASS"
+    },
+    {
+      "id": "audit",
+      "reportId": "security",
+      "command": "pnpm audit --prod",
+      "exitCode": 0,
+      "status": "PASS"
+    },
+    {
+      "id": "test",
+      "reportId": "test",
+      "command": "pnpm test",
+      "exitCode": 0,
+      "status": "PASS"
+    },
+    {
+      "id": "coverage",
+      "reportId": "test",
+      "command": "pnpm test:coverage",
+      "exitCode": 0,
+      "status": "WARN"
+    },
+    {
+      "id": "browser",
+      "reportId": "browser",
+      "command": "pnpm test:e2e",
+      "exitCode": 0,
+      "status": "PASS"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "package.json",
+      "sha256": "c1fde643f95021b8a7e8fd7732d9cfa77adac18607b4db30348e1972ecda2317"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "190606040f7a7d7ec4b5d0af078a782cfc467dcf1b617a3b7bb73150303ec6e6"
+    }
+  ]
+}

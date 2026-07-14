@@ -1,0 +1,146 @@
+import {useState} from 'react'
+import {
+  Box, Typography, Stack, IconButton, Divider, Paper, Chip,
+} from '@mui/material'
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
+import {format, isToday, parseISO, addDays, subDays} from 'date-fns'
+import {ko} from 'date-fns/locale'
+import type {RaceEntry} from '@/entities/race'
+import {CategoryChip} from '@/features/race-list/ui/CategoryChip'
+
+interface CalendarDayProps {
+  races: RaceEntry[]
+  onRaceClick: (race: RaceEntry) => void
+}
+
+export const CalendarDay = ({races, onRaceClick}: CalendarDayProps) => {
+  const [current, setCurrent] = useState(() => new Date())
+
+  const dateKey = format(current, 'yyyy.MM.dd')
+  const dayRaces = races
+    .filter(r => r.date === dateKey)
+    .sort((a, b) => a.time.localeCompare(b.time))
+
+  const prev = () => setCurrent(d => subDays(d, 1))
+  const next = () => setCurrent(d => addDays(d, 1))
+  const today = () => setCurrent(new Date())
+  const todayFlag = isToday(current)
+
+  // 앞뒤 5일 빠른 탐색
+  const nearbyDays = Array.from({length: 11}, (_, i) => {
+    const d = addDays(current, i - 5)
+    return {date: d, key: format(d, 'yyyy.MM.dd'), hasRace: false}
+  })
+  nearbyDays.forEach(item => {
+    item.hasRace = races.some(r => r.date === item.key)
+  })
+
+  return (
+    <Box>
+      {/* 날짜 네비게이션 */}
+      <Stack direction="row" alignItems="center" sx={{mb: 1.5}}>
+        <IconButton size="small" onClick={prev} aria-label="전날"><ChevronLeftIcon /></IconButton>
+        <Typography
+          variant="subtitle1"
+          sx={{fontWeight: 700, mx: 1, minWidth: 160, textAlign: 'center', color: todayFlag ? 'primary.main' : 'text.primary'}}>
+          {format(current, 'yyyy년 M월 d일 (EEE)', {locale: ko})}
+          {todayFlag && (
+            <Chip label="오늘" size="small" color="primary" sx={{ml: 0.75, height: 18, fontSize: '0.65rem'}} />
+          )}
+        </Typography>
+        <IconButton size="small" onClick={next} aria-label="다음날"><ChevronRightIcon /></IconButton>
+        {!todayFlag && (
+          <Typography
+            variant="caption"
+            onClick={today}
+            sx={{ml: 1, cursor: 'pointer', color: 'primary.main', '&:hover': {textDecoration: 'underline'}}}>
+            오늘
+          </Typography>
+        )}
+      </Stack>
+
+      {/* 빠른 날짜 이동 바 */}
+      <Stack direction="row" spacing={0.5} sx={{mb: 2, overflowX: 'auto', pb: 0.5}}>
+        {nearbyDays.map(item => {
+          const isActive = item.key === dateKey
+          const isT = isToday(item.date)
+          const dayNum = item.date.getDay()
+          return (
+            <Box
+              key={item.key}
+              onClick={() => setCurrent(item.date)}
+              sx={{
+                minWidth: 40, px: 0.75, py: 0.5, borderRadius: 1, cursor: 'pointer', textAlign: 'center',
+                bgcolor: isActive ? 'primary.main' : isT ? 'action.selected' : 'transparent',
+                '&:hover': {bgcolor: isActive ? 'primary.dark' : 'action.hover'},
+                position: 'relative',
+              }}>
+              <Typography variant="caption" sx={{
+                display: 'block', fontSize: '0.65rem', lineHeight: 1.2,
+                color: isActive ? '#fff' : (dayNum === 0 ? 'error.main' : dayNum === 6 ? 'primary.main' : 'text.secondary'),
+              }}>
+                {format(item.date, 'EEE', {locale: ko})}
+              </Typography>
+              <Typography variant="caption" sx={{
+                display: 'block', fontSize: '0.82rem', fontWeight: 600,
+                color: isActive ? '#fff' : 'text.primary',
+              }}>
+                {format(item.date, 'd')}
+              </Typography>
+              {item.hasRace && !isActive && (
+                <Box sx={{width: 4, height: 4, borderRadius: '50%', bgcolor: 'primary.main', mx: 'auto', mt: 0.25}} />
+              )}
+            </Box>
+          )
+        })}
+      </Stack>
+
+      {/* 대회 목록 */}
+      {dayRaces.length === 0 ? (
+        <Box sx={{py: 6, textAlign: 'center'}}>
+          <Typography color="text.secondary">이 날 대회 일정이 없습니다</Typography>
+        </Box>
+      ) : (
+        <Stack spacing={1.5}>
+          {dayRaces.map(race => (
+            <Paper
+              key={race.id}
+              variant="outlined"
+              onClick={() => onRaceClick(race)}
+              sx={{p: 1.5, cursor: 'pointer', '&:hover': {borderColor: 'primary.main', bgcolor: 'action.hover'}, transition: 'border-color 0.15s'}}>
+              <Stack direction="row" alignItems="flex-start" spacing={1.5}>
+                {/* 시간 */}
+                <Box sx={{minWidth: 46, textAlign: 'center'}}>
+                  <Typography variant="body2" sx={{fontWeight: 700, color: 'primary.main', fontSize: '0.9rem'}}>
+                    {race.time || '-'}
+                  </Typography>
+                </Box>
+
+                <Divider orientation="vertical" flexItem />
+
+                {/* 내용 */}
+                <Box sx={{flex: 1}}>
+                  <Stack direction="row" alignItems="center" spacing={0.75} sx={{mb: 0.5}}>
+                    <Typography variant="body2" sx={{fontWeight: 600}}>{race.title}</Typography>
+                  </Stack>
+                  <Typography variant="caption" color="text.secondary" sx={{display: 'block', mb: 0.5}}>
+                    📍 {race.venue}
+                  </Typography>
+                  <Stack direction="row" alignItems="center" justifyContent="space-between">
+                    <CategoryChip category={race.category} />
+                    <Stack direction="row" alignItems="center" spacing={0.25}>
+                      <InfoOutlinedIcon sx={{fontSize: 12, color: 'text.disabled'}} />
+                      <Typography variant="caption" sx={{fontSize: '0.65rem', color: 'text.disabled'}}>상세보기</Typography>
+                    </Stack>
+                  </Stack>
+                </Box>
+              </Stack>
+            </Paper>
+          ))}
+        </Stack>
+      )}
+    </Box>
+  )
+}

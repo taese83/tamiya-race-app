@@ -1,0 +1,46 @@
+# 의존성
+node_modules/
+.pnpm-store/
+
+# 빌드 결과
+dist/
+dist-ssr/
+client/dist/
+*.local
+
+# TypeScript 빌드 캐시
+cache/
+*.tsbuildinfo
+client/tsconfig.app.tsbuildinfo
+
+# 환경변수 (민감 정보 — 절대 커밋 금지)
+.env
+.env.local
+.env.*.local
+
+# Vercel
+.vercel/
+
+# 로그
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 에디터
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.sw?
+
+# 테스트
+playwright-report/
+test-results/
+coverage/

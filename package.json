@@ -1,0 +1,25 @@
+{
+  "name": "tamiya-race-app",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.14.0",
+  "engines": {"node": ">=22.11.0"},
+  "scripts": {
+    "dev": "concurrently \"pnpm --filter server dev\" \"pnpm --filter client dev\"",
+    "build": "pnpm --filter client build",
+    "server": "pnpm --filter server dev",
+    "client": "pnpm --filter client dev"
+  },
+  "dependencies": {
+    "@vercel/kv": "^3.0.0",
+    "@vercel/node": "^5.0.0",
+    "axios": "^1.7.0",
+    "cheerio": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "concurrently": "^9.0.0",
+    "typescript": "^6.0.0"
+  }
+}
