@@ -19,6 +19,7 @@ import {
 } from 'date-fns'
 import {ko} from 'date-fns/locale'
 import type {RaceEntry} from '@/entities/race'
+import {CLASS_LIST, getCategoryColor} from '@/entities/race'
 import {CategoryChip} from '@/features/race-list/ui/CategoryChip'
 
 interface CalendarMonthProps {
@@ -39,22 +40,6 @@ function sortByTime(races: RaceEntry[]): RaceEntry[] {
     if (!b.time) return -1
     return a.time.localeCompare(b.time)
   })
-}
-
-// ─── 종목 색상 팔레트 (CategoryChip 색상과 공유) ──────────────────────────────
-
-// M2B를 M2보다 먼저 두어 includes() 매칭 순서를 보장한다
-const CLASS_LIST = [
-  {key: 'M1', label: 'M1 클래스', color: '#e53935'},
-  {key: 'M2B', label: 'M2B 클래스', color: '#8e24aa'},
-  {key: 'M2', label: 'M2 클래스', color: '#1e88e5'},
-  {key: 'M3', label: 'M3 클래스', color: '#43a047'},
-  {key: 'OPEN', label: 'OPEN', color: '#fb8c00'},
-] as const
-
-const getCategoryColor = (category: string): string => {
-  const entry = CLASS_LIST.find(c => category.includes(c.key))
-  return entry?.color ?? '#546e7a'
 }
 
 // ─── 데스크탑: 상세 대회 행 ────────────────────────────────────────────────────
