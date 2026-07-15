@@ -1,6 +1,6 @@
-import {useState} from 'react'
+import {useState, useEffect} from 'react'
 import {
-  Box, Typography, Stack, IconButton, Divider, Paper, Chip,
+  Box, Typography, Stack, IconButton, Divider, Paper, Chip, Collapse,
 } from '@mui/material'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
@@ -9,6 +9,8 @@ import {format, isToday, isPast, startOfDay, addDays, subDays} from 'date-fns'
 import {ko} from 'date-fns/locale'
 import type {RaceEntry} from '@/entities/race'
 import {CategoryChip} from '@/entities/race'
+import {ItineraryButton, RouteMapPanel, computeOptimalItinerary} from '@/features/race-itinerary'
+import type {ItineraryResult, ItineraryOptions} from '@/features/race-itinerary'
 
 interface CalendarDayProps {
   races: RaceEntry[]
@@ -17,11 +19,30 @@ interface CalendarDayProps {
 
 export const CalendarDay = ({races, onRaceClick}: CalendarDayProps) => {
   const [current, setCurrent] = useState(() => new Date())
+  const [routeMapOpen, setRouteMapOpen] = useState(false)
+  const [itinerary, setItinerary] = useState<ItineraryResult | null>(null)
 
   const dateKey = format(current, 'yyyy.MM.dd')
   const dayRaces = races
     .filter(r => r.date === dateKey)
     .sort((a, b) => a.time.localeCompare(b.time))
+
+  // 날짜 변경 시 패널 자동 닫힘
+  useEffect(() => {
+    setRouteMapOpen(false)
+    setItinerary(null)
+  }, [current])
+
+  const handleItineraryOpen = (options: ItineraryOptions) => {
+    setItinerary(computeOptimalItinerary(dayRaces, options))
+    setRouteMapOpen(true)
+  }
+
+  // warningMessage 계산
+  const timedRaces = dayRaces.filter(r => r.time && r.time.trim() !== '')
+  const warningMsg = itinerary && itinerary.entries.length === 1 && timedRaces.length >= 2
+    ? '같은 시간대 경기만 있어 1경기만 선택 가능합니다'
+    : undefined
 
   const prev = () => setCurrent(d => subDays(d, 1))
   const next = () => setCurrent(d => addDays(d, 1))
@@ -54,12 +75,22 @@ export const CalendarDay = ({races, onRaceClick}: CalendarDayProps) => {
         <IconButton size="small" onClick={next} aria-label="다음날"><ChevronRightIcon /></IconButton>
         {!todayFlag && (
           <Typography
+            component="button"
             variant="caption"
             onClick={today}
-            sx={{ml: 1, cursor: 'pointer', color: 'primary.main', '&:hover': {textDecoration: 'underline'}}}>
+            sx={{ml: 1, cursor: 'pointer', color: 'primary.main', background: 'none', border: 'none', p: 0, font: 'inherit', '&:hover': {textDecoration: 'underline'}}}>
             오늘
           </Typography>
         )}
+        <Box sx={{ml: 'auto'}}>
+          <ItineraryButton
+            races={dayRaces}
+            dateKey={dateKey}
+            open={routeMapOpen}
+            onOpen={handleItineraryOpen}
+            onClose={() => setRouteMapOpen(false)}
+          />
+        </Box>
       </Stack>
 
       {/* 빠른 날짜 이동 바 */}
@@ -102,6 +133,21 @@ export const CalendarDay = ({races, onRaceClick}: CalendarDayProps) => {
           )
         })}
       </Stack>
+
+      {/* 최적 동선 패널 */}
+      <Collapse in={routeMapOpen} unmountOnExit>
+        {itinerary && (
+          <Box sx={{mb: 2}}>
+            <RouteMapPanel
+              result={itinerary}
+              dateKey={dateKey}
+              onRaceClick={onRaceClick}
+              onClose={() => setRouteMapOpen(false)}
+              warningMessage={warningMsg}
+            />
+          </Box>
+        )}
+      </Collapse>
 
       {/* 대회 목록 */}
       {dayRaces.length === 0 ? (

@@ -1,7 +1,7 @@
-import {useState, useMemo} from 'react'
+import {useState, useMemo, useEffect} from 'react'
 import {
   Box, Typography, Table, TableHead, TableBody, TableRow, TableCell,
-  TableContainer, Paper, Chip, Stack,
+  TableContainer, Paper, Chip, Stack, Collapse,
   useMediaQuery, Card, CardContent,
 } from '@mui/material'
 import {useTheme} from '@mui/material/styles'
@@ -11,6 +11,8 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import type {RaceEntry} from '@/entities/race'
 import {CategoryChip} from '@/entities/race'
 import {RaceDetailDrawer} from './RaceDetailDrawer'
+import {ItineraryButton, RouteMapPanel, computeOptimalItinerary} from '@/features/race-itinerary'
+import type {ItineraryResult, ItineraryOptions} from '@/features/race-itinerary'
 
 interface RaceTableProps {
   races: RaceEntry[]  // 이미 필터링된 데이터
@@ -42,9 +44,27 @@ export const RaceTable = ({races}: RaceTableProps) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const [selectedRace, setSelectedRace] = useState<RaceEntry | null>(null)
+  const [routeMapOpenDate, setRouteMapOpenDate] = useState<string | null>(null)
+  const [itineraryMap, setItineraryMap] = useState<Map<string, ItineraryResult>>(new Map())
 
   const grouped = useMemo(() => groupByDate(races), [races])
   const sortedDates = Array.from(grouped.keys()).sort()
+
+  // 필터 변경 시 패널 자동 닫힘
+  useEffect(() => {
+    setRouteMapOpenDate(null)
+    setItineraryMap(new Map())
+  }, [races])
+
+  const handleItineraryOpen = (date: string, dateRaces: RaceEntry[], options: ItineraryOptions) => {
+    const result = computeOptimalItinerary(dateRaces, options)
+    setItineraryMap(prev => new Map(prev).set(date, result))
+    setRouteMapOpenDate(date)
+  }
+
+  const handleItineraryClose = () => {
+    setRouteMapOpenDate(null)
+  }
 
   if (races.length === 0) {
     return (
@@ -78,7 +98,38 @@ export const RaceTable = ({races}: RaceTableProps) => {
               </Typography>
               {isPastDate && <Chip label="종료" size="small" sx={{height: 18, fontSize: '0.65rem'}} />}
               <Chip label={`${dateRaces.length}건`} size="small" variant="outlined" sx={{height: 18, fontSize: '0.65rem'}} />
+              <Box sx={{ml: 'auto'}}>
+                <ItineraryButton
+                  races={dateRaces}
+                  dateKey={date}
+                  open={routeMapOpenDate === date}
+                  onOpen={(options) => handleItineraryOpen(date, dateRaces, options)}
+                  onClose={handleItineraryClose}
+                />
+              </Box>
             </Stack>
+
+            <Collapse in={routeMapOpenDate === date} unmountOnExit>
+              {itineraryMap.has(date) && (
+                <Box sx={{mb: 1.5}}>
+                  <RouteMapPanel
+                    result={itineraryMap.get(date)!}
+                    dateKey={date}
+                    onRaceClick={setSelectedRace}
+                    onClose={handleItineraryClose}
+                    warningMessage={
+                      (() => {
+                        const res = itineraryMap.get(date)!
+                        const timedCount = dateRaces.filter(r => r.time && r.time.trim() !== '').length
+                        return res.entries.length === 1 && timedCount >= 2
+                          ? '같은 시간대 경기만 있어 1경기만 선택 가능합니다'
+                          : undefined
+                      })()
+                    }
+                  />
+                </Box>
+              )}
+            </Collapse>
 
             {isMobile ? (
               <Stack spacing={1}>
