@@ -27,7 +27,10 @@ export const ShareButton = ({settings}: ShareButtonProps) => {
   const handleShare = async () => {
     const shareUrl = buildShareUrl(settings)
 
-    if (navigator.share) {
+    // 터치 디바이스에서만 Web Share API 사용 — 데스크탑은 바로 클립보드 복사
+    const isTouchDevice = 'ontouchstart' in window
+
+    if (isTouchDevice && navigator.share) {
       try {
         await navigator.share({
           title: '타미야 대회 일정',
@@ -42,12 +45,13 @@ export const ShareButton = ({settings}: ShareButtonProps) => {
 
     try {
       await navigator.clipboard.writeText(shareUrl)
+      // 복사 성공 시에만 피드백 표시
+      setCopied(true)
+      setOpen(true)
+      setTimeout(() => setCopied(false), 2000)
     } catch {
-      // clipboard API 미지원 환경 — silent fail (execCommand는 deprecated)
+      // clipboard API 미지원 — 피드백 없이 무시
     }
-    setCopied(true)
-    setOpen(true)
-    setTimeout(() => setCopied(false), 2000)
   }
 
   return (
