@@ -16,9 +16,11 @@ interface RaceCalendarProps {
   view: CalendarViewType
   onViewChange: (v: CalendarViewType) => void
   onRaceClick: (race: RaceEntry) => void
+  /** 외부에서 증가시키면 현재 캘린더를 오늘 날짜로 remount */
+  todayKey?: number
 }
 
-export const RaceCalendar = ({races, view, onViewChange, onRaceClick}: RaceCalendarProps) => {
+export const RaceCalendar = ({races, view, onViewChange, onRaceClick, todayKey}: RaceCalendarProps) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
@@ -65,9 +67,10 @@ export const RaceCalendar = ({races, view, onViewChange, onRaceClick}: RaceCalen
         </ToggleButtonGroup>
       </Box>
 
-      {view === 'day' && <CalendarDay races={races} onRaceClick={onRaceClick} />}
-      {view === 'week' && <CalendarWeek races={races} onRaceClick={onRaceClick} />}
-      {view === 'month' && <CalendarMonth races={races} onRaceClick={onRaceClick} />}
+      {/* todayKey가 바뀌면 해당 컴포넌트가 remount되어 내부 current가 오늘로 초기화됨 */}
+      {view === 'day' && <CalendarDay key={todayKey} races={races} onRaceClick={onRaceClick} />}
+      {view === 'week' && <CalendarWeek key={todayKey} races={races} onRaceClick={onRaceClick} />}
+      {view === 'month' && <CalendarMonth key={todayKey} races={races} onRaceClick={onRaceClick} />}
     </Box>
   )
 }

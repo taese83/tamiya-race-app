@@ -1,6 +1,6 @@
-import {useState, useEffect} from 'react'
+import {useState} from 'react'
 import {
-  Box, Typography, Stack, IconButton, Divider, Paper, Chip, Collapse,
+  Box, Typography, Stack, IconButton, Divider, Paper, Chip,
 } from '@mui/material'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
@@ -9,8 +9,6 @@ import {format, isToday, isPast, startOfDay, addDays, subDays} from 'date-fns'
 import {ko} from 'date-fns/locale'
 import type {RaceEntry} from '@/entities/race'
 import {CategoryChip} from '@/entities/race'
-import {ItineraryButton, RouteMapPanel, computeOptimalItinerary} from '@/features/race-itinerary'
-import type {ItineraryResult, ItineraryOptions} from '@/features/race-itinerary'
 
 interface CalendarDayProps {
   races: RaceEntry[]
@@ -19,28 +17,11 @@ interface CalendarDayProps {
 
 export const CalendarDay = ({races, onRaceClick}: CalendarDayProps) => {
   const [current, setCurrent] = useState(() => new Date())
-  const [routeMapOpen, setRouteMapOpen] = useState(false)
-  const [itinerary, setItinerary] = useState<ItineraryResult | null>(null)
 
   const dateKey = format(current, 'yyyy.MM.dd')
   const dayRaces = races
     .filter(r => r.date === dateKey)
     .sort((a, b) => a.time.localeCompare(b.time))
-
-  useEffect(() => {
-    setRouteMapOpen(false)
-    setItinerary(null)
-  }, [current])
-
-  const handleItineraryOpen = (options: ItineraryOptions) => {
-    setItinerary(computeOptimalItinerary(dayRaces, options))
-    setRouteMapOpen(true)
-  }
-
-  const timedRaces = dayRaces.filter(r => r.time && r.time.trim() !== '')
-  const warningMsg = itinerary && itinerary.entries.length === 1 && timedRaces.length >= 2
-    ? '같은 시간대 경기만 있어 1경기만 선택 가능합니다'
-    : undefined
 
   const prev = () => setCurrent(d => subDays(d, 1))
   const next = () => setCurrent(d => addDays(d, 1))
@@ -48,7 +29,6 @@ export const CalendarDay = ({races, onRaceClick}: CalendarDayProps) => {
   const todayFlag = isToday(current)
   const isPastDay = !todayFlag && isPast(startOfDay(current))
 
-  // 앞뒤 5일 빠른 탐색
   const nearbyDays = Array.from({length: 11}, (_, i) => {
     const d = addDays(current, i - 5)
     return {date: d, key: format(d, 'yyyy.MM.dd'), hasRace: false}
@@ -80,30 +60,7 @@ export const CalendarDay = ({races, onRaceClick}: CalendarDayProps) => {
             오늘
           </Typography>
         )}
-        <Box sx={{ml: 'auto'}}>
-          <ItineraryButton
-            races={dayRaces}
-            dateKey={dateKey}
-            open={routeMapOpen}
-            onOpen={handleItineraryOpen}
-            onClose={() => setRouteMapOpen(false)}
-          />
-        </Box>
       </Stack>
-
-      <Collapse in={routeMapOpen} unmountOnExit>
-        {itinerary && (
-          <Box sx={{mb: 2}}>
-            <RouteMapPanel
-              result={itinerary}
-              dateKey={dateKey}
-              onRaceClick={onRaceClick}
-              onClose={() => setRouteMapOpen(false)}
-              warningMessage={warningMsg}
-            />
-          </Box>
-        )}
-      </Collapse>
 
       {/* 빠른 날짜 이동 바 */}
       <Stack direction="row" spacing={0.5} sx={{mb: 2, overflowX: 'auto', pb: 0.5}}>
@@ -164,16 +121,12 @@ export const CalendarDay = ({races, onRaceClick}: CalendarDayProps) => {
               onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); onRaceClick(race) } }}
               sx={{p: 1.5, cursor: 'pointer', '&:hover': {borderColor: 'primary.main', bgcolor: 'action.hover'}, '&:focus-visible': {outline: '2px solid', outlineColor: 'primary.main'}, transition: 'border-color 0.15s'}}>
               <Stack direction="row" alignItems="flex-start" spacing={1.5}>
-                {/* 시간 */}
                 <Box sx={{minWidth: 46, textAlign: 'center'}}>
                   <Typography variant="body2" sx={{fontWeight: 700, color: 'primary.main', fontSize: '0.9rem'}}>
                     {race.time || '-'}
                   </Typography>
                 </Box>
-
                 <Divider orientation="vertical" flexItem />
-
-                {/* 내용 */}
                 <Box sx={{flex: 1}}>
                   <Stack direction="row" alignItems="center" spacing={0.75} sx={{mb: 0.5}}>
                     <Typography variant="body2" sx={{fontWeight: 600}}>{race.title}</Typography>

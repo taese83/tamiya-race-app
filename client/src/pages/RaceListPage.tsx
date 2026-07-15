@@ -1,14 +1,15 @@
-import {useMemo, useState} from 'react'
+import {useMemo, useState, useCallback, useRef} from 'react'
 import {useQuery} from '@tanstack/react-query'
 import {
   Box, Typography, AppBar, Toolbar, IconButton,
   CircularProgress, Alert, Stack, Chip,
   ToggleButtonGroup, ToggleButton, Paper, Collapse,
-  Button, Badge, Tooltip,
+  Button, Badge, Tooltip, Fab,
 } from '@mui/material'
 import ViewListIcon from '@mui/icons-material/ViewList'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import FilterListIcon from '@mui/icons-material/FilterList'
+import TodayIcon from '@mui/icons-material/Today'
 import {format} from 'date-fns'
 import {RACES_QUERY_KEY, fetchRaces} from '@/entities/race'
 import type {RacesResponse, RaceEntry} from '@/entities/race'
@@ -36,6 +37,8 @@ export const RaceListPage = () => {
 
   const [showFilter, setShowFilter] = useState(false)
   const [calendarSelectedRace, setCalendarSelectedRace] = useState<RaceEntry | null>(null)
+  // 캘린더: todayKey 증가 → CalendarDay/Week/Month remount → 오늘 날짜로 초기화
+  const [calendarTodayKey, setCalendarTodayKey] = useState(0)
 
   const {data, isLoading, isError, error} = useQuery<RacesResponse, Error>({
     queryKey: RACES_QUERY_KEY,
@@ -63,6 +66,29 @@ export const RaceListPage = () => {
   }
 
   const activeFilterCount = selectedVenues.length + selectedCategories.length
+
+  // ref로 최신 filteredRaces를 항상 참조 — useCallback 클로저 stale 방지
+  const filteredRacesRef = useRef(filteredRaces)
+  filteredRacesRef.current = filteredRaces
+
+  const viewModeRef = useRef(viewMode)
+  viewModeRef.current = viewMode
+
+  const handleGoToToday = useCallback(() => {
+    if (viewModeRef.current === 'list') {
+      // 클릭 시점의 최신 filteredRaces 기준으로 anchor 날짜 계산
+      const dates = Array.from(new Set(filteredRacesRef.current.map(r => r.date))).sort()
+      const todayStr = format(new Date(), 'yyyy.MM.dd')
+      const target = dates.includes(todayStr)
+        ? todayStr
+        : dates.find(d => d >= todayStr) ?? null
+      if (!target) return
+      const el = document.getElementById(`race-date-${target}`)
+      el?.scrollIntoView({behavior: 'smooth', block: 'start'})
+    } else {
+      setCalendarTodayKey(k => k + 1)
+    }
+  }, [])
 
   return (
     <Box sx={{minHeight: '100vh', bgcolor: 'background.default'}}>
@@ -201,11 +227,31 @@ export const RaceListPage = () => {
               view={calendarView}
               onViewChange={setCalendarView}
               onRaceClick={setCalendarSelectedRace}
+              todayKey={calendarTodayKey}
             />
             <RaceDetailDrawer race={calendarSelectedRace} onClose={() => setCalendarSelectedRace(null)} />
           </>
         )}
       </Box>
+
+      {/* 오늘 날짜로 이동 FAB — 데이터 로드 후 항상 표시 */}
+      {data != null && (
+        <Tooltip title="오늘로 이동" placement="left">
+          <Fab
+            size="small"
+            color="primary"
+            aria-label="오늘 날짜로 이동"
+            onClick={handleGoToToday}
+            sx={{
+              position: 'fixed',
+              bottom: 24,
+              right: 24,
+              zIndex: (theme) => theme.zIndex.drawer,
+            }}>
+            <TodayIcon />
+          </Fab>
+        </Tooltip>
+      )}
     </Box>
   )
 }
