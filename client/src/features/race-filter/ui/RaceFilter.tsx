@@ -5,13 +5,21 @@ import {
 } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import type {RaceEntry} from '@/entities/race'
+import {
+  RACE_TYPE_LABEL, RACE_TYPE_COLOR, REGION_LABEL,
+  type RaceType, type Region,
+} from '@/shared/lib/raceMeta'
 
 interface RaceFilterProps {
-  races: RaceEntry[]                  // 원본 전체 데이터 (옵션 추출용)
+  races: RaceEntry[]
   selectedVenues: string[]
   selectedCategories: string[]
+  selectedRaceTypes: RaceType[]
+  selectedRegions: Region[]
   onVenuesChange: (v: string[]) => void
   onCategoriesChange: (c: string[]) => void
+  onRaceTypesChange: (t: RaceType[]) => void
+  onRegionsChange: (r: Region[]) => void
 }
 
 function extractVenues(races: RaceEntry[]): string[] {
@@ -33,53 +41,100 @@ export const RaceFilter = ({
   races,
   selectedVenues,
   selectedCategories,
+  selectedRaceTypes,
+  selectedRegions,
   onVenuesChange,
   onCategoriesChange,
+  onRaceTypesChange,
+  onRegionsChange,
 }: RaceFilterProps) => {
   const venues = useMemo(() => extractVenues(races), [races])
   const categories = useMemo(() => extractCategories(races), [races])
 
-  const hasFilter = selectedVenues.length > 0 || selectedCategories.length > 0
-
-  const handleCategoryToggle = (_: React.MouseEvent, values: string[]) => {
-    onCategoriesChange(values)
-  }
+  const hasFilter =
+    selectedVenues.length > 0 ||
+    selectedCategories.length > 0 ||
+    selectedRaceTypes.length > 0 ||
+    selectedRegions.length > 0
 
   const clearAll = () => {
     onVenuesChange([])
     onCategoriesChange([])
+    onRaceTypesChange([])
+    onRegionsChange([])
+  }
+
+  const toggleSx = {
+    borderRadius: '16px !important',
+    border: '1px solid !important',
+    px: 1.5, py: 0.25,
+    fontSize: '0.75rem',
+    '&.Mui-selected': {
+      bgcolor: 'primary.main',
+      color: '#fff',
+      borderColor: 'primary.main !important',
+    },
   }
 
   return (
     <Stack spacing={1.5}>
-      {/* 종목 필터 */}
+      {/* 대회 유형 */}
+      <Box>
+        <Typography variant="caption" color="text.secondary" sx={{display: 'block', mb: 0.75}}>대회 유형</Typography>
+        <ToggleButtonGroup
+          value={selectedRaceTypes}
+          onChange={(_e, v) => onRaceTypesChange(v)}
+          size="small"
+          sx={{flexWrap: 'wrap', gap: 0.5}}>
+          {(['station', 'world', 'asia'] as RaceType[]).map(type => (
+            <ToggleButton
+              key={type}
+              value={type}
+              sx={{
+                ...toggleSx,
+                '&.Mui-selected': {
+                  bgcolor: RACE_TYPE_COLOR[type],
+                  color: '#fff',
+                  borderColor: `${RACE_TYPE_COLOR[type]} !important`,
+                },
+              }}>
+              {RACE_TYPE_LABEL[type]}
+            </ToggleButton>
+          ))}
+        </ToggleButtonGroup>
+      </Box>
+
+      <Divider sx={{my: 0}} />
+
+      {/* 지역 */}
+      <Box>
+        <Typography variant="caption" color="text.secondary" sx={{display: 'block', mb: 0.75}}>지역</Typography>
+        <ToggleButtonGroup
+          value={selectedRegions}
+          onChange={(_e, v) => onRegionsChange(v)}
+          size="small"
+          sx={{flexWrap: 'wrap', gap: 0.5}}>
+          {(['seoul', 'busan'] as Region[]).map(region => (
+            <ToggleButton key={region} value={region} sx={toggleSx}>
+              {REGION_LABEL[region]}
+            </ToggleButton>
+          ))}
+        </ToggleButtonGroup>
+      </Box>
+
+      <Divider sx={{my: 0}} />
+
+      {/* 종목 */}
       {categories.length > 0 && (
         <Box>
-          <Typography variant="caption" color="text.secondary" sx={{display: 'block', mb: 0.75}}>
-            종목
-          </Typography>
+          <Typography variant="caption" color="text.secondary" sx={{display: 'block', mb: 0.75}}>종목</Typography>
           <ToggleButtonGroup
             value={selectedCategories}
-            onChange={handleCategoryToggle}
+            onChange={(_e, v) => onCategoriesChange(v)}
             size="small"
             sx={{flexWrap: 'wrap', gap: 0.5}}>
             {categories.map(cat => (
-              <ToggleButton
-                key={cat}
-                value={cat}
-                sx={{
-                  borderRadius: '16px !important',
-                  border: '1px solid !important',
-                  px: 1.5, py: 0.25,
-                  fontSize: '0.75rem',
-                  '&.Mui-selected': {
-                    bgcolor: 'primary.main',
-                    color: '#fff',
-                    borderColor: 'primary.main !important',
-                  },
-                }}>
-                {cat}
-              </ToggleButton>
+              <ToggleButton key={cat} value={cat} sx={toggleSx}>{cat}</ToggleButton>
             ))}
           </ToggleButtonGroup>
         </Box>
@@ -87,11 +142,9 @@ export const RaceFilter = ({
 
       <Divider sx={{my: 0}} />
 
-      {/* 장소 필터 */}
+      {/* 장소 */}
       <Box>
-        <Typography variant="caption" color="text.secondary" sx={{display: 'block', mb: 0.75}}>
-          장소
-        </Typography>
+        <Typography variant="caption" color="text.secondary" sx={{display: 'block', mb: 0.75}}>장소</Typography>
         <Autocomplete
           multiple
           size="small"

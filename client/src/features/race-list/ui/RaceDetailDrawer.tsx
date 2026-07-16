@@ -18,6 +18,8 @@ import {ko} from 'date-fns/locale'
 import {fetchRaceDetail, raceDetailQueryKey} from '@/entities/race'
 import type {RaceEntry} from '@/entities/race'
 import {CategoryChip} from '@/entities/race'
+import {getRaceType, getRegion, RACE_TYPE_LABEL, RACE_TYPE_COLOR, REGION_LABEL} from '@/shared/lib/raceMeta'
+import {getRulesUrl} from '@/shared/lib/raceRules'
 
 interface RaceDetailDrawerProps {
   race: RaceEntry | null
@@ -26,6 +28,21 @@ interface RaceDetailDrawerProps {
 
 function parseTamiyaDate(dateStr: string): Date {
   return parseISO(dateStr.replace(/\./g, '-'))
+}
+
+/** race.date + race.time 기준으로 실제 경기 종료 여부 판정 (60분 진행 가정) */
+function isRaceOver(dateStr: string, timeStr: string): boolean {
+  const base = parseTamiyaDate(dateStr)
+  if (timeStr) {
+    const [h, m] = timeStr.split(':').map(Number)
+    if (!isNaN(h!) && !isNaN(m!)) {
+      base.setHours(h!, m!, 0, 0)
+      // 경기 시작 후 60분이 지나야 종료 처리
+      return isPast(new Date(base.getTime() + 60 * 60 * 1000))
+    }
+  }
+  // time 없으면 날짜 기준 (자정 이후)
+  return isPast(base)
 }
 
 // 한국 전화번호 추출: 지역번호(02~0xx) + 휴대폰(010~019)
@@ -107,6 +124,7 @@ const InquiryText = ({text}: {text: string}) => {
 
 export const RaceDetailDrawer = ({race, onClose}: RaceDetailDrawerProps) => {
   const wrId = race?.id.split('-')[0] ?? ''
+  const rulesUrl = race ? getRulesUrl(race.category) : null
 
   const {data, isLoading, isError} = useQuery({
     queryKey: raceDetailQueryKey(wrId),
@@ -121,7 +139,7 @@ export const RaceDetailDrawer = ({race, onClose}: RaceDetailDrawerProps) => {
     detail?.registrationMethod?.includes('접수하기') ||
     detail?.registrationMethod?.includes('온라인 접수') || false
   )
-  const isPastRace = race ? isPast(parseTamiyaDate(race.date)) : false
+  const isPastRace = race ? isRaceOver(race.date, race.time ?? '') : false
 
   return (
     <Drawer
@@ -134,8 +152,27 @@ export const RaceDetailDrawer = ({race, onClose}: RaceDetailDrawerProps) => {
         {/* 헤더 */}
         <Box sx={{px: 2.5, py: 2, display: 'flex', alignItems: 'flex-start', gap: 1, borderBottom: '1px solid', borderColor: 'divider'}}>
           <Box sx={{flex: 1}}>
-            <Stack direction="row" spacing={1} alignItems="center" sx={{mb: 0.5}}>
+            <Stack direction="row" spacing={0.75} alignItems="center" flexWrap="wrap" sx={{mb: 0.5}}>
               {race && <CategoryChip category={race.category} />}
+              {race && (() => {
+                const type = getRaceType(race.title)
+                if (type === 'station') return null
+                return (
+                  <Chip
+                    label={RACE_TYPE_LABEL[type]}
+                    size="small"
+                    sx={{height: 20, fontSize: '0.65rem', bgcolor: RACE_TYPE_COLOR[type], color: '#fff', fontWeight: 700}}
+                  />
+                )
+              })()}
+              {race && (
+                <Chip
+                  label={REGION_LABEL[getRegion(race.venue)]}
+                  size="small"
+                  variant="outlined"
+                  sx={{height: 20, fontSize: '0.65rem'}}
+                />
+              )}
               {isPastRace && <Chip label="종료" size="small" sx={{height: 20, fontSize: '0.68rem'}} />}
             </Stack>
             <Typography variant="h6" sx={{fontWeight: 700, fontSize: '1rem', lineHeight: 1.4}}>
@@ -253,6 +290,24 @@ export const RaceDetailDrawer = ({race, onClose}: RaceDetailDrawerProps) => {
                   <Box sx={{pl: 3}}>
                     <InquiryText text={detail.inquiry} />
                   </Box>
+                </Box>
+              )}
+
+              {/* 클래스 규정 링크 */}
+              {rulesUrl && (
+                <Box>
+                  <Divider sx={{mb: 1.5}} />
+                  <Button
+                    variant="text"
+                    size="small"
+                    fullWidth
+                    endIcon={<OpenInNewIcon sx={{fontSize: 14}} />}
+                    href={rulesUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    sx={{color: 'text.secondary', fontSize: '0.75rem', justifyContent: 'flex-start'}}>
+                    규정 보기
+                  </Button>
                 </Box>
               )}
 

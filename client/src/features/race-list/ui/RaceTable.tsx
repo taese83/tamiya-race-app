@@ -8,6 +8,8 @@ import {useTheme} from '@mui/material/styles'
 import {format, isPast, isToday, parseISO} from 'date-fns'
 import {ko} from 'date-fns/locale'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
+import HowToRegIcon from '@mui/icons-material/HowToReg'
+import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import type {RaceEntry} from '@/entities/race'
 import {CategoryChip} from '@/entities/race'
 import {RaceDetailDrawer} from './RaceDetailDrawer'
@@ -44,7 +46,24 @@ export const RaceTable = ({races}: RaceTableProps) => {
   const [selectedRace, setSelectedRace] = useState<RaceEntry | null>(null)
 
   const grouped = useMemo(() => groupByDate(races), [races])
-  const sortedDates = Array.from(grouped.keys()).sort()
+
+  // 접수 시작일 → 경기 목록 맵 (전체 races 기준)
+  const regStartGrouped = useMemo(() => {
+    const map = new Map<string, RaceEntry[]>()
+    races.forEach(r => {
+      if (!r.registrationStartDate) return
+      const arr = map.get(r.registrationStartDate) ?? []
+      arr.push(r)
+      map.set(r.registrationStartDate, arr)
+    })
+    return map
+  }, [races])
+
+  // 경기일 + 접수 시작일을 합쳐 정렬 (경기 없는 날의 접수일도 포함)
+  const sortedDates = useMemo(() => {
+    const dateSet = new Set([...grouped.keys(), ...regStartGrouped.keys()])
+    return Array.from(dateSet).sort()
+  }, [grouped, regStartGrouped])
 
 
   if (races.length === 0) {
@@ -71,6 +90,10 @@ export const RaceTable = ({races}: RaceTableProps) => {
         const dateRaces = grouped.get(date) ?? []
         const isTodayDate = isToday(parseTamiyaDate(date))
         const isPastDate = isPast(parseTamiyaDate(date)) && !isTodayDate
+        // 이 날짜가 접수 시작일인 경기 목록 (regStartGrouped에서 직접 조회)
+        const regStartRaces = regStartGrouped.get(date) ?? []
+        // 경기도 없고 접수도 없으면 렌더 불필요 (안전 가드)
+        if (dateRaces.length === 0 && regStartRaces.length === 0) return null
 
         return (
           <Box
@@ -82,8 +105,58 @@ export const RaceTable = ({races}: RaceTableProps) => {
                 {formatKorDate(date)}
               </Typography>
               {isPastDate && <Chip label="종료" size="small" sx={{height: 18, fontSize: '0.65rem'}} />}
-              <Chip label={`${dateRaces.length}건`} size="small" variant="outlined" sx={{height: 18, fontSize: '0.65rem'}} />
+              {dateRaces.length > 0 && <Chip label={`경기 ${dateRaces.length}건`} size="small" variant="outlined" sx={{height: 18, fontSize: '0.65rem'}} />}
+              {regStartRaces.length > 0 && (() => {
+                const venueCount = new Set(regStartRaces.map(r => r.venue)).size
+                return <Chip label={`접수 시작 ${venueCount}개소`} size="small" color="warning" sx={{height: 18, fontSize: '0.65rem'}} />
+              })()}
             </Stack>
+
+            {/* 접수 시작 경기 배너 — 경기장별 그룹핑 */}
+            {regStartRaces.length > 0 && (() => {
+              // venue 기준 그룹핑, 등장 순서 유지
+              const venueMap = new Map<string, typeof regStartRaces>()
+              regStartRaces.forEach(r => {
+                const arr = venueMap.get(r.venue) ?? []
+                arr.push(r)
+                venueMap.set(r.venue, arr)
+              })
+              return Array.from(venueMap.entries()).map(([venue, venueRaces]) => {
+                // 경기일은 첫 번째 경기 기준 (같은 접수 시작일 그룹이므로 대부분 동일)
+                const firstRace = venueRaces[0]!
+                const categories = venueRaces.map(r => r.category.replace(' 클래스', '')).join(', ')
+                const raceDateStr = format(parseTamiyaDate(firstRace.date), 'M/d', {locale: ko})
+                return (
+                  <Box
+                    key={`reg-${venue}`}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`${venue} 접수 시작`}
+                    onClick={() => setSelectedRace(firstRace)}
+                    onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); setSelectedRace(firstRace) } }}
+                    sx={{
+                      mb: 0.75, px: 1.5, py: 1,
+                      borderRadius: 1.5, cursor: 'pointer',
+                      border: '1px solid', borderColor: 'warning.main',
+                      bgcolor: 'warning.light',
+                      display: 'flex', alignItems: 'center', gap: 1,
+                      '&:hover': {bgcolor: 'warning.main', '& *': {color: '#fff !important'}},
+                      transition: 'background-color 0.1s',
+                    }}>
+                    <HowToRegIcon sx={{fontSize: 16, color: 'warning.dark', flexShrink: 0}} />
+                    <Box sx={{flex: 1, minWidth: 0}}>
+                      <Typography variant="caption" sx={{fontWeight: 700, color: 'warning.dark', display: 'block', fontSize: '0.75rem'}}>
+                        접수 시작 · {venue}
+                      </Typography>
+                      <Typography variant="caption" sx={{color: 'text.secondary', fontSize: '0.72rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block'}}>
+                        {categories} · 경기일 {raceDateStr}
+                      </Typography>
+                    </Box>
+                    <OpenInNewIcon sx={{fontSize: 14, color: 'warning.dark', flexShrink: 0}} />
+                  </Box>
+                )
+              })
+            })()}
 
             {isMobile ? (
               <Stack spacing={1}>

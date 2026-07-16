@@ -7,6 +7,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import {format, isToday, isPast, startOfDay, addDays, subDays} from 'date-fns'
 import {ko} from 'date-fns/locale'
+import HowToRegIcon from '@mui/icons-material/HowToReg'
 import type {RaceEntry} from '@/entities/race'
 import {CategoryChip} from '@/entities/race'
 
@@ -21,11 +22,22 @@ export const CalendarDay = ({races, onRaceClick}: CalendarDayProps) => {
   const dateKey = format(current, 'yyyy.MM.dd')
   const dayRaces = races
     .filter(r => r.date === dateKey)
-    .sort((a, b) => a.time.localeCompare(b.time))
+    .sort((a, b) => {
+      if (!a.time && !b.time) return 0
+      if (!a.time) return 1
+      if (!b.time) return -1
+      return a.time.localeCompare(b.time)
+    })
+
+  // 이 날짜가 접수 시작일인 경기 — 경기장별 그룹핑
+  const regStartVenues = new Map(
+    races
+      .filter(r => r.registrationStartDate === dateKey)
+      .map((r): [string, RaceEntry] => [r.venue, r])
+  )
 
   const prev = () => setCurrent(d => subDays(d, 1))
   const next = () => setCurrent(d => addDays(d, 1))
-  const today = () => setCurrent(new Date())
   const todayFlag = isToday(current)
   const isPastDay = !todayFlag && isPast(startOfDay(current))
 
@@ -51,15 +63,6 @@ export const CalendarDay = ({races, onRaceClick}: CalendarDayProps) => {
           )}
         </Typography>
         <IconButton size="small" onClick={next} aria-label="다음날"><ChevronRightIcon /></IconButton>
-        {!todayFlag && (
-          <Typography
-            component="button"
-            variant="caption"
-            onClick={today}
-            sx={{ml: 1, cursor: 'pointer', color: 'primary.main', background: 'none', border: 'none', p: 0, font: 'inherit', '&:hover': {textDecoration: 'underline'}}}>
-            오늘
-          </Typography>
-        )}
       </Stack>
 
       {/* 빠른 날짜 이동 바 */}
@@ -103,12 +106,45 @@ export const CalendarDay = ({races, onRaceClick}: CalendarDayProps) => {
         })}
       </Stack>
 
+      {/* 접수 시작일 섹션 */}
+      {regStartVenues.size > 0 && (
+        <Box sx={{mb: 2}}>
+          {Array.from(regStartVenues.entries()).map(([venue, rep]) => (
+            <Box
+              key={`reg-${venue}`}
+              role="button"
+              tabIndex={0}
+              aria-label={`${venue} 접수 시작 상세 보기`}
+              onClick={() => onRaceClick(rep)}
+              onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); onRaceClick(rep) } }}
+              sx={{
+                mb: 0.75, px: 1.5, py: 1, borderRadius: 1.5, cursor: 'pointer',
+                border: '1px solid', borderColor: 'warning.main', bgcolor: 'warning.light',
+                display: 'flex', alignItems: 'center', gap: 1,
+                '&:hover': {bgcolor: 'warning.main'},
+                '&:focus-visible': {outline: '2px solid', outlineColor: 'warning.dark'},
+                transition: 'background-color 0.1s',
+              }}>
+              <HowToRegIcon sx={{fontSize: 16, color: 'warning.dark', flexShrink: 0}} />
+              <Box sx={{flex: 1, minWidth: 0}}>
+                <Typography variant="caption" sx={{fontWeight: 700, color: 'warning.dark', display: 'block', fontSize: '0.75rem'}}>
+                  접수 시작 · {venue}
+                </Typography>
+                <Typography variant="caption" sx={{color: 'text.secondary', fontSize: '0.72rem', display: 'block'}}>
+                  {rep.category} · 경기일 {format(new Date(rep.date.replace(/\./g, '-')), 'M/d', {locale: ko})}
+                </Typography>
+              </Box>
+            </Box>
+          ))}
+        </Box>
+      )}
+
       {/* 대회 목록 */}
-      {dayRaces.length === 0 ? (
+      {dayRaces.length === 0 && regStartVenues.size === 0 ? (
         <Box sx={{py: 6, textAlign: 'center'}}>
           <Typography color="text.secondary">이 날 대회 일정이 없습니다</Typography>
         </Box>
-      ) : (
+      ) : dayRaces.length === 0 ? null : (
         <Stack spacing={1.5} sx={{opacity: isPastDay ? 0.45 : 1}}>
           {dayRaces.map(race => (
             <Paper

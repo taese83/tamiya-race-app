@@ -8,7 +8,6 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import HowToRegIcon from '@mui/icons-material/HowToReg'
 import CloseIcon from '@mui/icons-material/Close'
-import EmojiEventsIcon from '@mui/icons-material/EmojiEvents'
 import {
   format, startOfMonth, endOfMonth, startOfWeek, endOfWeek,
   eachDayOfInterval, isSameMonth, isToday, isPast, startOfDay,
@@ -17,6 +16,13 @@ import {ko} from 'date-fns/locale'
 import type {RaceEntry} from '@/entities/race'
 import {CLASS_LIST, getCategoryColor} from '@/entities/race'
 import {CategoryChip} from '@/entities/race'
+import {getRaceType, RACE_TYPE_LABEL, RACE_TYPE_COLOR, getRegistrationStatus, REGISTRATION_STATUS_LABEL, REGISTRATION_STATUS_COLOR} from '@/shared/lib/raceMeta'
+
+/** 월드/아시아 챌린지는 검은색, 스테이션은 클래스 색상 */
+function getRaceBoxColor(race: {title: string; category: string}): string {
+  const type = getRaceType(race.title)
+  return type === 'world' || type === 'asia' ? '#212121' : getCategoryColor(race.category)
+}
 
 interface CalendarMonthProps {
   races: RaceEntry[]
@@ -46,7 +52,7 @@ interface RaceRowProps {
 }
 
 const RaceRow = ({race, onClick}: RaceRowProps) => {
-  const color = getCategoryColor(race.category)
+  const color = getRaceBoxColor(race)
   return (
     <Tooltip
       placement="top"
@@ -120,8 +126,23 @@ const MobileRaceRow = ({race, onClick}: RaceRowProps) => (
       </Typography>
     </Box>
     <Box sx={{flex: 1, minWidth: 0}}>
-      <Stack direction="row" alignItems="center" spacing={0.75} sx={{mb: 0.25}}>
+      <Stack direction="row" alignItems="center" spacing={0.75} flexWrap="wrap" sx={{mb: 0.25}}>
         <CategoryChip category={race.category} />
+        {(() => {
+          const type = getRaceType(race.title)
+          if (type === 'station') return null
+          return (
+            <Box sx={{
+              px: 0.6, py: 0.1, borderRadius: 0.5,
+              bgcolor: RACE_TYPE_COLOR[type],
+              display: 'inline-flex', alignItems: 'center',
+            }}>
+              <Typography sx={{fontSize: '0.6rem', fontWeight: 700, color: '#fff', lineHeight: 1.3}}>
+                {RACE_TYPE_LABEL[type]}
+              </Typography>
+            </Box>
+          )
+        })()}
       </Stack>
       <Typography variant="caption" color="text.secondary" sx={{fontSize: '0.75rem'}}>
         📍 {race.venue}
@@ -233,18 +254,31 @@ const DrawerRaceMatrix = ({races, onRaceClick}: DrawerRaceMatrixProps) => {
                         onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); onRaceClick(race) } }}
                         sx={{
                           px: 0.5, py: 0.4, borderRadius: 0.75, cursor: 'pointer',
-                          bgcolor: getCategoryColor(race.category),
+                          bgcolor: getRaceBoxColor(race),
                           '&:hover': {opacity: 0.85},
                           '&:focus-visible': {outline: '2px solid', outlineColor: 'primary.main', outlineOffset: 1},
                           transition: 'opacity 0.1s',
                         }}>
-                        <Typography sx={{
-                          fontSize: '0.6rem', fontWeight: 700, color: '#fff',
-                          lineHeight: 1.3, textAlign: 'center',
-                          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                        }}>
-                          {race.category.replace(' 클래스', '')}
-                        </Typography>
+                        <Stack direction="row" alignItems="center" justifyContent="center" spacing={0.3}>
+                          {(() => {
+                            const type = getRaceType(race.title)
+                            if (type === 'station') return null
+                            return (
+                              <Box sx={{
+                                width: 5, height: 5, borderRadius: '50%',
+                                bgcolor: 'rgba(255,255,255,0.9)', flexShrink: 0,
+                                boxShadow: `0 0 0 1.5px ${RACE_TYPE_COLOR[type]}`,
+                              }} />
+                            )
+                          })()}
+                          <Typography sx={{
+                            fontSize: '0.6rem', fontWeight: 700, color: '#fff',
+                            lineHeight: 1.3, textAlign: 'center',
+                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                          }}>
+                            {race.category.replace(' 클래스', '')}
+                          </Typography>
+                        </Stack>
                       </Box>
                     ))
                   ) : (
@@ -263,13 +297,12 @@ const DrawerRaceMatrix = ({races, onRaceClick}: DrawerRaceMatrixProps) => {
 // ─── 모바일: 셀 내 소형 종목 칩 (장소 + 시간 포함) ──────────────────────────
 
 interface MobileRaceChipProps {
-  category: string
-  time: string
-  venue: string
+  race: RaceEntry
 }
 
-const MobileRaceChip = ({category, time, venue}: MobileRaceChipProps) => {
-  const color = getCategoryColor(category)
+const MobileRaceChip = ({race}: MobileRaceChipProps) => {
+  const {category, time, venue} = race
+  const color = getRaceBoxColor(race)
   return (
     <Box sx={{px: 0.4, py: 0.2, borderRadius: 0.5, bgcolor: color, overflow: 'hidden'}}>
       {/* 장소 — 최대 2줄 */}
@@ -303,6 +336,7 @@ const MobileRaceChip = ({category, time, venue}: MobileRaceChipProps) => {
 interface DayCellDesktopProps {
   day: Date
   dayRaces: RaceEntry[]
+  regStartRaces: RaceEntry[]
   inMonth: boolean
   todayFlag: boolean
   isPastDay: boolean
@@ -315,7 +349,7 @@ interface DayCellDesktopProps {
 const CELL_HEIGHT_DESKTOP = 140
 
 const DayCellDesktop = ({
-  day, dayRaces, inMonth, todayFlag, isPastDay, dayNum,
+  day, dayRaces, regStartRaces, inMonth, todayFlag, isPastDay, dayNum,
   isSelected, onSelect, onRaceClick,
 }: DayCellDesktopProps) => {
   const visibleRaces = dayRaces.slice(0, MAX_SHOW)
@@ -364,6 +398,39 @@ const DayCellDesktop = ({
           +{overCount}건 더보기
         </Typography>
       )}
+      {/* 접수 시작일 — 도트 + 지점명 + "접수 시작일" */}
+      {regStartRaces.length > 0 && (() => {
+        const venueMap = new Map(regStartRaces.map((r): [string, RaceEntry] => [r.venue, r]))
+        return Array.from(venueMap.entries()).map(([venue, rep]) => (
+          <Box
+            key={`reg-${venue}`}
+            role="button"
+            tabIndex={0}
+            aria-label={`${venue} 접수 시작 상세 보기`}
+            onClick={e => { e.stopPropagation(); onRaceClick(rep) }}
+            onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); onRaceClick(rep) } }}
+            sx={{
+              mt: 0.3, display: 'flex', alignItems: 'center', gap: 0.4,
+              cursor: 'pointer', flexShrink: 0,
+              '&:hover .reg-label': {textDecoration: 'underline'},
+              '&:focus-visible': {outline: '2px solid', outlineColor: 'warning.dark', borderRadius: 0.5},
+            }}>
+            {/* 도트 */}
+            <Box sx={{width: 6, height: 6, borderRadius: '50%', bgcolor: 'warning.main', flexShrink: 0}} />
+            {/* 지점명 + 접수 시작일 */}
+            <Typography
+              className="reg-label"
+              sx={{
+                fontSize: '0.58rem', color: 'warning.dark', fontWeight: 600,
+                lineHeight: 1.2, wordBreak: 'break-all',
+                display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+              }}>
+              {venue} 접수
+            </Typography>
+          </Box>
+        ))
+      })()}
     </Paper>
   )
 }
@@ -371,6 +438,7 @@ const DayCellDesktop = ({
 // ─── 모바일 날짜 셀 ───────────────────────────────────────────────────────────
 
 interface DayCellMobileProps {
+  regStartRaces: RaceEntry[]
   day: Date
   dayRaces: RaceEntry[]
   inMonth: boolean
@@ -379,11 +447,12 @@ interface DayCellMobileProps {
   dayNum: number
   isSelected: boolean
   onSelect: () => void
+  onRaceClick: (race: RaceEntry) => void
 }
 
 const DayCellMobile = ({
-  day, dayRaces, inMonth, todayFlag, isPastDay, dayNum,
-  isSelected, onSelect,
+  day, dayRaces, regStartRaces, inMonth, todayFlag, isPastDay, dayNum,
+  isSelected, onSelect, onRaceClick,
 }: DayCellMobileProps) => {
   const MAX_VISIBLE = 3
   const visible = dayRaces.slice(0, MAX_VISIBLE)
@@ -439,7 +508,7 @@ const DayCellMobile = ({
       {/* 종목 칩 — 가변 높이, 최대 3개 */}
       <Box sx={{display: 'flex', flexDirection: 'column', gap: 0.3}}>
         {visible.map(race => (
-          <MobileRaceChip key={race.id} category={race.category} time={race.time} venue={race.venue} />
+          <MobileRaceChip key={race.id} race={race} />
         ))}
         {extra > 0 && (
           <Typography sx={{
@@ -449,87 +518,60 @@ const DayCellMobile = ({
             +{extra}
           </Typography>
         )}
+        {/* 접수 시작 — 경기장별 전체 표시, 데스크탑과 동일 패턴 */}
+        {regStartRaces.length > 0 && (() => {
+          const venueMap = new Map(regStartRaces.map((r): [string, RaceEntry] => [r.venue, r]))
+          return Array.from(venueMap.entries()).map(([venue, rep]) => (
+            <Box
+              key={`reg-${venue}`}
+              role="button"
+              tabIndex={0}
+              aria-label={`${venue} 접수 시작 상세 보기`}
+              onClick={e => { e.stopPropagation(); onRaceClick(rep) }}
+              onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); onRaceClick(rep) } }}
+              sx={{mt: 0.3, display: 'flex', alignItems: 'center', gap: 0.35, cursor: 'pointer', '&:hover .reg-label': {textDecoration: 'underline'}, '&:focus-visible': {outline: '2px solid', outlineColor: 'warning.dark', borderRadius: 0.4}}}>
+              <Box sx={{width: 5, height: 5, borderRadius: '50%', bgcolor: 'warning.main', flexShrink: 0}} />
+              <Typography
+                className="reg-label"
+                sx={{
+                  fontSize: '0.44rem', color: 'warning.dark', fontWeight: 600,
+                  lineHeight: 1.2, wordBreak: 'break-all',
+                  display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                }}>
+                {venue} 접수
+              </Typography>
+            </Box>
+          ))
+        })()}
       </Box>
     </Paper>
   )
 }
-
-// ─── 오늘의 대회 헤더 ─────────────────────────────────────────────────────────
-
-interface TodayRaceHeaderProps {
-  todayRaces: RaceEntry[]
-  onRaceClick: (race: RaceEntry) => void
-}
-
-const TodayRaceHeader = ({todayRaces, onRaceClick}: TodayRaceHeaderProps) => (
-  <Box sx={{mb: 2, p: 1.5, bgcolor: 'action.hover', borderRadius: 2, border: '1px solid', borderColor: 'divider'}}>
-    <Stack direction="row" alignItems="center" spacing={0.5} sx={{mb: 1}}>
-      <EmojiEventsIcon sx={{fontSize: 14, color: 'primary.main'}} />
-      <Typography variant="caption" sx={{fontWeight: 700, color: 'primary.main', fontSize: '0.75rem'}}>
-        오늘의 대회
-      </Typography>
-    </Stack>
-    <Stack direction="row" flexWrap="wrap" gap={0.75}>
-      {CLASS_LIST.map(cls => {
-        const race = todayRaces.find(r => r.category.includes(cls.key))
-        const isActive = Boolean(race)
-        return (
-          <Box
-            key={cls.key}
-            role={isActive ? 'button' : undefined}
-            tabIndex={isActive ? 0 : undefined}
-            aria-label={isActive && race ? `${race.category} ${race.time} ${race.venue}` : undefined}
-            onClick={race ? () => onRaceClick(race) : undefined}
-            onKeyDown={isActive && race ? e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); onRaceClick(race) } } : undefined}
-            sx={{
-              display: 'flex', alignItems: 'center', gap: 0.5,
-              opacity: isActive ? 1 : 0.28,
-              cursor: isActive ? 'pointer' : 'default',
-              px: 1, py: 0.5, borderRadius: 1,
-              bgcolor: isActive ? cls.color + '18' : 'transparent',
-              border: '1px solid', borderColor: isActive ? cls.color + '66' : 'transparent',
-              '&:hover': isActive ? {bgcolor: cls.color + '28'} : {},
-              transition: 'background-color 0.1s',
-            }}>
-            <Box sx={{
-              width: 10, height: 10, borderRadius: '50%',
-              bgcolor: isActive ? cls.color : 'text.disabled',
-              boxShadow: isActive ? `0 0 0 2px ${cls.color}44` : 'none',
-              flexShrink: 0,
-            }} />
-            <Box>
-              <Typography sx={{
-                fontSize: '0.72rem', fontWeight: 600, lineHeight: 1.2,
-                color: isActive ? cls.color : 'text.disabled',
-              }}>
-                {cls.key}
-              </Typography>
-              {isActive && race?.time && (
-                <Typography sx={{fontSize: '0.65rem', color: 'text.secondary', lineHeight: 1.1}}>
-                  {race.time}
-                </Typography>
-              )}
-            </Box>
-          </Box>
-        )
-      })}
-    </Stack>
-  </Box>
-)
 
 // ─── 색상 가이드 ──────────────────────────────────────────────────────────────
 
 const ColorLegend = () => (
   <Box sx={{mt: 1.5, px: 0.5}}>
     <Typography variant="caption" sx={{fontSize: '0.68rem', color: 'text.disabled', display: 'block', mb: 0.5}}>
-      클래스 색상 안내
+      색상 안내
     </Typography>
     <Stack direction="row" flexWrap="wrap" gap={1}>
+      {/* 클래스 색상 */}
       {CLASS_LIST.map(cls => (
         <Stack key={cls.key} direction="row" alignItems="center" spacing={0.5}>
           <Box sx={{width: 10, height: 10, borderRadius: '50%', bgcolor: cls.color, flexShrink: 0}} />
           <Typography variant="caption" sx={{fontSize: '0.68rem', color: 'text.secondary'}}>
             {cls.label}
+          </Typography>
+        </Stack>
+      ))}
+      {/* 대회 유형 색상 */}
+      {(['world', 'asia'] as const).map(type => (
+        <Stack key={type} direction="row" alignItems="center" spacing={0.5}>
+          <Box sx={{width: 10, height: 10, borderRadius: '50%', bgcolor: RACE_TYPE_COLOR[type], flexShrink: 0}} />
+          <Typography variant="caption" sx={{fontSize: '0.68rem', color: 'text.secondary'}}>
+            {RACE_TYPE_LABEL[type]}
           </Typography>
         </Stack>
       ))}
@@ -561,8 +603,14 @@ export const CalendarMonth = ({races, onRaceClick}: CalendarMonthProps) => {
   // 날짜별 시간순 정렬
   racesByDate.forEach((arr, key) => racesByDate.set(key, sortByTime(arr)))
 
-  const todayKey = format(new Date(), 'yyyy.MM.dd')
-  const todayRaces = racesByDate.get(todayKey) ?? []
+  // 접수 시작일 → 해당 경기 목록 맵
+  const regStartByDate = new Map<string, RaceEntry[]>()
+  races.forEach(r => {
+    if (!r.registrationStartDate) return
+    const arr = regStartByDate.get(r.registrationStartDate) ?? []
+    arr.push(r)
+    regStartByDate.set(r.registrationStartDate, arr)
+  })
 
   const prev = () => {
     setSelectedDate(null)
@@ -572,21 +620,14 @@ export const CalendarMonth = ({races, onRaceClick}: CalendarMonthProps) => {
     setSelectedDate(null)
     setCurrent(d => new Date(d.getFullYear(), d.getMonth() + 1, 1))
   }
-  const today = () => {
-    setSelectedDate(null)
-    setCurrent(new Date())
-  }
 
   const selectedRaces = selectedDate ? (racesByDate.get(selectedDate) ?? []) : []
+  // 선택된 날짜가 접수 시작일인 경기들 (드로어에 함께 표시)
+  const selectedRegStartRaces = selectedDate ? (regStartByDate.get(selectedDate) ?? []) : []
   const selectedDateObj = selectedDate ? new Date(selectedDate.replace(/\./g, '-')) : null
 
   return (
     <Box>
-      {/* 오늘 대회가 있으면 상단에 클래스별 하이라이트 표시 */}
-      {todayRaces.length > 0 && (
-        <TodayRaceHeader todayRaces={todayRaces} onRaceClick={onRaceClick} />
-      )}
-
       {/* 헤더 */}
       <Stack direction="row" alignItems="center" sx={{mb: 1.5}}>
         <IconButton size="small" onClick={prev} aria-label="이전 달"><ChevronLeftIcon /></IconButton>
@@ -594,17 +635,6 @@ export const CalendarMonth = ({races, onRaceClick}: CalendarMonthProps) => {
           {format(current, 'yyyy년 M월', {locale: ko})}
         </Typography>
         <IconButton size="small" onClick={next} aria-label="다음 달"><ChevronRightIcon /></IconButton>
-        <Typography
-          component="button"
-          variant="caption"
-          onClick={today}
-          sx={{
-            ml: 1, cursor: 'pointer', color: 'primary.main',
-            background: 'none', border: 'none', p: 0, font: 'inherit',
-            '&:hover': {textDecoration: 'underline'},
-          }}>
-          오늘
-        </Typography>
         {!isMobile && (
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ml: 'auto'}}>
             <HowToRegIcon sx={{fontSize: 12, color: 'text.disabled'}} />
@@ -627,6 +657,7 @@ export const CalendarMonth = ({races, onRaceClick}: CalendarMonthProps) => {
         {days.map(day => {
           const dateKey = format(day, 'yyyy.MM.dd')
           const dayRaces = racesByDate.get(dateKey) ?? []
+          const regStartRaces = regStartByDate.get(dateKey) ?? []
           const todayFlag = isToday(day)
           const isPastDay = !todayFlag && isPast(startOfDay(day))
           const inMonth = isSameMonth(day, current)
@@ -637,12 +668,19 @@ export const CalendarMonth = ({races, onRaceClick}: CalendarMonthProps) => {
                 key={dateKey}
                 day={day}
                 dayRaces={dayRaces}
+                regStartRaces={regStartRaces}
                 inMonth={inMonth}
                 todayFlag={todayFlag}
                 isPastDay={isPastDay}
                 dayNum={day.getDay()}
                 isSelected={selectedDate === dateKey}
-                onSelect={() => setSelectedDate(selectedDate === dateKey ? null : dateKey)}
+                onSelect={() => {
+                  // 경기 또는 접수 경기가 있을 때만 드로어 오픈
+                  if (dayRaces.length > 0 || regStartRaces.length > 0) {
+                    setSelectedDate(selectedDate === dateKey ? null : dateKey)
+                  }
+                }}
+                onRaceClick={onRaceClick}
               />
             )
           }
@@ -652,6 +690,7 @@ export const CalendarMonth = ({races, onRaceClick}: CalendarMonthProps) => {
               key={dateKey}
               day={day}
               dayRaces={dayRaces}
+              regStartRaces={regStartRaces}
               inMonth={inMonth}
               todayFlag={todayFlag}
               isPastDay={isPastDay}
@@ -675,11 +714,11 @@ export const CalendarMonth = ({races, onRaceClick}: CalendarMonthProps) => {
       {/* 색상 가이드 */}
       <ColorLegend />
 
-      {/* 날짜 선택 시 하단 드로어 — 모바일: 항상, 데스크탑: 같은 날짜에 복수 경기장이 있을 때만 */}
+      {/* 날짜 선택 시 하단 드로어 — 모바일: 항상, 데스크탑: 복수 경기장이 있을 때만 */}
       {(isMobile || (!isMobile && selectedRaces.length > 1)) && (
         <Drawer
           anchor="bottom"
-          open={Boolean(selectedDate && selectedRaces.length > 0)}
+          open={Boolean(selectedDate && (selectedRaces.length > 0 || selectedRegStartRaces.length > 0))}
           onClose={() => setSelectedDate(null)}
           slotProps={{paper: {sx: {borderRadius: '16px 16px 0 0', maxHeight: '60vh'}}}}>
           {/* 드로어 핸들 */}
@@ -694,7 +733,7 @@ export const CalendarMonth = ({races, onRaceClick}: CalendarMonthProps) => {
                 {selectedDateObj && format(selectedDateObj, 'M월 d일', {locale: ko})}
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                {selectedDateObj && format(selectedDateObj, 'EEE', {locale: ko})} · {selectedRaces.length}개 일정
+                {selectedDateObj && format(selectedDateObj, 'EEE', {locale: ko})} · {selectedRaces.length}개 일정{selectedRegStartRaces.length > 0 ? ` · 접수 ${new Set(selectedRegStartRaces.map(r => r.venue)).size}개소` : ''}
               </Typography>
             </Box>
             <IconButton size="small" onClick={() => setSelectedDate(null)} aria-label="닫기" sx={{ml: 'auto'}}>
@@ -704,12 +743,76 @@ export const CalendarMonth = ({races, onRaceClick}: CalendarMonthProps) => {
 
           <Divider />
 
-          {/* 대회 목록 — 시간대 그룹 × 경기장 열 매트릭스 */}
           <Box sx={{overflowY: 'auto'}}>
-            <DrawerRaceMatrix
-              races={selectedRaces}
-              onRaceClick={onRaceClick}
-            />
+            {/* ── 접수 섹션 ── */}
+            {selectedRegStartRaces.length > 0 && (() => {
+              const venueMap = new Map(selectedRegStartRaces.map((r): [string, RaceEntry] => [r.venue, r]))
+              const raceYear = selectedDate ? parseInt(selectedDate.split('.')[0] ?? '', 10) || undefined : undefined
+              const items = Array.from(venueMap.entries()).map(([venue, rep]) => {
+                const status = getRegistrationStatus(rep.registrationDeadlineRaw ?? '', raceYear)
+                return {venue, rep, status}
+              })
+              const defaultColor = '#e65100'
+              return (
+                <Box sx={{px: 1.5, pt: 1.5, pb: selectedRaces.length > 0 ? 0 : 1}}>
+                  {/* 섹션 헤더 — 경기도 있을 때만 표시해서 맥락 구분 */}
+                  {selectedRaces.length > 0 && (
+                    <Typography variant="caption" sx={{fontWeight: 700, color: 'text.secondary', display: 'block', mb: 0.75, fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: 0.5}}>
+                      접수 정보
+                    </Typography>
+                  )}
+                  {items.map(({venue, rep, status}) => {
+                    const color = status ? REGISTRATION_STATUS_COLOR[status] : defaultColor
+                    const label = status ? REGISTRATION_STATUS_LABEL[status] : null
+                    return (
+                      <Box
+                        key={`drawer-reg-${venue}`}
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`${venue} 접수 상세 보기`}
+                        onClick={() => { onRaceClick(rep); setSelectedDate(null) }}
+                        onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); onRaceClick(rep); setSelectedDate(null) } }}
+                        sx={{
+                          mb: 0.75, px: 1, py: 0.75, borderRadius: 1.5, cursor: 'pointer',
+                          border: '1px solid', borderColor: color, bgcolor: `${color}18`,
+                          display: 'flex', alignItems: 'center', gap: 1,
+                          '&:hover': {bgcolor: `${color}30`},
+                          '&:focus-visible': {outline: '2px solid', outlineColor: color},
+                          transition: 'background-color 0.1s',
+                        }}>
+                        <Box sx={{width: 7, height: 7, borderRadius: '50%', bgcolor: color, flexShrink: 0}} />
+                        <Box sx={{flex: 1, minWidth: 0}}>
+                          <Typography variant="caption" sx={{fontWeight: 700, color, display: 'block', fontSize: '0.73rem'}}>
+                            {venue}{label ? ` · ${label}` : ''}
+                          </Typography>
+                          <Typography variant="caption" sx={{color: 'text.secondary', fontSize: '0.68rem'}}>
+                            {rep.category} · 경기일 {format(new Date(rep.date.replace(/\./g, '-')), 'M/d', {locale: ko})}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    )
+                  })}
+                </Box>
+              )
+            })()}
+
+            {/* ── 경기 섹션 ── */}
+            {selectedRaces.length > 0 && (
+              <>
+                {selectedRegStartRaces.length > 0 && (
+                  <Box sx={{px: 1.5, pb: 0.5}}>
+                    <Divider sx={{mb: 1}} />
+                    <Typography variant="caption" sx={{fontWeight: 700, color: 'text.secondary', display: 'block', mb: 0.5, fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: 0.5}}>
+                      경기 일정
+                    </Typography>
+                  </Box>
+                )}
+                <DrawerRaceMatrix
+                  races={selectedRaces}
+                  onRaceClick={onRaceClick}
+                />
+              </>
+            )}
           </Box>
         </Drawer>
       )}

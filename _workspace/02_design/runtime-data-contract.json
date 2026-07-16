@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "mode": "static-snapshot",
+  "authoritativeSource": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&ser=0",
+  "buildCwd": "tamiya-race-app",
+  "deploymentRoot": "tamiya-race-app/client",
+  "generatedArtifacts": [
+    {
+      "path": "tamiya-race-app/data/races.json",
+      "required": true,
+      "minCount": 1,
+      "validation": {
+        "recordsPointer": "/data",
+        "countPointer": "/count",
+        "freshnessPointer": "/cachedAt",
+        "requiredFields": ["id", "title", "date", "category"],
+        "minimumFieldRatio": 0.95,
+        "maximumDuplicateRatio": 0,
+        "maximumCountDropRatio": 0.40
+      }
+    },
+    {
+      "path": "tamiya-race-app/client/public/races.json",
+      "required": true,
+      "minCount": 1,
+      "validation": {
+        "recordsPointer": "/data",
+        "countPointer": "/count",
+        "freshnessPointer": "/cachedAt",
+        "requiredFields": ["id", "title", "date", "category"],
+        "minimumFieldRatio": 0.95,
+        "maximumDuplicateRatio": 0,
+        "maximumCountDropRatio": 0.40
+      }
+    }
+  ],
+  "freshnessSlo": "PT24H",
+  "promotionPolicy": "reject-invalid",
+  "servingFallback": "last-known-good",
+  "refreshCapabilities": ["scheduled", "manual-recovery"]
+}

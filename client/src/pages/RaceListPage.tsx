@@ -15,10 +15,11 @@ import {RACES_QUERY_KEY, fetchRaces} from '@/entities/race'
 import type {RacesResponse, RaceEntry} from '@/entities/race'
 import {RaceTable} from '@/features/race-list/ui/RaceTable'
 import {RaceDetailDrawer} from '@/features/race-list/ui/RaceDetailDrawer'
-import {RaceCalendar} from '@/features/race-calendar/ui/RaceCalendar'
+import {RaceCalendar, TodayRaceHeader} from '@/features/race-calendar/ui/RaceCalendar'
 import {RaceFilter} from '@/features/race-filter/ui/RaceFilter'
 import {ShareButton} from '@/features/race-share/ui/ShareButton'
 import {usePageSettings} from '@/features/race-filter/model/usePageSettings'
+import {getRaceType, getRegion} from '@/shared/lib/raceMeta'
 
 function matchCategory(category: string, filter: string): boolean {
   return category.includes(filter.replace(' 클래스', ''))
@@ -31,6 +32,8 @@ export const RaceListPage = () => {
     calendarView, setCalendarView,
     selectedVenues, setSelectedVenues,
     selectedCategories, setSelectedCategories,
+    selectedRaceTypes, setSelectedRaceTypes,
+    selectedRegions, setSelectedRegions,
     clearAllFilters,
     currentSettings,
   } = usePageSettings()
@@ -48,14 +51,23 @@ export const RaceListPage = () => {
   })
 
   // ── 필터 적용 ────────────────────────────────────────────────────────────────
+  // 오늘 날짜 전체 경기 (필터 무관)
+  const todayRaces = useMemo(() => {
+    if (!data?.data) return []
+    const todayStr = format(new Date(), 'yyyy.MM.dd')
+    return data.data.filter(r => r.date === todayStr)
+  }, [data])
+
   const filteredRaces = useMemo(() => {
     if (!data?.data) return []
     return data.data.filter(r => {
       const venueOk = selectedVenues.length === 0 || selectedVenues.includes(r.venue)
       const catOk = selectedCategories.length === 0 || selectedCategories.some((c: string) => matchCategory(r.category, c))
-      return venueOk && catOk
+      const typeOk = selectedRaceTypes.length === 0 || selectedRaceTypes.includes(getRaceType(r.title))
+      const regionOk = selectedRegions.length === 0 || selectedRegions.includes(getRegion(r.venue))
+      return venueOk && catOk && typeOk && regionOk
     })
-  }, [data, selectedVenues, selectedCategories])
+  }, [data, selectedVenues, selectedCategories, selectedRaceTypes, selectedRegions])
 
   const updatedAt = data?.cachedAt
     ? format(new Date(data.cachedAt), 'yyyy.MM.dd HH:mm')
@@ -65,7 +77,7 @@ export const RaceListPage = () => {
     if (v != null) setViewMode(v)
   }
 
-  const activeFilterCount = selectedVenues.length + selectedCategories.length
+  const activeFilterCount = selectedVenues.length + selectedCategories.length + selectedRaceTypes.length + selectedRegions.length
 
   // ref로 최신 filteredRaces를 항상 참조 — useCallback 클로저 stale 방지
   const filteredRacesRef = useRef(filteredRaces)
@@ -173,8 +185,12 @@ export const RaceListPage = () => {
                   races={data?.data ?? []}
                   selectedVenues={selectedVenues}
                   selectedCategories={selectedCategories}
+                  selectedRaceTypes={selectedRaceTypes}
+                  selectedRegions={selectedRegions}
                   onVenuesChange={setSelectedVenues}
                   onCategoriesChange={setSelectedCategories}
+                  onRaceTypesChange={setSelectedRaceTypes}
+                  onRegionsChange={setSelectedRegions}
                 />
               </Box>
               {activeFilterCount > 0 && (
@@ -217,21 +233,32 @@ export const RaceListPage = () => {
         )}
 
         {data != null && viewMode === 'list' && (
-          <RaceTable races={filteredRaces} />
+          <>
+            {todayRaces.length > 0 && (
+              <TodayRaceHeader
+                todayRaces={todayRaces}
+                onRaceClick={race => {
+                  // 리스트 뷰에서는 캘린더 드로어 대신 RaceDetailDrawer 오픈
+                  setCalendarSelectedRace(race)
+                }}
+              />
+            )}
+            <RaceTable races={filteredRaces} />
+          </>
         )}
 
         {data != null && viewMode === 'calendar' && (
-          <>
-            <RaceCalendar
-              races={filteredRaces}
-              view={calendarView}
-              onViewChange={setCalendarView}
-              onRaceClick={setCalendarSelectedRace}
-              todayKey={calendarTodayKey}
-            />
-            <RaceDetailDrawer race={calendarSelectedRace} onClose={() => setCalendarSelectedRace(null)} />
-          </>
+          <RaceCalendar
+            races={filteredRaces}
+            view={calendarView}
+            onViewChange={setCalendarView}
+            onRaceClick={setCalendarSelectedRace}
+            todayKey={calendarTodayKey}
+          />
         )}
+
+        {/* RaceDetailDrawer — 리스트/캘린더 공통 (오늘의 대회 헤더에서도 호출) */}
+        <RaceDetailDrawer race={calendarSelectedRace} onClose={() => setCalendarSelectedRace(null)} />
       </Box>
 
       {/* 오늘 날짜로 이동 FAB — 데이터 로드 후 항상 표시 */}

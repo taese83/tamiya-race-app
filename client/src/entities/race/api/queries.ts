@@ -1,4 +1,5 @@
 import type {RacesResponse, RaceDetail} from '../model/types'
+import {parseRegistrationStartDate} from '@/shared/lib/raceMeta'
 
 export const RACES_QUERY_KEY = ['races'] as const
 export const raceDetailQueryKey = (wrId: string) => ['race-detail', wrId] as const
@@ -23,11 +24,24 @@ async function loadData(): Promise<RacesResponse> {
     cachedAt: string
   }
 
+  const details = raw.details ?? {}
   cached = {
     ok: true,
-    // 구버전 races.json(note 필드 없음) 호환: note 없으면 빈 문자열로 정규화
-    data: (raw.data ?? []).map(r => ({...r, note: r.note ?? ''})),
-    details: raw.details ?? {},
+    data: (raw.data ?? []).map(r => {
+      const wrId = r.id.split('-')[0] ?? ''
+      const detail = details[wrId]
+      const raceYear = parseInt(r.date.split('.')[0] ?? '', 10) || undefined
+      const registrationStartDate = detail?.registrationDeadline
+        ? parseRegistrationStartDate(detail.registrationDeadline, raceYear) ?? undefined
+        : undefined
+      return {
+        ...r,
+        note: r.note ?? '',
+        registrationStartDate,
+        registrationDeadlineRaw: detail?.registrationDeadline,
+      }
+    }),
+    details,
     count: raw.count ?? 0,
     cachedAt: raw.cachedAt ?? new Date().toISOString(),
   }

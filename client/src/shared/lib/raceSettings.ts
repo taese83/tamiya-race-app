@@ -11,6 +11,8 @@ export interface SavedSettings {
   cview?: 'day' | 'week' | 'month'
   venues?: string[]
   cats?: string[]
+  raceTypes?: string[]
+  regions?: string[]
 }
 
 /** 현재 설정을 base64로 인코딩 → ?s= 파람 값으로 사용 (한글 안전) */
@@ -46,10 +48,16 @@ export function sanitizeSettings(parsed: Record<string, unknown>): SavedSettings
     view: VALID_VIEWS.has(parsed['view'] as string) ? parsed['view'] as 'list' | 'calendar' : undefined,
     cview: VALID_CVIEWS.has(parsed['cview'] as string) ? parsed['cview'] as 'day' | 'week' | 'month' : undefined,
     venues: Array.isArray(parsed['venues'])
-      ? (parsed['venues'] as unknown[]).filter((x): x is string => typeof x === 'string')
+      ? (parsed['venues'] as unknown[]).filter((x): x is string => typeof x === 'string' && x.length <= 200).slice(0, 50)
       : undefined,
     cats: Array.isArray(parsed['cats'])
-      ? (parsed['cats'] as unknown[]).filter((x): x is string => typeof x === 'string')
+      ? (parsed['cats'] as unknown[]).filter((x): x is string => typeof x === 'string' && x.length <= 100).slice(0, 20)
+      : undefined,
+    raceTypes: Array.isArray(parsed['raceTypes'])
+      ? (parsed['raceTypes'] as unknown[]).filter((x): x is string => ['world', 'asia', 'station'].includes(x as string))
+      : undefined,
+    regions: Array.isArray(parsed['regions'])
+      ? (parsed['regions'] as unknown[]).filter((x): x is string => ['seoul', 'busan'].includes(x as string))
       : undefined,
   }
 }

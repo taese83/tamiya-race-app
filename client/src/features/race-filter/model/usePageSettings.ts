@@ -10,6 +10,7 @@
 import {useState, useCallback, useEffect} from 'react'
 import {decodeSettings, sanitizeSettings} from '@/shared/lib/raceSettings'
 import type {SavedSettings, CalendarViewType} from '@/shared/lib/raceSettings'
+import type {RaceType, Region} from '@/shared/lib/raceMeta'
 export type {SavedSettings, CalendarViewType}
 
 const LS_KEY = 'tamiya-race-settings'
@@ -78,6 +79,12 @@ export const usePageSettings = () => {
   const [calendarView, _setCalendarView] = useState<CalendarViewType>(() => validCalendarView(init.cview))
   const [selectedVenues, _setSelectedVenues] = useState<string[]>(() => init.venues ?? [])
   const [selectedCategories, _setSelectedCategories] = useState<string[]>(() => init.cats ?? [])
+  const [selectedRaceTypes, _setSelectedRaceTypes] = useState<RaceType[]>(
+    () => (init.raceTypes ?? []) as RaceType[]
+  )
+  const [selectedRegions, _setSelectedRegions] = useState<Region[]>(
+    () => (init.regions ?? []) as Region[]
+  )
 
   const setViewMode = useCallback((v: 'list' | 'calendar') => {
     _setViewMode(v)
@@ -99,10 +106,22 @@ export const usePageSettings = () => {
     updateStorage({cats: cats.length > 0 ? cats : undefined})
   }, [])
 
+  const setSelectedRaceTypes = useCallback((types: RaceType[]) => {
+    _setSelectedRaceTypes(types)
+    updateStorage({raceTypes: types.length > 0 ? types : undefined})
+  }, [])
+
+  const setSelectedRegions = useCallback((regions: Region[]) => {
+    _setSelectedRegions(regions)
+    updateStorage({regions: regions.length > 0 ? regions : undefined})
+  }, [])
+
   const clearAllFilters = useCallback(() => {
     _setSelectedVenues([])
     _setSelectedCategories([])
-    updateStorage({venues: undefined, cats: undefined})
+    _setSelectedRaceTypes([])
+    _setSelectedRegions([])
+    updateStorage({venues: undefined, cats: undefined, raceTypes: undefined, regions: undefined})
   }, [])
 
   const currentSettings: SavedSettings = {
@@ -110,6 +129,8 @@ export const usePageSettings = () => {
     cview: calendarView !== 'month' ? calendarView : undefined,
     venues: selectedVenues.length > 0 ? selectedVenues : undefined,
     cats: selectedCategories.length > 0 ? selectedCategories : undefined,
+    raceTypes: selectedRaceTypes.length > 0 ? selectedRaceTypes : undefined,
+    regions: selectedRegions.length > 0 ? selectedRegions : undefined,
   }
 
   return {
@@ -121,6 +142,10 @@ export const usePageSettings = () => {
     setSelectedVenues,
     selectedCategories,
     setSelectedCategories,
+    selectedRaceTypes,
+    setSelectedRaceTypes,
+    selectedRegions,
+    setSelectedRegions,
     clearAllFilters,
     currentSettings,
   }
