@@ -8,6 +8,7 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents'
 import {format} from 'date-fns'
 import type {RaceEntry} from '@/entities/race'
 import {CLASS_LIST} from '@/entities/race'
+import type {CalendarEvent} from '@/entities/calendar-event'
 import type {CalendarViewType} from '@/shared/lib/raceSettings'
 import {CalendarDay} from './CalendarDay'
 import {CalendarWeek} from './CalendarWeek'
@@ -23,6 +24,7 @@ interface RaceCalendarProps {
   /** 접수 배너 클릭 시 — venue별 경기 목록 전달 */
   onRegStartClick?: (races: RaceEntry[]) => void
   todayKey?: number
+  calendarEvents?: CalendarEvent[]
 }
 
 // ─── 오늘의 대회 헤더 (뷰 + 리스트 공통) ─────────────────────────────────────
@@ -82,7 +84,7 @@ export const TodayRaceHeader = ({todayRaces}: TodayRaceHeaderProps) => (
 
 // ─── 메인 컴포넌트 ────────────────────────────────────────────────────────────
 
-export const RaceCalendar = ({races, view, onViewChange, onRaceClick, onRegStartClick, todayKey}: RaceCalendarProps) => {
+export const RaceCalendar = ({races, view, onViewChange, onRaceClick, onRegStartClick, todayKey, calendarEvents = []}: RaceCalendarProps) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
@@ -126,9 +128,9 @@ export const RaceCalendar = ({races, view, onViewChange, onRaceClick, onRegStart
         <TodayRaceHeader todayRaces={todayRaces} />
       )}
 
-      {view === 'day' && <CalendarDay key={todayKey} races={races} onRaceClick={onRaceClick} onRegStartClick={onRegStartClick} />}
-      {view === 'week' && <CalendarWeek key={todayKey} races={races} onRaceClick={onRaceClick} onRegStartClick={onRegStartClick} />}
-      {view === 'month' && <CalendarMonth key={todayKey} races={races} onRaceClick={onRaceClick} onRegStartClick={onRegStartClick} />}
+      {view === 'day' && <CalendarDay key={todayKey} races={races} onRaceClick={onRaceClick} onRegStartClick={onRegStartClick} calendarEvents={calendarEvents} />}
+      {view === 'week' && <CalendarWeek key={todayKey} races={races} onRaceClick={onRaceClick} onRegStartClick={onRegStartClick} calendarEvents={calendarEvents} />}
+      {view === 'month' && <CalendarMonth key={todayKey} races={races} onRaceClick={onRaceClick} onRegStartClick={onRegStartClick} calendarEvents={calendarEvents} />}
     </Box>
   )
 }

@@ -15,6 +15,7 @@ import {
 import {ko} from 'date-fns/locale'
 import type {RaceEntry} from '@/entities/race'
 import {CLASS_LIST, getCategoryColor, CategoryChip} from '@/entities/race'
+import type {CalendarEvent} from '@/entities/calendar-event'
 import {getRaceType, RACE_TYPE_LABEL, RACE_TYPE_COLOR, getRegistrationStatus, REGISTRATION_STATUS_LABEL, REGISTRATION_STATUS_COLOR} from '@/shared/lib/raceMeta'
 
 /** 월드/아시아 챌린지는 검은색, 스테이션은 클래스 색상 */
@@ -27,6 +28,7 @@ interface CalendarMonthProps {
   races: RaceEntry[]
   onRaceClick: (race: RaceEntry) => void
   onRegStartClick?: (races: RaceEntry[]) => void
+  calendarEvents?: CalendarEvent[]
 }
 
 const MAX_SHOW = 3
@@ -337,6 +339,7 @@ interface DayCellDesktopProps {
   day: Date
   dayRaces: RaceEntry[]
   regStartRaces: RaceEntry[]
+  dayEvents: CalendarEvent[]
   inMonth: boolean
   todayFlag: boolean
   isPastDay: boolean
@@ -350,7 +353,7 @@ interface DayCellDesktopProps {
 const CELL_HEIGHT_DESKTOP = 140
 
 const DayCellDesktop = ({
-  day, dayRaces, regStartRaces, inMonth, todayFlag, isPastDay, dayNum,
+  day, dayRaces, regStartRaces, dayEvents, inMonth, todayFlag, isPastDay, dayNum,
   isSelected, onSelect, onRaceClick, onRegStartClick,
 }: DayCellDesktopProps) => {
   const visibleRaces = dayRaces.slice(0, MAX_SHOW)
@@ -441,6 +444,14 @@ const DayCellDesktop = ({
           )
         })
       })()}
+      {/* 내 캘린더 도트 */}
+      {dayEvents.length > 0 && (
+        <Box sx={{mt: 0.4, display: 'flex', gap: 0.4, flexWrap: 'wrap', flexShrink: 0}}>
+          {dayEvents.map(event => (
+            <Box key={event.id} sx={{width: 7, height: 7, borderRadius: '50%', bgcolor: event.color, flexShrink: 0}} title={event.title} />
+          ))}
+        </Box>
+      )}
     </Paper>
   )
 }
@@ -451,6 +462,7 @@ interface DayCellMobileProps {
   regStartRaces: RaceEntry[]
   day: Date
   dayRaces: RaceEntry[]
+  dayEvents: CalendarEvent[]
   inMonth: boolean
   todayFlag: boolean
   isPastDay: boolean
@@ -462,7 +474,7 @@ interface DayCellMobileProps {
 }
 
 const DayCellMobile = ({
-  day, dayRaces, regStartRaces, inMonth, todayFlag, isPastDay, dayNum,
+  day, dayRaces, regStartRaces, dayEvents, inMonth, todayFlag, isPastDay, dayNum,
   isSelected, onSelect, onRaceClick: _onRaceClick, onRegStartClick: _onRegStartClick,
 }: DayCellMobileProps) => {
   const MAX_VISIBLE = 3
@@ -562,6 +574,14 @@ const DayCellMobile = ({
             )
           })
         })()}
+        {/* 내 캘린더 도트 */}
+        {dayEvents.length > 0 && (
+          <Box sx={{display: 'flex', gap: 0.35, flexWrap: 'wrap', mt: 0.3}}>
+            {dayEvents.map(event => (
+              <Box key={event.id} sx={{width: 5, height: 5, borderRadius: '50%', bgcolor: event.color, flexShrink: 0}} />
+            ))}
+          </Box>
+        )}
       </Box>
     </Paper>
   )
@@ -599,7 +619,7 @@ const ColorLegend = () => (
 
 // ─── 월 캘린더 ────────────────────────────────────────────────────────────────
 
-export const CalendarMonth = ({races, onRaceClick, onRegStartClick}: CalendarMonthProps) => {
+export const CalendarMonth = ({races, onRaceClick, onRegStartClick, calendarEvents = []}: CalendarMonthProps) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
@@ -687,6 +707,7 @@ export const CalendarMonth = ({races, onRaceClick, onRegStartClick}: CalendarMon
           const dateKey = format(day, 'yyyy.MM.dd')
           const dayRaces = racesByDate.get(dateKey) ?? []
           const regStartRaces = regStartByDate.get(dateKey) ?? []
+          const dayEvents = calendarEvents.filter(e => e.date === dateKey)
           const todayFlag = isToday(day)
           const isPastDay = !todayFlag && isPast(startOfDay(day))
           const inMonth = isSameMonth(day, current)
@@ -698,6 +719,7 @@ export const CalendarMonth = ({races, onRaceClick, onRegStartClick}: CalendarMon
                 day={day}
                 dayRaces={dayRaces}
                 regStartRaces={regStartRaces}
+                dayEvents={dayEvents}
                 inMonth={inMonth}
                 todayFlag={todayFlag}
                 isPastDay={isPastDay}
@@ -726,6 +748,7 @@ export const CalendarMonth = ({races, onRaceClick, onRegStartClick}: CalendarMon
               day={day}
               dayRaces={dayRaces}
               regStartRaces={regStartRaces}
+              dayEvents={dayEvents}
               inMonth={inMonth}
               todayFlag={todayFlag}
               isPastDay={isPastDay}
@@ -865,6 +888,39 @@ export const CalendarMonth = ({races, onRaceClick, onRegStartClick}: CalendarMon
                 />
               </>
             )}
+
+            {/* ── 내 캘린더 이벤트 섹션 ── */}
+            {selectedDate && calendarEvents.filter(e => e.date === selectedDate).length > 0 && (() => {
+              const dateEvents = calendarEvents.filter(e => e.date === selectedDate)
+              return (
+                <Box sx={{px: 1.5, py: 1.5}}>
+                  {(selectedRaces.length > 0 || selectedRegStartRaces.length > 0) && (
+                    <Divider sx={{mb: 1}} />
+                  )}
+                  <Typography variant="caption" sx={{fontWeight: 700, color: 'text.secondary', display: 'block', mb: 0.75, fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: 0.5}}>
+                    내 캘린더
+                  </Typography>
+                  <Stack spacing={0.75}>
+                    {dateEvents.map(event => (
+                      <Box key={event.id} sx={{display: 'flex', alignItems: 'flex-start', gap: 1, py: 0.5}}>
+                        <Box sx={{width: 8, height: 8, borderRadius: '50%', bgcolor: event.color, flexShrink: 0, mt: 0.3}} />
+                        <Box sx={{flex: 1, minWidth: 0}}>
+                          <Typography sx={{fontSize: '0.8rem', fontWeight: 600, lineHeight: 1.3}}>
+                            {event.title}
+                          </Typography>
+                          <Typography sx={{fontSize: '0.7rem', color: 'text.secondary'}}>
+                            {event.allDay ? '종일' : `${event.time ?? ''}${event.endTime ? ` ~ ${event.endTime}` : ''}`}
+                          </Typography>
+                          {event.location && (
+                            <Typography sx={{fontSize: '0.68rem', color: 'text.disabled'}}>📍 {event.location}</Typography>
+                          )}
+                        </Box>
+                      </Box>
+                    ))}
+                  </Stack>
+                </Box>
+              )
+            })()}
           </Box>
         </Drawer>
       )}

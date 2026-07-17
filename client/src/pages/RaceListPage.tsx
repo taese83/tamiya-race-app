@@ -10,6 +10,7 @@ import ViewListIcon from '@mui/icons-material/ViewList'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import TodayIcon from '@mui/icons-material/Today'
+import PermContactCalendarIcon from '@mui/icons-material/PermContactCalendar'
 import {format} from 'date-fns'
 import {RACES_QUERY_KEY, fetchRaces} from '@/entities/race'
 import type {RacesResponse, RaceEntry} from '@/entities/race'
@@ -21,6 +22,7 @@ import {RaceFilter} from '@/features/race-filter/ui/RaceFilter'
 import {ShareButton} from '@/features/race-share/ui/ShareButton'
 import {usePageSettings} from '@/features/race-filter/model/usePageSettings'
 import {getRaceType, getRegion} from '@/shared/lib/raceMeta'
+import {useNaverCalendar, NaverCalendarDrawer} from '@/features/naver-calendar'
 
 function matchCategory(category: string, filter: string): boolean {
   return category.includes(filter.replace(' 클래스', ''))
@@ -45,6 +47,9 @@ export const RaceListPage = () => {
   const [calendarTodayKey, setCalendarTodayKey] = useState(0)
   // 접수 상세 드로어 — 리스트·캘린더 공통
   const [regDrawerRaces, setRegDrawerRaces] = useState<RaceEntry[]>([])
+  // 내 캘린더 드로어
+  const [showCalendarDrawer, setShowCalendarDrawer] = useState(false)
+  const naverCalendar = useNaverCalendar()
 
   const {data, isLoading, isError, error} = useQuery<RacesResponse, Error>({
     queryKey: RACES_QUERY_KEY,
@@ -174,6 +179,22 @@ export const RaceListPage = () => {
             </ToggleButton>
           </ToggleButtonGroup>
 
+          <Tooltip title="내 캘린더">
+            <IconButton
+              size="small"
+              onClick={() => setShowCalendarDrawer(true)}
+              aria-label="내 캘린더 설정"
+              color={naverCalendar.sources.length > 0 ? 'primary' : 'default'}>
+              <Badge
+                badgeContent={naverCalendar.totalEventCount > 0 ? naverCalendar.totalEventCount : undefined}
+                color={naverCalendar.hasError ? 'warning' : 'primary'}
+                max={99}
+                sx={{'& .MuiBadge-badge': {fontSize: '0.6rem', height: 14, minWidth: 14, top: 2, right: 2}}}>
+                <PermContactCalendarIcon fontSize="small" />
+              </Badge>
+            </IconButton>
+          </Tooltip>
+
           <ShareButton settings={currentSettings} />
         </Toolbar>
 
@@ -240,7 +261,7 @@ export const RaceListPage = () => {
             {todayRaces.length > 0 && (
               <TodayRaceHeader todayRaces={todayRaces} />
             )}
-            <RaceTable races={filteredRaces} />
+            <RaceTable races={filteredRaces} calendarEvents={naverCalendar.events} />
           </>
         )}
 
@@ -252,6 +273,7 @@ export const RaceListPage = () => {
             onRaceClick={setCalendarSelectedRace}
             onRegStartClick={setRegDrawerRaces}
             todayKey={calendarTodayKey}
+            calendarEvents={naverCalendar.events}
           />
         )}
 
@@ -261,6 +283,17 @@ export const RaceListPage = () => {
 
       {/* 접수 상세 드로어 — 리스트·캘린더 공통 */}
       <RegistrationDrawer races={regDrawerRaces} onClose={() => setRegDrawerRaces([])} />
+
+      {/* 내 캘린더 드로어 */}
+      <NaverCalendarDrawer
+        open={showCalendarDrawer}
+        onClose={() => setShowCalendarDrawer(false)}
+        sources={naverCalendar.sources}
+        loadingId={naverCalendar.loadingId}
+        maxSources={naverCalendar.maxSources}
+        onAdd={naverCalendar.addSource}
+        onRemove={naverCalendar.removeSource}
+      />
 
       {/* 오늘 날짜로 이동 FAB — 데이터 로드 후 항상 표시 */}
       {data != null && (

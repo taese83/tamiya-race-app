@@ -12,11 +12,13 @@ import HowToRegIcon from '@mui/icons-material/HowToReg'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import type {RaceEntry} from '@/entities/race'
 import {CategoryChip} from '@/entities/race'
+import type {CalendarEvent} from '@/entities/calendar-event'
 import {RaceDetailDrawer} from './RaceDetailDrawer'
 import {RegistrationDrawer} from './RegistrationDrawer'
 
 interface RaceTableProps {
   races: RaceEntry[]
+  calendarEvents?: CalendarEvent[]
 }
 
 function parseTamiyaDate(dateStr: string): Date {
@@ -41,7 +43,7 @@ function groupByDate(races: RaceEntry[]): Map<string, RaceEntry[]> {
   return map
 }
 
-export const RaceTable = ({races}: RaceTableProps) => {
+export const RaceTable = ({races, calendarEvents = []}: RaceTableProps) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const [selectedRace, setSelectedRace] = useState<RaceEntry | null>(null)
@@ -62,11 +64,22 @@ export const RaceTable = ({races}: RaceTableProps) => {
     return map
   }, [races])
 
-  // 경기일 + 접수 시작일을 합쳐 정렬 (경기 없는 날의 접수일도 포함)
+  // calendarEvents를 날짜별로 그룹핑
+  const calendarEventsByDate = useMemo(() => {
+    const map = new Map<string, CalendarEvent[]>()
+    calendarEvents.forEach(e => {
+      const arr = map.get(e.date) ?? []
+      arr.push(e)
+      map.set(e.date, arr)
+    })
+    return map
+  }, [calendarEvents])
+
+  // 경기일 + 접수 시작일 + 네이버 이벤트 날짜를 합쳐 정렬
   const sortedDates = useMemo(() => {
-    const dateSet = new Set([...grouped.keys(), ...regStartGrouped.keys()])
+    const dateSet = new Set([...grouped.keys(), ...regStartGrouped.keys(), ...calendarEventsByDate.keys()])
     return Array.from(dateSet).sort()
-  }, [grouped, regStartGrouped])
+  }, [grouped, regStartGrouped, calendarEventsByDate])
 
 
   if (races.length === 0) {
@@ -95,8 +108,9 @@ export const RaceTable = ({races}: RaceTableProps) => {
         const isPastDate = isPast(parseTamiyaDate(date)) && !isTodayDate
         // 이 날짜가 접수 시작일인 경기 목록 (regStartGrouped에서 직접 조회)
         const regStartRaces = regStartGrouped.get(date) ?? []
-        // 경기도 없고 접수도 없으면 렌더 불필요 (안전 가드)
-        if (dateRaces.length === 0 && regStartRaces.length === 0) return null
+        const dateCalendarEvents = calendarEventsByDate.get(date) ?? []
+        // 경기도 없고 접수도 없고 네이버 이벤트도 없으면 렌더 불필요
+        if (dateRaces.length === 0 && regStartRaces.length === 0 && dateCalendarEvents.length === 0) return null
 
         return (
           <Box
@@ -113,6 +127,10 @@ export const RaceTable = ({races}: RaceTableProps) => {
                 const venueCount = new Set(regStartRaces.map(r => r.venue)).size
                 return <Chip label={`접수 시작 ${venueCount}개소`} size="small" color="warning" sx={{height: 18, fontSize: '0.65rem'}} />
               })()}
+              {dateCalendarEvents.length > 0 && (
+                <Chip label={`내 캘린더 ${dateCalendarEvents.length}건`} size="small" variant="outlined"
+                  sx={{height: 18, fontSize: '0.65rem', borderColor: dateCalendarEvents[0]?.color, color: dateCalendarEvents[0]?.color}} />
+              )}
             </Stack>
 
             {/* 접수 시작 경기 배너 — 경기장별 그룹핑 */}
@@ -239,6 +257,42 @@ export const RaceTable = ({races}: RaceTableProps) => {
                 </Table>
               </TableContainer>
             ) : null}
+
+            {/* ── 내 캘린더 이벤트 섹션 ── */}
+            {dateCalendarEvents.length > 0 && (
+              <Box sx={{mt: dateRaces.length > 0 ? 1.5 : 0}}>
+                {dateRaces.length > 0 && (
+                  <Stack direction="row" alignItems="center" spacing={1} sx={{mb: 0.75}}>
+                    <Box sx={{flex: 1, height: 1, bgcolor: 'divider'}} />
+                    <Typography variant="caption" sx={{fontSize: '0.65rem', color: 'text.disabled', whiteSpace: 'nowrap'}}>
+                      내 캘린더
+                    </Typography>
+                    <Box sx={{flex: 1, height: 1, bgcolor: 'divider'}} />
+                  </Stack>
+                )}
+                <Stack spacing={0.5}>
+                  {dateCalendarEvents.map(event => (
+                    <Box key={event.id} sx={{
+                      display: 'flex', alignItems: 'flex-start', gap: 1,
+                      px: 1.5, py: 0.75, borderRadius: 1,
+                      bgcolor: `${event.color}0d`,
+                      border: '1px solid', borderColor: `${event.color}33`,
+                    }}>
+                      <Box sx={{width: 8, height: 8, borderRadius: '50%', bgcolor: event.color, flexShrink: 0, mt: 0.4}} />
+                      <Box sx={{flex: 1, minWidth: 0}}>
+                        <Typography sx={{fontSize: '0.8rem', fontWeight: 600, lineHeight: 1.3}}>
+                          {event.title}
+                        </Typography>
+                        <Typography sx={{fontSize: '0.7rem', color: 'text.secondary'}}>
+                          {event.allDay ? '종일' : `${event.time ?? ''}${event.endTime ? ` ~ ${event.endTime}` : ''}`}
+                          {event.location ? ` · 📍 ${event.location}` : ''}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  ))}
+                </Stack>
+              </Box>
+            )}
           </Box>
         )
       })}
