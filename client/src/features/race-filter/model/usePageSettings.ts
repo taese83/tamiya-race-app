@@ -65,13 +65,14 @@ export const usePageSettings = () => {
     readSharedParam() ?? loadFromStorage()
   )
 
-  // 마운트 후 1회: ?s= 파람이 있으면 localStorage 저장 + URL clean (render phase 밖)
+  // 마운트 후 1회: ?s= 파람이 있으면 기존 localStorage에 병합 + URL clean (render phase 밖)
+  // saveToStorage(전체 교체) 대신 updateStorage(병합)을 사용해 기존 설정을 보존한다
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const shared = params.get('s')
     if (!shared) return
     const decoded = decodeSettings(shared)
-    if (decoded) saveToStorage(decoded)
+    if (decoded) updateStorage(decoded)
     window.history.replaceState(null, '', window.location.pathname + window.location.hash)
   }, [])
 

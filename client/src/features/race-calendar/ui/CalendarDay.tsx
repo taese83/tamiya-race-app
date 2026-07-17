@@ -14,9 +14,10 @@ import {CategoryChip} from '@/entities/race'
 interface CalendarDayProps {
   races: RaceEntry[]
   onRaceClick: (race: RaceEntry) => void
+  onRegStartClick?: (races: RaceEntry[]) => void
 }
 
-export const CalendarDay = ({races, onRaceClick}: CalendarDayProps) => {
+export const CalendarDay = ({races, onRaceClick, onRegStartClick}: CalendarDayProps) => {
   const [current, setCurrent] = useState(() => new Date())
 
   const dateKey = format(current, 'yyyy.MM.dd')
@@ -29,7 +30,14 @@ export const CalendarDay = ({races, onRaceClick}: CalendarDayProps) => {
       return a.time.localeCompare(b.time)
     })
 
-  // 이 날짜가 접수 시작일인 경기 — 경기장별 그룹핑
+  // 이 날짜가 접수 시작일인 경기 — 경기장별 그룹핑 (전체 경기 목록)
+  const regStartVenueGroups = new Map<string, RaceEntry[]>()
+  races.filter(r => r.registrationStartDate === dateKey).forEach(r => {
+    const arr = regStartVenueGroups.get(r.venue) ?? []
+    arr.push(r)
+    regStartVenueGroups.set(r.venue, arr)
+  })
+  // 하위 호환용 (첫번째 경기 대표값)
   const regStartVenues = new Map(
     races
       .filter(r => r.registrationStartDate === dateKey)
@@ -109,14 +117,19 @@ export const CalendarDay = ({races, onRaceClick}: CalendarDayProps) => {
       {/* 접수 시작일 섹션 */}
       {regStartVenues.size > 0 && (
         <Box sx={{mb: 2}}>
-          {Array.from(regStartVenues.entries()).map(([venue, rep]) => (
+          {Array.from(regStartVenues.entries()).map(([venue, rep]) => {
+            const venueRaces = regStartVenueGroups.get(venue) ?? [rep]
+            const handleRegClick = () => { if (onRegStartClick) onRegStartClick(venueRaces); else onRaceClick(rep) }
+            const categories = venueRaces.map(r => r.category.replace(' 클래스', '')).join(', ')
+            const raceDateStr = format(new Date(rep.date.replace(/\./g, '-')), 'M/d', {locale: ko})
+            return (
             <Box
               key={`reg-${venue}`}
               role="button"
               tabIndex={0}
               aria-label={`${venue} 접수 시작 상세 보기`}
-              onClick={() => onRaceClick(rep)}
-              onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); onRaceClick(rep) } }}
+              onClick={handleRegClick}
+              onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); handleRegClick() } }}
               sx={{
                 mb: 0.75, px: 1.5, py: 1, borderRadius: 1.5, cursor: 'pointer',
                 border: '1px solid', borderColor: 'warning.main', bgcolor: 'warning.light',
@@ -131,11 +144,11 @@ export const CalendarDay = ({races, onRaceClick}: CalendarDayProps) => {
                   접수 시작 · {venue}
                 </Typography>
                 <Typography variant="caption" sx={{color: 'text.secondary', fontSize: '0.72rem', display: 'block'}}>
-                  {rep.category} · 경기일 {format(new Date(rep.date.replace(/\./g, '-')), 'M/d', {locale: ko})}
+                  {categories} · 경기일 {raceDateStr}
                 </Typography>
               </Box>
             </Box>
-          ))}
+          )})}
         </Box>
       )}
 

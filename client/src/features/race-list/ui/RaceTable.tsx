@@ -13,6 +13,7 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import type {RaceEntry} from '@/entities/race'
 import {CategoryChip} from '@/entities/race'
 import {RaceDetailDrawer} from './RaceDetailDrawer'
+import {RegistrationDrawer} from './RegistrationDrawer'
 
 interface RaceTableProps {
   races: RaceEntry[]
@@ -44,6 +45,8 @@ export const RaceTable = ({races}: RaceTableProps) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const [selectedRace, setSelectedRace] = useState<RaceEntry | null>(null)
+  // 접수 상세 드로어 — venue별 경기 목록
+  const [regDrawerRaces, setRegDrawerRaces] = useState<RaceEntry[]>([])
 
   const grouped = useMemo(() => groupByDate(races), [races])
 
@@ -131,9 +134,9 @@ export const RaceTable = ({races}: RaceTableProps) => {
                     key={`reg-${venue}`}
                     role="button"
                     tabIndex={0}
-                    aria-label={`${venue} 접수 시작`}
-                    onClick={() => setSelectedRace(firstRace)}
-                    onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); setSelectedRace(firstRace) } }}
+                    aria-label={`${venue} 접수 상세 보기`}
+                    onClick={() => setRegDrawerRaces(venueRaces)}
+                    onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); setRegDrawerRaces(venueRaces) } }}
                     sx={{
                       mb: 0.75, px: 1.5, py: 1,
                       borderRadius: 1.5, cursor: 'pointer',
@@ -158,7 +161,7 @@ export const RaceTable = ({races}: RaceTableProps) => {
               })
             })()}
 
-            {isMobile ? (
+            {dateRaces.length > 0 && isMobile ? (
               <Stack spacing={1}>
                 {dateRaces.map(race => (
                   <Card
@@ -189,7 +192,7 @@ export const RaceTable = ({races}: RaceTableProps) => {
                   </Card>
                 ))}
               </Stack>
-            ) : (
+            ) : dateRaces.length > 0 ? (
               <TableContainer component={Paper} variant="outlined" sx={{borderRadius: 2}}>
                 <Table size="small">
                   <TableHead>
@@ -235,12 +238,13 @@ export const RaceTable = ({races}: RaceTableProps) => {
                   </TableBody>
                 </Table>
               </TableContainer>
-            )}
+            ) : null}
           </Box>
         )
       })}
 
       <RaceDetailDrawer race={selectedRace} onClose={() => setSelectedRace(null)} />
+      <RegistrationDrawer races={regDrawerRaces} onClose={() => setRegDrawerRaces([])} />
     </Box>
   )
 }

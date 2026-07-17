@@ -20,6 +20,8 @@ interface RaceCalendarProps {
   view: CalendarViewType
   onViewChange: (v: CalendarViewType) => void
   onRaceClick: (race: RaceEntry) => void
+  /** 접수 배너 클릭 시 — venue별 경기 목록 전달 */
+  onRegStartClick?: (races: RaceEntry[]) => void
   todayKey?: number
 }
 
@@ -90,7 +92,7 @@ export const TodayRaceHeader = ({todayRaces, onRaceClick}: TodayRaceHeaderProps)
 
 // ─── 메인 컴포넌트 ────────────────────────────────────────────────────────────
 
-export const RaceCalendar = ({races, view, onViewChange, onRaceClick, todayKey}: RaceCalendarProps) => {
+export const RaceCalendar = ({races, view, onViewChange, onRaceClick, onRegStartClick, todayKey}: RaceCalendarProps) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
@@ -134,9 +136,9 @@ export const RaceCalendar = ({races, view, onViewChange, onRaceClick, todayKey}:
         <TodayRaceHeader todayRaces={todayRaces} onRaceClick={onRaceClick} />
       )}
 
-      {view === 'day' && <CalendarDay key={todayKey} races={races} onRaceClick={onRaceClick} />}
-      {view === 'week' && <CalendarWeek key={todayKey} races={races} onRaceClick={onRaceClick} />}
-      {view === 'month' && <CalendarMonth key={todayKey} races={races} onRaceClick={onRaceClick} />}
+      {view === 'day' && <CalendarDay key={todayKey} races={races} onRaceClick={onRaceClick} onRegStartClick={onRegStartClick} />}
+      {view === 'week' && <CalendarWeek key={todayKey} races={races} onRaceClick={onRaceClick} onRegStartClick={onRegStartClick} />}
+      {view === 'month' && <CalendarMonth key={todayKey} races={races} onRaceClick={onRaceClick} onRegStartClick={onRegStartClick} />}
     </Box>
   )
 }

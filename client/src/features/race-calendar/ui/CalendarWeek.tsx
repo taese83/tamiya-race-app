@@ -15,10 +15,11 @@ import {CategoryChip} from '@/entities/race'
 interface CalendarWeekProps {
   races: RaceEntry[]
   onRaceClick: (race: RaceEntry) => void
+  onRegStartClick?: (races: RaceEntry[]) => void
 }
 
 
-export const CalendarWeek = ({races, onRaceClick}: CalendarWeekProps) => {
+export const CalendarWeek = ({races, onRaceClick, onRegStartClick}: CalendarWeekProps) => {
   const [current, setCurrent] = useState(() => new Date())
 
   const weekStart = startOfWeek(current, {weekStartsOn: 0})
@@ -135,22 +136,30 @@ export const CalendarWeek = ({races, onRaceClick}: CalendarWeekProps) => {
 
               {/* 접수 시작일 — 경기장별 도트+지점명 */}
               {regStartRaces.length > 0 && (() => {
-                const venueMap = new Map(regStartRaces.map((r): [string, RaceEntry] => [r.venue, r]))
-                return Array.from(venueMap.entries()).map(([venue, rep]) => (
+                const venueGroupMapW = new Map<string, RaceEntry[]>()
+                regStartRaces.forEach(r => {
+                  const arr = venueGroupMapW.get(r.venue) ?? []
+                  arr.push(r)
+                  venueGroupMapW.set(r.venue, arr)
+                })
+                return Array.from(venueGroupMapW.entries()).map(([venue, vRacesW]) => {
+                  const repW = vRacesW[0]!
+                  const handleClickW = () => { if (onRegStartClick) onRegStartClick(vRacesW); else onRaceClick(repW) }
+                  return (
                   <Box
                     key={`reg-${venue}`}
                     role="button"
                     tabIndex={0}
                     aria-label={`${venue} 접수 시작 상세 보기`}
-                    onClick={() => onRaceClick(rep)}
-                    onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); onRaceClick(rep) } }}
+                    onClick={handleClickW}
+                    onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); handleClickW() } }}
                     sx={{mt: 0.4, display: 'flex', alignItems: 'center', gap: 0.4, cursor: 'pointer', '&:hover .reg-label': {textDecoration: 'underline'}, '&:focus-visible': {outline: '2px solid', outlineColor: 'warning.dark', borderRadius: 0.4}}}>
                     <Box sx={{width: 6, height: 6, borderRadius: '50%', bgcolor: 'warning.main', flexShrink: 0}} />
                     <Typography className="reg-label" sx={{fontSize: '0.58rem', color: 'warning.dark', fontWeight: 600, lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>
                       {venue.length > 5 ? venue.slice(0, 5) + '…' : venue} 접수 시작일
                     </Typography>
                   </Box>
-                ))
+                )})
               })()}
             </Paper>
           )

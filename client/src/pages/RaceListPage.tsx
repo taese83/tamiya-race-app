@@ -15,6 +15,7 @@ import {RACES_QUERY_KEY, fetchRaces} from '@/entities/race'
 import type {RacesResponse, RaceEntry} from '@/entities/race'
 import {RaceTable} from '@/features/race-list/ui/RaceTable'
 import {RaceDetailDrawer} from '@/features/race-list/ui/RaceDetailDrawer'
+import {RegistrationDrawer} from '@/features/race-list/ui/RegistrationDrawer'
 import {RaceCalendar, TodayRaceHeader} from '@/features/race-calendar/ui/RaceCalendar'
 import {RaceFilter} from '@/features/race-filter/ui/RaceFilter'
 import {ShareButton} from '@/features/race-share/ui/ShareButton'
@@ -42,6 +43,8 @@ export const RaceListPage = () => {
   const [calendarSelectedRace, setCalendarSelectedRace] = useState<RaceEntry | null>(null)
   // 캘린더: todayKey 증가 → CalendarDay/Week/Month remount → 오늘 날짜로 초기화
   const [calendarTodayKey, setCalendarTodayKey] = useState(0)
+  // 접수 상세 드로어 — 리스트·캘린더 공통
+  const [regDrawerRaces, setRegDrawerRaces] = useState<RaceEntry[]>([])
 
   const {data, isLoading, isError, error} = useQuery<RacesResponse, Error>({
     queryKey: RACES_QUERY_KEY,
@@ -51,13 +54,6 @@ export const RaceListPage = () => {
   })
 
   // ── 필터 적용 ────────────────────────────────────────────────────────────────
-  // 오늘 날짜 전체 경기 (필터 무관)
-  const todayRaces = useMemo(() => {
-    if (!data?.data) return []
-    const todayStr = format(new Date(), 'yyyy.MM.dd')
-    return data.data.filter(r => r.date === todayStr)
-  }, [data])
-
   const filteredRaces = useMemo(() => {
     if (!data?.data) return []
     return data.data.filter(r => {
@@ -68,6 +64,12 @@ export const RaceListPage = () => {
       return venueOk && catOk && typeOk && regionOk
     })
   }, [data, selectedVenues, selectedCategories, selectedRaceTypes, selectedRegions])
+
+  // 오늘 날짜 경기 — filteredRaces 기반 (캘린더와 동일 로직, 필터 적용됨)
+  const todayRaces = useMemo(() => {
+    const todayStr = format(new Date(), 'yyyy.MM.dd')
+    return filteredRaces.filter(r => r.date === todayStr)
+  }, [filteredRaces])
 
   const updatedAt = data?.cachedAt
     ? format(new Date(data.cachedAt), 'yyyy.MM.dd HH:mm')
@@ -253,6 +255,7 @@ export const RaceListPage = () => {
             view={calendarView}
             onViewChange={setCalendarView}
             onRaceClick={setCalendarSelectedRace}
+            onRegStartClick={setRegDrawerRaces}
             todayKey={calendarTodayKey}
           />
         )}
@@ -260,6 +263,9 @@ export const RaceListPage = () => {
         {/* RaceDetailDrawer — 리스트/캘린더 공통 (오늘의 대회 헤더에서도 호출) */}
         <RaceDetailDrawer race={calendarSelectedRace} onClose={() => setCalendarSelectedRace(null)} />
       </Box>
+
+      {/* 접수 상세 드로어 — 리스트·캘린더 공통 */}
+      <RegistrationDrawer races={regDrawerRaces} onClose={() => setRegDrawerRaces([])} />
 
       {/* 오늘 날짜로 이동 FAB — 데이터 로드 후 항상 표시 */}
       {data != null && (

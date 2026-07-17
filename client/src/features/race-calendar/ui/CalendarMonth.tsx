@@ -1,4 +1,4 @@
-import {useState} from 'react'
+import {useState, useMemo} from 'react'
 import {
   Box, Typography, Paper, Stack, IconButton, Tooltip,
   useMediaQuery, Drawer, Divider,
@@ -14,8 +14,7 @@ import {
 } from 'date-fns'
 import {ko} from 'date-fns/locale'
 import type {RaceEntry} from '@/entities/race'
-import {CLASS_LIST, getCategoryColor} from '@/entities/race'
-import {CategoryChip} from '@/entities/race'
+import {CLASS_LIST, getCategoryColor, CategoryChip} from '@/entities/race'
 import {getRaceType, RACE_TYPE_LABEL, RACE_TYPE_COLOR, getRegistrationStatus, REGISTRATION_STATUS_LABEL, REGISTRATION_STATUS_COLOR} from '@/shared/lib/raceMeta'
 
 /** 월드/아시아 챌린지는 검은색, 스테이션은 클래스 색상 */
@@ -27,6 +26,7 @@ function getRaceBoxColor(race: {title: string; category: string}): string {
 interface CalendarMonthProps {
   races: RaceEntry[]
   onRaceClick: (race: RaceEntry) => void
+  onRegStartClick?: (races: RaceEntry[]) => void
 }
 
 const MAX_SHOW = 3
@@ -344,13 +344,14 @@ interface DayCellDesktopProps {
   isSelected: boolean
   onSelect: () => void
   onRaceClick: (race: RaceEntry) => void
+  onRegStartClick?: (races: RaceEntry[]) => void
 }
 
 const CELL_HEIGHT_DESKTOP = 140
 
 const DayCellDesktop = ({
   day, dayRaces, regStartRaces, inMonth, todayFlag, isPastDay, dayNum,
-  isSelected, onSelect, onRaceClick,
+  isSelected, onSelect, onRaceClick, onRegStartClick,
 }: DayCellDesktopProps) => {
   const visibleRaces = dayRaces.slice(0, MAX_SHOW)
   const overCount = dayRaces.length - MAX_SHOW
@@ -400,15 +401,23 @@ const DayCellDesktop = ({
       )}
       {/* 접수 시작일 — 도트 + 지점명 + "접수 시작일" */}
       {regStartRaces.length > 0 && (() => {
-        const venueMap = new Map(regStartRaces.map((r): [string, RaceEntry] => [r.venue, r]))
-        return Array.from(venueMap.entries()).map(([venue, rep]) => (
+        const venueGroupMap = new Map<string, RaceEntry[]>()
+        regStartRaces.forEach(r => {
+          const arr = venueGroupMap.get(r.venue) ?? []
+          arr.push(r)
+          venueGroupMap.set(r.venue, arr)
+        })
+        return Array.from(venueGroupMap.entries()).map(([venue, venueRaces]) => {
+          const rep = venueRaces[0]!
+          const handleClick = () => { if (onRegStartClick) onRegStartClick(venueRaces); else onRaceClick(rep) }
+          return (
           <Box
             key={`reg-${venue}`}
             role="button"
             tabIndex={0}
             aria-label={`${venue} 접수 시작 상세 보기`}
-            onClick={e => { e.stopPropagation(); onRaceClick(rep) }}
-            onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); onRaceClick(rep) } }}
+            onClick={e => { e.stopPropagation(); handleClick() }}
+            onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); handleClick() } }}
             sx={{
               mt: 0.3, display: 'flex', alignItems: 'center', gap: 0.4,
               cursor: 'pointer', flexShrink: 0,
@@ -429,7 +438,8 @@ const DayCellDesktop = ({
               {venue} 접수
             </Typography>
           </Box>
-        ))
+          )
+        })
       })()}
     </Paper>
   )
@@ -448,11 +458,12 @@ interface DayCellMobileProps {
   isSelected: boolean
   onSelect: () => void
   onRaceClick: (race: RaceEntry) => void
+  onRegStartClick?: (races: RaceEntry[]) => void
 }
 
 const DayCellMobile = ({
   day, dayRaces, regStartRaces, inMonth, todayFlag, isPastDay, dayNum,
-  isSelected, onSelect, onRaceClick,
+  isSelected, onSelect, onRaceClick, onRegStartClick: _onRegStartClick,
 }: DayCellMobileProps) => {
   const MAX_VISIBLE = 3
   const visible = dayRaces.slice(0, MAX_VISIBLE)
@@ -520,15 +531,20 @@ const DayCellMobile = ({
         )}
         {/* 접수 시작 — 경기장별 전체 표시, 데스크탑과 동일 패턴 */}
         {regStartRaces.length > 0 && (() => {
-          const venueMap = new Map(regStartRaces.map((r): [string, RaceEntry] => [r.venue, r]))
-          return Array.from(venueMap.entries()).map(([venue, rep]) => (
+          const venueGroupMap2 = new Map<string, RaceEntry[]>()
+          regStartRaces.forEach(r => {
+            const arr = venueGroupMap2.get(r.venue) ?? []
+            arr.push(r)
+            venueGroupMap2.set(r.venue, arr)
+          })
+          return Array.from(venueGroupMap2.entries()).map(([venue]) => (
             <Box
               key={`reg-${venue}`}
               role="button"
               tabIndex={0}
               aria-label={`${venue} 접수 시작 상세 보기`}
-              onClick={e => { e.stopPropagation(); onRaceClick(rep) }}
-              onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); onRaceClick(rep) } }}
+              onClick={e => { e.stopPropagation(); onSelect() }}
+              onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); onSelect() } }}
               sx={{mt: 0.3, display: 'flex', alignItems: 'center', gap: 0.35, cursor: 'pointer', '&:hover .reg-label': {textDecoration: 'underline'}, '&:focus-visible': {outline: '2px solid', outlineColor: 'warning.dark', borderRadius: 0.4}}}>
               <Box sx={{width: 5, height: 5, borderRadius: '50%', bgcolor: 'warning.main', flexShrink: 0}} />
               <Typography
@@ -581,12 +597,14 @@ const ColorLegend = () => (
 
 // ─── 월 캘린더 ────────────────────────────────────────────────────────────────
 
-export const CalendarMonth = ({races, onRaceClick}: CalendarMonthProps) => {
+export const CalendarMonth = ({races, onRaceClick, onRegStartClick}: CalendarMonthProps) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   const [current, setCurrent] = useState(() => new Date())
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
+  // 선택된 날짜의 접수 경기 스냅샷 — regStartByDate에서 dateKey 기준으로 저장
+  const [selectedRegStartSnapshot, setSelectedRegStartSnapshot] = useState<RaceEntry[]>([])
 
   const monthStart = startOfMonth(current)
   const monthEnd = endOfMonth(current)
@@ -594,36 +612,43 @@ export const CalendarMonth = ({races, onRaceClick}: CalendarMonthProps) => {
   const calEnd = endOfWeek(monthEnd, {weekStartsOn: 0})
   const days = eachDayOfInterval({start: calStart, end: calEnd})
 
-  const racesByDate = new Map<string, RaceEntry[]>()
-  races.forEach(r => {
-    const arr = racesByDate.get(r.date) ?? []
-    arr.push(r)
-    racesByDate.set(r.date, arr)
-  })
-  // 날짜별 시간순 정렬
-  racesByDate.forEach((arr, key) => racesByDate.set(key, sortByTime(arr)))
+  const racesByDate = useMemo(() => {
+    const map = new Map<string, RaceEntry[]>()
+    races.forEach(r => {
+      const arr = map.get(r.date) ?? []
+      arr.push(r)
+      map.set(r.date, arr)
+    })
+    map.forEach((arr, key) => map.set(key, sortByTime(arr)))
+    return map
+  }, [races])
 
-  // 접수 시작일 → 해당 경기 목록 맵
-  const regStartByDate = new Map<string, RaceEntry[]>()
-  races.forEach(r => {
-    if (!r.registrationStartDate) return
-    const arr = regStartByDate.get(r.registrationStartDate) ?? []
-    arr.push(r)
-    regStartByDate.set(r.registrationStartDate, arr)
-  })
+  // 접수 시작일 → 해당 경기 목록 맵 (races 변경 시 재계산)
+  const regStartByDate = useMemo(() => {
+    const map = new Map<string, RaceEntry[]>()
+    races.forEach(r => {
+      if (!r.registrationStartDate) return
+      const arr = map.get(r.registrationStartDate) ?? []
+      arr.push(r)
+      map.set(r.registrationStartDate, arr)
+    })
+    return map
+  }, [races])
 
   const prev = () => {
     setSelectedDate(null)
+    setSelectedRegStartSnapshot([])
     setCurrent(d => new Date(d.getFullYear(), d.getMonth() - 1, 1))
   }
   const next = () => {
     setSelectedDate(null)
+    setSelectedRegStartSnapshot([])
     setCurrent(d => new Date(d.getFullYear(), d.getMonth() + 1, 1))
   }
 
   const selectedRaces = selectedDate ? (racesByDate.get(selectedDate) ?? []) : []
-  // 선택된 날짜가 접수 시작일인 경기들 (드로어에 함께 표시)
-  const selectedRegStartRaces = selectedDate ? (regStartByDate.get(selectedDate) ?? []) : []
+  // 선택된 날짜의 접수 경기 — 스냅샷 사용 (셀 탭 시 저장된 전체 목록)
+  const selectedRegStartRaces = selectedRegStartSnapshot
   const selectedDateObj = selectedDate ? new Date(selectedDate.replace(/\./g, '-')) : null
 
   return (
@@ -675,12 +700,18 @@ export const CalendarMonth = ({races, onRaceClick}: CalendarMonthProps) => {
                 dayNum={day.getDay()}
                 isSelected={selectedDate === dateKey}
                 onSelect={() => {
-                  // 경기 또는 접수 경기가 있을 때만 드로어 오픈
                   if (dayRaces.length > 0 || regStartRaces.length > 0) {
-                    setSelectedDate(selectedDate === dateKey ? null : dateKey)
+                    if (selectedDate === dateKey) {
+                      setSelectedDate(null)
+                      setSelectedRegStartSnapshot([])
+                    } else {
+                      setSelectedDate(dateKey)
+                      setSelectedRegStartSnapshot(regStartRaces)
+                    }
                   }
                 }}
                 onRaceClick={onRaceClick}
+                onRegStartClick={onRegStartClick}
               />
             )
           }
@@ -698,14 +729,19 @@ export const CalendarMonth = ({races, onRaceClick}: CalendarMonthProps) => {
               isSelected={selectedDate === dateKey}
               onSelect={() => {
                 if (dayRaces.length === 1 && dayRaces[0]) {
-                  // 단일 대회: 바로 상세 오픈
                   onRaceClick(dayRaces[0])
                 } else if (dayRaces.length > 1) {
-                  // 복수 대회: 드로어로 목록 표시
-                  setSelectedDate(selectedDate === dateKey ? null : dateKey)
+                  if (selectedDate === dateKey) {
+                    setSelectedDate(null)
+                    setSelectedRegStartSnapshot([])
+                  } else {
+                    setSelectedDate(dateKey)
+                    setSelectedRegStartSnapshot(regStartRaces)
+                  }
                 }
               }}
               onRaceClick={onRaceClick}
+              onRegStartClick={onRegStartClick}
             />
           )
         })}
@@ -719,7 +755,7 @@ export const CalendarMonth = ({races, onRaceClick}: CalendarMonthProps) => {
         <Drawer
           anchor="bottom"
           open={Boolean(selectedDate && (selectedRaces.length > 0 || selectedRegStartRaces.length > 0))}
-          onClose={() => setSelectedDate(null)}
+          onClose={() => { setSelectedDate(null); setSelectedRegStartSnapshot([]) }}
           slotProps={{paper: {sx: {borderRadius: '16px 16px 0 0', maxHeight: '60vh'}}}}>
           {/* 드로어 핸들 */}
           <Box sx={{display: 'flex', justifyContent: 'center', pt: 1, pb: 0.5}}>
@@ -736,7 +772,7 @@ export const CalendarMonth = ({races, onRaceClick}: CalendarMonthProps) => {
                 {selectedDateObj && format(selectedDateObj, 'EEE', {locale: ko})} · {selectedRaces.length}개 일정{selectedRegStartRaces.length > 0 ? ` · 접수 ${new Set(selectedRegStartRaces.map(r => r.venue)).size}개소` : ''}
               </Typography>
             </Box>
-            <IconButton size="small" onClick={() => setSelectedDate(null)} aria-label="닫기" sx={{ml: 'auto'}}>
+            <IconButton size="small" onClick={() => { setSelectedDate(null); setSelectedRegStartSnapshot([]) }} aria-label="닫기" sx={{ml: 'auto'}}>
               <CloseIcon fontSize="small" />
             </IconButton>
           </Stack>
@@ -746,11 +782,17 @@ export const CalendarMonth = ({races, onRaceClick}: CalendarMonthProps) => {
           <Box sx={{overflowY: 'auto'}}>
             {/* ── 접수 섹션 ── */}
             {selectedRegStartRaces.length > 0 && (() => {
-              const venueMap = new Map(selectedRegStartRaces.map((r): [string, RaceEntry] => [r.venue, r]))
+              const venueGroupMap3 = new Map<string, RaceEntry[]>()
+              selectedRegStartRaces.forEach(r => {
+                const arr = venueGroupMap3.get(r.venue) ?? []
+                arr.push(r)
+                venueGroupMap3.set(r.venue, arr)
+              })
               const raceYear = selectedDate ? parseInt(selectedDate.split('.')[0] ?? '', 10) || undefined : undefined
-              const items = Array.from(venueMap.entries()).map(([venue, rep]) => {
+              const items = Array.from(venueGroupMap3.entries()).map(([venue, vRaceList]) => {
+                const rep = vRaceList[0]!
                 const status = getRegistrationStatus(rep.registrationDeadlineRaw ?? '', raceYear)
-                return {venue, rep, status}
+                return {venue, rep, vRaceList, status}
               })
               const defaultColor = '#e65100'
               return (
@@ -761,17 +803,23 @@ export const CalendarMonth = ({races, onRaceClick}: CalendarMonthProps) => {
                       접수 정보
                     </Typography>
                   )}
-                  {items.map(({venue, rep, status}) => {
+                  {items.map(({venue, rep, vRaceList, status}) => {
                     const color = status ? REGISTRATION_STATUS_COLOR[status] : defaultColor
                     const label = status ? REGISTRATION_STATUS_LABEL[status] : null
+                    const categories = vRaceList.map(r => r.category.replace(' 클래스', '')).join(', ')
+                    const raceDateStr = format(new Date(rep.date.replace(/\./g, '-')), 'M/d', {locale: ko})
+                    const handleDrawerRegClick = () => {
+                      if (onRegStartClick) { onRegStartClick(vRaceList); setSelectedDate(null); setSelectedRegStartSnapshot([]) }
+                      else { onRaceClick(rep); setSelectedDate(null); setSelectedRegStartSnapshot([]) }
+                    }
                     return (
                       <Box
                         key={`drawer-reg-${venue}`}
                         role="button"
                         tabIndex={0}
                         aria-label={`${venue} 접수 상세 보기`}
-                        onClick={() => { onRaceClick(rep); setSelectedDate(null) }}
-                        onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); onRaceClick(rep); setSelectedDate(null) } }}
+                        onClick={handleDrawerRegClick}
+                        onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); handleDrawerRegClick() } }}
                         sx={{
                           mb: 0.75, px: 1, py: 0.75, borderRadius: 1.5, cursor: 'pointer',
                           border: '1px solid', borderColor: color, bgcolor: `${color}18`,
@@ -786,7 +834,7 @@ export const CalendarMonth = ({races, onRaceClick}: CalendarMonthProps) => {
                             {venue}{label ? ` · ${label}` : ''}
                           </Typography>
                           <Typography variant="caption" sx={{color: 'text.secondary', fontSize: '0.68rem'}}>
-                            {rep.category} · 경기일 {format(new Date(rep.date.replace(/\./g, '-')), 'M/d', {locale: ko})}
+                            {categories} · 경기일 {raceDateStr}
                           </Typography>
                         </Box>
                       </Box>
