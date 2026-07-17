@@ -463,7 +463,7 @@ interface DayCellMobileProps {
 
 const DayCellMobile = ({
   day, dayRaces, regStartRaces, inMonth, todayFlag, isPastDay, dayNum,
-  isSelected, onSelect, onRaceClick, onRegStartClick: _onRegStartClick,
+  isSelected, onSelect, onRaceClick: _onRaceClick, onRegStartClick,
 }: DayCellMobileProps) => {
   const MAX_VISIBLE = 3
   const visible = dayRaces.slice(0, MAX_VISIBLE)
@@ -537,14 +537,19 @@ const DayCellMobile = ({
             arr.push(r)
             venueGroupMap2.set(r.venue, arr)
           })
-          return Array.from(venueGroupMap2.entries()).map(([venue]) => (
+          return Array.from(venueGroupMap2.entries()).map(([venue, venueRaces]) => {
+            const handleDotClick = () => {
+              if (onRegStartClick) onRegStartClick(venueRaces)
+              else onSelect()
+            }
+            return (
             <Box
               key={`reg-${venue}`}
               role="button"
               tabIndex={0}
               aria-label={`${venue} 접수 시작 상세 보기`}
-              onClick={e => { e.stopPropagation(); onSelect() }}
-              onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); onSelect() } }}
+              onClick={e => { e.stopPropagation(); handleDotClick() }}
+              onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); handleDotClick() } }}
               sx={{mt: 0.3, display: 'flex', alignItems: 'center', gap: 0.35, cursor: 'pointer', '&:hover .reg-label': {textDecoration: 'underline'}, '&:focus-visible': {outline: '2px solid', outlineColor: 'warning.dark', borderRadius: 0.4}}}>
               <Box sx={{width: 5, height: 5, borderRadius: '50%', bgcolor: 'warning.main', flexShrink: 0}} />
               <Typography
@@ -558,7 +563,8 @@ const DayCellMobile = ({
                 {venue} 접수
               </Typography>
             </Box>
-          ))
+            )
+          })
         })()}
       </Box>
     </Paper>
@@ -647,8 +653,10 @@ export const CalendarMonth = ({races, onRaceClick, onRegStartClick}: CalendarMon
   }
 
   const selectedRaces = selectedDate ? (racesByDate.get(selectedDate) ?? []) : []
-  // 선택된 날짜의 접수 경기 — 스냅샷 사용 (셀 탭 시 저장된 전체 목록)
-  const selectedRegStartRaces = selectedRegStartSnapshot
+  // 선택된 날짜의 접수 경기 — 열려 있는 동안 races 갱신을 반영하되, selectedDate가 없으면 빈 배열
+  const selectedRegStartRaces = selectedDate
+    ? (regStartByDate.get(selectedDate) ?? selectedRegStartSnapshot)
+    : []
   const selectedDateObj = selectedDate ? new Date(selectedDate.replace(/\./g, '-')) : null
 
   return (
@@ -728,9 +736,9 @@ export const CalendarMonth = ({races, onRaceClick, onRegStartClick}: CalendarMon
               dayNum={day.getDay()}
               isSelected={selectedDate === dateKey}
               onSelect={() => {
-                if (dayRaces.length === 1 && dayRaces[0]) {
+                if (dayRaces.length === 1 && regStartRaces.length === 0 && dayRaces[0]) {
                   onRaceClick(dayRaces[0])
-                } else if (dayRaces.length > 1) {
+                } else if (dayRaces.length > 1 || regStartRaces.length > 0) {
                   if (selectedDate === dateKey) {
                     setSelectedDate(null)
                     setSelectedRegStartSnapshot([])
@@ -750,8 +758,8 @@ export const CalendarMonth = ({races, onRaceClick, onRegStartClick}: CalendarMon
       {/* 색상 가이드 */}
       <ColorLegend />
 
-      {/* 날짜 선택 시 하단 드로어 — 모바일: 항상, 데스크탑: 복수 경기장이 있을 때만 */}
-      {(isMobile || (!isMobile && selectedRaces.length > 1)) && (
+      {/* 날짜 선택 시 하단 드로어 — 모바일: 항상, 데스크탑: 경기 2개 이상이거나 접수 정보 있을 때 */}
+      {(isMobile || (!isMobile && (selectedRaces.length > 1 || selectedRegStartRaces.length > 0))) && (
         <Drawer
           anchor="bottom"
           open={Boolean(selectedDate && (selectedRaces.length > 0 || selectedRegStartRaces.length > 0))}

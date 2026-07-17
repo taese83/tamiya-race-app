@@ -86,6 +86,8 @@ export function getRegistrationStatus(
   if (startStr > todayStr) return null  // 아직 시작 안 됨
   if (endStr && todayStr > endStr) return 'closed'
   if (endStr && todayStr <= endStr) return 'open'
+  // 마감일 파싱 불가 (시간대만 있는 경우 등) — 시작일이 지났으면 마감으로 처리
+  if (todayStr > startStr) return 'closed'
   return null
 }
 

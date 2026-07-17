@@ -159,6 +159,7 @@ const RegistrationGroupSection = ({races, detail, isLoading, isError, showDivide
             <Box sx={{pt: 0.5}}>
               {detail.applyUrl ? (
                 <Button
+                  component="a"
                   variant="contained"
                   color="warning"
                   fullWidth
@@ -174,6 +175,7 @@ const RegistrationGroupSection = ({races, detail, isLoading, isError, showDivide
               ) : (
                 safeUrl(races[0]?.detailUrl) && (
                   <Button
+                    component="a"
                     variant="outlined"
                     color="warning"
                     fullWidth
@@ -203,7 +205,7 @@ export const RegistrationDrawer = ({races, onClose}: RegistrationDrawerProps) =>
   // wrId별로 그룹핑 — 같은 공지(wrId)에 여러 클래스가 있을 수 있음
   const wrIdGroupMap = new Map<string, RaceEntry[]>()
   races.forEach(r => {
-    const wrId = r.id.split('-')[0] ?? ''
+    const wrId = r.id.split('-').find(p => p.length > 0) ?? ''
     if (!wrId) return
     const arr = wrIdGroupMap.get(wrId) ?? []
     arr.push(r)

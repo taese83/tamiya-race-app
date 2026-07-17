@@ -1,4 +1,4 @@
-import {useMemo, useState, useCallback, useRef} from 'react'
+import {useMemo, useState, useCallback, useRef, useEffect} from 'react'
 import {useQuery} from '@tanstack/react-query'
 import {
   Box, Typography, AppBar, Toolbar, IconButton,
@@ -82,11 +82,12 @@ export const RaceListPage = () => {
   const activeFilterCount = selectedVenues.length + selectedCategories.length + selectedRaceTypes.length + selectedRegions.length
 
   // ref로 최신 filteredRaces를 항상 참조 — useCallback 클로저 stale 방지
+  // useEffect로 커밋된 값만 반영 (concurrent mode에서 버려진 render 값 방지)
   const filteredRacesRef = useRef(filteredRaces)
-  filteredRacesRef.current = filteredRaces
+  useEffect(() => { filteredRacesRef.current = filteredRaces }, [filteredRaces])
 
   const viewModeRef = useRef(viewMode)
-  viewModeRef.current = viewMode
+  useEffect(() => { viewModeRef.current = viewMode }, [viewMode])
 
   const handleGoToToday = useCallback(() => {
     if (viewModeRef.current === 'list') {

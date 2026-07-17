@@ -37,12 +37,11 @@ export const CalendarDay = ({races, onRaceClick, onRegStartClick}: CalendarDayPr
     arr.push(r)
     regStartVenueGroups.set(r.venue, arr)
   })
-  // 하위 호환용 (첫번째 경기 대표값)
-  const regStartVenues = new Map(
-    races
-      .filter(r => r.registrationStartDate === dateKey)
-      .map((r): [string, RaceEntry] => [r.venue, r])
-  )
+  // 경기장별 첫 번째 경기를 대표값으로 사용 (first-writer-wins)
+  const regStartVenues = new Map<string, RaceEntry>()
+  races.filter(r => r.registrationStartDate === dateKey).forEach(r => {
+    if (!regStartVenues.has(r.venue)) regStartVenues.set(r.venue, r)
+  })
 
   const prev = () => setCurrent(d => subDays(d, 1))
   const next = () => setCurrent(d => addDays(d, 1))
