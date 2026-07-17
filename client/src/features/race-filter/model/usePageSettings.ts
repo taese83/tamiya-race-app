@@ -60,10 +60,13 @@ function validCalendarView(v: string | undefined): CalendarViewType {
 }
 
 export const usePageSettings = () => {
-  // 초기값: ?s= 파람 디코딩 우선, 없으면 localStorage (side effect 없음)
-  const [init] = useState<SavedSettings>(() =>
-    readSharedParam() ?? loadFromStorage()
-  )
+  // 초기값: localStorage 기반으로 ?s= 파람을 병합 (공유 파람의 키만 덮어씀)
+  // ?? 대신 병합을 사용해 공유 파람에 없는 필드(venues, cats 등)는 localStorage 값을 유지한다
+  const [init] = useState<SavedSettings>(() => {
+    const stored = loadFromStorage()
+    const shared = readSharedParam()
+    return shared ? {...stored, ...shared} : stored
+  })
 
   // 마운트 후 1회: ?s= 파람이 있으면 기존 localStorage에 병합 + URL clean (render phase 밖)
   // saveToStorage(전체 교체) 대신 updateStorage(병합)을 사용해 기존 설정을 보존한다
