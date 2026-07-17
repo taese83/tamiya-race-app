@@ -29,10 +29,9 @@ interface RaceCalendarProps {
 
 export interface TodayRaceHeaderProps {
   todayRaces: RaceEntry[]
-  onRaceClick: (race: RaceEntry) => void
 }
 
-export const TodayRaceHeader = ({todayRaces, onRaceClick}: TodayRaceHeaderProps) => (
+export const TodayRaceHeader = ({todayRaces}: TodayRaceHeaderProps) => (
   <Box sx={{mb: 2, p: 1.5, bgcolor: 'action.hover', borderRadius: 2, border: '1px solid', borderColor: 'divider'}}>
     <Stack direction="row" alignItems="center" spacing={0.5} sx={{mb: 1}}>
       <EmojiEventsIcon sx={{fontSize: 14, color: 'primary.main'}} />
@@ -45,25 +44,16 @@ export const TodayRaceHeader = ({todayRaces, onRaceClick}: TodayRaceHeaderProps)
         const races = todayRaces.filter(r => r.category.includes(cls.key))
         const isActive = races.length > 0
         const isMulti = races.length > 1
-        const repRace = races[0]
 
         return (
           <Box
             key={cls.key}
-            role={isActive ? 'button' : undefined}
-            tabIndex={isActive ? 0 : undefined}
-            aria-label={isActive && repRace ? `${repRace.category} ${repRace.time ?? ''} ${repRace.venue}`.trim() : undefined}
-            onClick={repRace ? () => onRaceClick(repRace) : undefined}
-            onKeyDown={isActive && repRace ? e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); onRaceClick(repRace) } } : undefined}
             sx={{
               display: 'flex', alignItems: 'center', gap: 0.5,
               opacity: isActive ? 1 : 0.28,
-              cursor: isActive ? 'pointer' : 'default',
               px: 1, py: 0.5, borderRadius: 1,
               bgcolor: isActive ? cls.color + '18' : 'transparent',
               border: '1px solid', borderColor: isActive ? cls.color + '66' : 'transparent',
-              '&:hover': isActive ? {bgcolor: cls.color + '28'} : {},
-              transition: 'background-color 0.1s',
             }}>
             <Box sx={{
               width: 10, height: 10, borderRadius: '50%',
@@ -133,7 +123,7 @@ export const RaceCalendar = ({races, view, onViewChange, onRaceClick, onRegStart
 
       {/* 오늘의 대회 — 모든 뷰 공통 */}
       {todayRaces.length > 0 && (
-        <TodayRaceHeader todayRaces={todayRaces} onRaceClick={onRaceClick} />
+        <TodayRaceHeader todayRaces={todayRaces} />
       )}
 
       {view === 'day' && <CalendarDay key={todayKey} races={races} onRaceClick={onRaceClick} onRegStartClick={onRegStartClick} />}

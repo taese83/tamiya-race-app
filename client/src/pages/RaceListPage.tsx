@@ -238,13 +238,7 @@ export const RaceListPage = () => {
         {data != null && viewMode === 'list' && (
           <>
             {todayRaces.length > 0 && (
-              <TodayRaceHeader
-                todayRaces={todayRaces}
-                onRaceClick={race => {
-                  // 리스트 뷰에서는 캘린더 드로어 대신 RaceDetailDrawer 오픈
-                  setCalendarSelectedRace(race)
-                }}
-              />
+              <TodayRaceHeader todayRaces={todayRaces} />
             )}
             <RaceTable races={filteredRaces} />
           </>

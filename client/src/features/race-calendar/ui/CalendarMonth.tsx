@@ -463,7 +463,7 @@ interface DayCellMobileProps {
 
 const DayCellMobile = ({
   day, dayRaces, regStartRaces, inMonth, todayFlag, isPastDay, dayNum,
-  isSelected, onSelect, onRaceClick: _onRaceClick, onRegStartClick,
+  isSelected, onSelect, onRaceClick: _onRaceClick, onRegStartClick: _onRegStartClick,
 }: DayCellMobileProps) => {
   const MAX_VISIBLE = 3
   const visible = dayRaces.slice(0, MAX_VISIBLE)
@@ -537,19 +537,15 @@ const DayCellMobile = ({
             arr.push(r)
             venueGroupMap2.set(r.venue, arr)
           })
-          return Array.from(venueGroupMap2.entries()).map(([venue, venueRaces]) => {
-            const handleDotClick = () => {
-              if (onRegStartClick) onRegStartClick(venueRaces)
-              else onSelect()
-            }
+          return Array.from(venueGroupMap2.entries()).map(([venue]) => {
             return (
             <Box
               key={`reg-${venue}`}
               role="button"
               tabIndex={0}
               aria-label={`${venue} 접수 시작 상세 보기`}
-              onClick={e => { e.stopPropagation(); handleDotClick() }}
-              onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); handleDotClick() } }}
+              onClick={e => { e.stopPropagation(); onSelect() }}
+              onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); onSelect() } }}
               sx={{mt: 0.3, display: 'flex', alignItems: 'center', gap: 0.35, cursor: 'pointer', '&:hover .reg-label': {textDecoration: 'underline'}, '&:focus-visible': {outline: '2px solid', outlineColor: 'warning.dark', borderRadius: 0.4}}}>
               <Box sx={{width: 5, height: 5, borderRadius: '50%', bgcolor: 'warning.main', flexShrink: 0}} />
               <Typography
