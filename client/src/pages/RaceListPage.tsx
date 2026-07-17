@@ -179,22 +179,7 @@ export const RaceListPage = () => {
             </ToggleButton>
           </ToggleButtonGroup>
 
-          <Tooltip title="내 캘린더">
-            <IconButton
-              size="small"
-              onClick={() => setShowCalendarDrawer(true)}
-              aria-label="내 캘린더 설정"
-              color={naverCalendar.sources.length > 0 ? 'primary' : 'default'}>
-              <Badge
-                badgeContent={naverCalendar.totalEventCount > 0 ? naverCalendar.totalEventCount : undefined}
-                color={naverCalendar.hasError ? 'warning' : 'primary'}
-                max={99}
-                sx={{'& .MuiBadge-badge': {fontSize: '0.6rem', height: 14, minWidth: 14, top: 2, right: 2}}}>
-                <PermContactCalendarIcon fontSize="small" />
-              </Badge>
-            </IconButton>
-          </Tooltip>
-
+          {/* TODO: 내 캘린더 — iCal 502 이슈 해결 후 활성화 */}
           <ShareButton settings={currentSettings} />
         </Toolbar>
 
