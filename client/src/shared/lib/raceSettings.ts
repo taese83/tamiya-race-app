@@ -40,24 +40,23 @@ export function decodeSettings(encoded: string): SavedSettings | null {
   }
 }
 
-/** 신뢰할 수 없는 출처(URL 파람, localStorage)의 설정값을 화이트리스트 검증 */
+/** 신뢰할 수 없는 출처(URL 파람, localStorage)의 설정값을 화이트리스트 검증
+ *  파람에 없는 키는 결과 객체에 포함하지 않아 spread 병합 시 기존 값을 덮어쓰지 않는다 */
 export function sanitizeSettings(parsed: Record<string, unknown>): SavedSettings {
   const VALID_VIEWS = new Set(['list', 'calendar'])
   const VALID_CVIEWS = new Set(['day', 'week', 'month'])
-  return {
-    view: VALID_VIEWS.has(parsed['view'] as string) ? parsed['view'] as 'list' | 'calendar' : undefined,
-    cview: VALID_CVIEWS.has(parsed['cview'] as string) ? parsed['cview'] as 'day' | 'week' | 'month' : undefined,
-    venues: Array.isArray(parsed['venues'])
-      ? (parsed['venues'] as unknown[]).filter((x): x is string => typeof x === 'string' && x.length <= 200).slice(0, 50)
-      : undefined,
-    cats: Array.isArray(parsed['cats'])
-      ? (parsed['cats'] as unknown[]).filter((x): x is string => typeof x === 'string' && x.length <= 100).slice(0, 20)
-      : undefined,
-    raceTypes: Array.isArray(parsed['raceTypes'])
-      ? (parsed['raceTypes'] as unknown[]).filter((x): x is string => ['world', 'asia', 'station'].includes(x as string))
-      : undefined,
-    regions: Array.isArray(parsed['regions'])
-      ? (parsed['regions'] as unknown[]).filter((x): x is string => ['seoul', 'busan'].includes(x as string))
-      : undefined,
-  }
+  const result: SavedSettings = {}
+  if (VALID_VIEWS.has(parsed['view'] as string))
+    result.view = parsed['view'] as 'list' | 'calendar'
+  if (VALID_CVIEWS.has(parsed['cview'] as string))
+    result.cview = parsed['cview'] as 'day' | 'week' | 'month'
+  if (Array.isArray(parsed['venues']))
+    result.venues = (parsed['venues'] as unknown[]).filter((x): x is string => typeof x === 'string' && x.length <= 200).slice(0, 50)
+  if (Array.isArray(parsed['cats']))
+    result.cats = (parsed['cats'] as unknown[]).filter((x): x is string => typeof x === 'string' && x.length <= 100).slice(0, 20)
+  if (Array.isArray(parsed['raceTypes']))
+    result.raceTypes = (parsed['raceTypes'] as unknown[]).filter((x): x is string => ['world', 'asia', 'station'].includes(x as string))
+  if (Array.isArray(parsed['regions']))
+    result.regions = (parsed['regions'] as unknown[]).filter((x): x is string => ['seoul', 'busan'].includes(x as string))
+  return result
 }
