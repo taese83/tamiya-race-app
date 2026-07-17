@@ -11,15 +11,17 @@ import {
 import {ko} from 'date-fns/locale'
 import type {RaceEntry} from '@/entities/race'
 import {CategoryChip} from '@/entities/race'
+import type {CalendarEvent} from '@/entities/calendar-event'
 
 interface CalendarWeekProps {
   races: RaceEntry[]
   onRaceClick: (race: RaceEntry) => void
   onRegStartClick?: (races: RaceEntry[]) => void
+  calendarEvents?: CalendarEvent[]
 }
 
 
-export const CalendarWeek = ({races, onRaceClick, onRegStartClick}: CalendarWeekProps) => {
+export const CalendarWeek = ({races, onRaceClick, onRegStartClick, calendarEvents = []}: CalendarWeekProps) => {
   const [current, setCurrent] = useState(() => new Date())
 
   const weekStart = startOfWeek(current, {weekStartsOn: 0})
@@ -66,6 +68,7 @@ export const CalendarWeek = ({races, onRaceClick, onRegStartClick}: CalendarWeek
           const dateKey = format(day, 'yyyy.MM.dd')
           const dayRaces = racesByDate.get(dateKey) ?? []
           const regStartRaces = regStartByDate.get(dateKey) ?? []
+          const dayEvents = calendarEvents.filter(e => e.date === dateKey)
           const todayFlag = isToday(day)
           const isPastDay = !todayFlag && isPast(startOfDay(day))
           const dayNum = day.getDay()
@@ -133,6 +136,28 @@ export const CalendarWeek = ({races, onRaceClick, onRegStartClick}: CalendarWeek
                   <Typography variant="caption" sx={{color: 'text.disabled', fontSize: '0.65rem'}}>-</Typography>
                 )}
               </Stack>
+
+              {/* 내 캘린더 이벤트 */}
+              {dayEvents.length > 0 && (
+                <Box sx={{mt: (dayRaces.length > 0 || regStartRaces.length > 0) ? 0.5 : 0}}>
+                  {(dayRaces.length > 0 || regStartRaces.length > 0) && (
+                    <Box sx={{borderTop: '1px solid', borderColor: 'divider', mb: 0.5, mt: 0.5}} />
+                  )}
+                  <Stack spacing={0.4}>
+                    {dayEvents.map(event => (
+                      <Box key={event.id} sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
+                        <Box sx={{width: 7, height: 7, borderRadius: '50%', bgcolor: event.color, flexShrink: 0}} />
+                        <Typography sx={{
+                          fontSize: '0.6rem', color: 'text.secondary', lineHeight: 1.3,
+                          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                        }}>
+                          {event.allDay ? '' : (event.time ? `${event.time} ` : '')}{event.title}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Stack>
+                </Box>
+              )}
 
               {/* 접수 시작일 — 경기장별 도트+지점명 */}
               {regStartRaces.length > 0 && (() => {

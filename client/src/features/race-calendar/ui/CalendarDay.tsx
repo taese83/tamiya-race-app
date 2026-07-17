@@ -10,17 +10,29 @@ import {ko} from 'date-fns/locale'
 import HowToRegIcon from '@mui/icons-material/HowToReg'
 import type {RaceEntry} from '@/entities/race'
 import {CategoryChip} from '@/entities/race'
+import type {CalendarEvent} from '@/entities/calendar-event'
+import {CalendarEventChip} from '@/features/naver-calendar'
 
 interface CalendarDayProps {
   races: RaceEntry[]
   onRaceClick: (race: RaceEntry) => void
   onRegStartClick?: (races: RaceEntry[]) => void
+  calendarEvents?: CalendarEvent[]
 }
 
-export const CalendarDay = ({races, onRaceClick, onRegStartClick}: CalendarDayProps) => {
+export const CalendarDay = ({races, onRaceClick, onRegStartClick, calendarEvents = []}: CalendarDayProps) => {
   const [current, setCurrent] = useState(() => new Date())
 
   const dateKey = format(current, 'yyyy.MM.dd')
+  const dayEvents = calendarEvents.filter(e => e.date === dateKey)
+    .sort((a, b) => {
+      if (a.allDay && !b.allDay) return 1
+      if (!a.allDay && b.allDay) return -1
+      if (!a.time && !b.time) return 0
+      if (!a.time) return 1
+      if (!b.time) return -1
+      return a.time.localeCompare(b.time)
+    })
   const dayRaces = races
     .filter(r => r.date === dateKey)
     .sort((a, b) => {
@@ -152,7 +164,7 @@ export const CalendarDay = ({races, onRaceClick, onRegStartClick}: CalendarDayPr
       )}
 
       {/* 대회 목록 */}
-      {dayRaces.length === 0 && regStartVenues.size === 0 ? (
+      {dayRaces.length === 0 && regStartVenues.size === 0 && dayEvents.length === 0 ? (
         <Box sx={{py: 6, textAlign: 'center'}}>
           <Typography color="text.secondary">이 날 대회 일정이 없습니다</Typography>
         </Box>
@@ -194,6 +206,24 @@ export const CalendarDay = ({races, onRaceClick, onRegStartClick}: CalendarDayPr
             </Paper>
           ))}
         </Stack>
+      )}
+
+      {/* 내 캘린더 이벤트 */}
+      {dayEvents.length > 0 && (
+        <Box sx={{mt: dayRaces.length > 0 || regStartVenues.size > 0 ? 2 : 0}}>
+          {(dayRaces.length > 0 || regStartVenues.size > 0) && (
+            <Divider sx={{mb: 1.5}}>
+              <Typography variant="caption" sx={{fontSize: '0.65rem', color: 'text.disabled', px: 1}}>
+                내 캘린더
+              </Typography>
+            </Divider>
+          )}
+          <Stack spacing={1}>
+            {dayEvents.map(event => (
+              <CalendarEventChip key={event.id} event={event} />
+            ))}
+          </Stack>
+        </Box>
       )}
     </Box>
   )
