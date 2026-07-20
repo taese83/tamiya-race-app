@@ -87,7 +87,7 @@
       "date": "2026.07.26",
       "time": "11:00",
       "category": "M3 클래스",
-      "note": "선착순 50명",
+      "note": "선착순 60명",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=691"
     },
     {
@@ -97,7 +97,7 @@
       "date": "2026.07.26",
       "time": "13:00",
       "category": "M2B 클래스",
-      "note": "선착순 70명",
+      "note": "선착순 60명",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=691"
     },
     {
@@ -234,7 +234,7 @@
       "id": "630-0",
       "title": "스테이션 챌린지",
       "venue": "김해놀방",
-      "date": "2026.07.21",
+      "date": "2026.07.22",
       "time": "21:00",
       "category": "M3 클래스",
       "note": "",
@@ -1531,5 +1531,5 @@
     }
   },
   "count": 96,
-  "cachedAt": "2026-07-19T15:57:11.083Z"
+  "cachedAt": "2026-07-20T16:23:48.745Z"
 }
