@@ -191,6 +191,26 @@
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=692"
     },
     {
+      "id": "707-0",
+      "title": "스테이션 챌린지",
+      "venue": "부산챔피언서킷",
+      "date": "2026.08.17",
+      "time": "15:00",
+      "category": "M2B 클래스",
+      "note": "",
+      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=707"
+    },
+    {
+      "id": "707-1",
+      "title": "스테이션 챌린지",
+      "venue": "부산챔피언서킷",
+      "date": "2026.08.17",
+      "time": "18:00",
+      "category": "M2 클래스",
+      "note": "",
+      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=707"
+    },
+    {
       "id": "482-0",
       "title": "스테이션 챌린지",
       "venue": "마리오점",
@@ -279,26 +299,6 @@
       "category": "OPEN 클래스",
       "note": "선착순 45명 / 매장 오픈 9:30",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=687"
-    },
-    {
-      "id": "707-0",
-      "title": "스테이션 챌린지",
-      "venue": "부산챔피언서킷",
-      "date": "2026.08.15",
-      "time": "17:00",
-      "category": "M2B 클래스",
-      "note": "",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=707"
-    },
-    {
-      "id": "707-1",
-      "title": "스테이션 챌린지",
-      "venue": "부산챔피언서킷",
-      "date": "2026.08.15",
-      "time": "21:00",
-      "category": "M2 클래스",
-      "note": "",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=707"
     },
     {
       "id": "729-0",
@@ -1560,5 +1560,5 @@
     }
   },
   "count": 98,
-  "cachedAt": "2026-07-21T02:10:53.898Z"
+  "cachedAt": "2026-07-21T16:22:48.519Z"
 }
