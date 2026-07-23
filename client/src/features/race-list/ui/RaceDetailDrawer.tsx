@@ -21,6 +21,7 @@ import {CategoryChip} from '@/entities/race'
 import {getRaceType, getRegion, RACE_TYPE_LABEL, RACE_TYPE_COLOR, REGION_LABEL} from '@/shared/lib/raceMeta'
 import {getRulesUrl} from '@/shared/lib/raceRules'
 import {FavoriteToggle, useFavorites} from '@/features/race-favorite'
+import {ParticipationBox} from '@/features/participation'
 
 interface RaceDetailDrawerProps {
   race: RaceEntry | null
@@ -302,24 +303,6 @@ export const RaceDetailDrawer = ({race, onClose}: RaceDetailDrawerProps) => {
                 </Box>
               )}
 
-              {/* 클래스 규정 링크 */}
-              {rulesUrl && (
-                <Box>
-                  <Divider sx={{mb: 1.5}} />
-                  <Button
-                    variant="text"
-                    size="small"
-                    fullWidth
-                    endIcon={<OpenInNewIcon sx={{fontSize: 14}} />}
-                    href={rulesUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    sx={{color: 'text.secondary', fontSize: '0.75rem', justifyContent: 'flex-start'}}>
-                    규정 보기
-                  </Button>
-                </Box>
-              )}
-
               {/* 온라인 접수 버튼 */}
               {isOnlineApply && (
                 <Box sx={{pt: 1}}>
@@ -363,21 +346,43 @@ export const RaceDetailDrawer = ({race, onClose}: RaceDetailDrawerProps) => {
               )}
             </Stack>
           )}
+
+          {/* 내 참여 기록 — 스크롤 영역 하단 (원본 페이지 링크 바로 위) */}
+          {race && (
+            <Box sx={{mt: detail ? 2.5 : 0}}>
+              {detail && <Divider sx={{mb: 1.5}} />}
+              <ParticipationBox raceId={race.id} wrId={race.wrId} raceDate={race.date} />
+            </Box>
+          )}
         </Box>
 
-        {/* 푸터 — 원본 페이지 링크 (detailUrl 없으면 숨김) */}
-        {race?.detailUrl && (
-          <Box sx={{px: 2.5, py: 1.5, borderTop: '1px solid', borderColor: 'divider'}}>
-            <Button
-              variant="text"
-              size="small"
-              endIcon={<OpenInNewIcon sx={{fontSize: 14}} />}
-              href={race.detailUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              sx={{color: 'text.secondary', fontSize: '0.75rem'}}>
-              타미야 원본 페이지 보기
-            </Button>
+        {/* 푸터 — 원본 페이지 링크 + 규정 보기 (하나라도 있으면 렌더) */}
+        {(race?.detailUrl || rulesUrl) && (
+          <Box sx={{px: 2.5, py: 1.5, borderTop: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center'}}>
+            {race?.detailUrl && (
+              <Button
+                variant="text"
+                size="small"
+                endIcon={<OpenInNewIcon sx={{fontSize: 14}} />}
+                href={race.detailUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{color: 'text.secondary', fontSize: '0.75rem'}}>
+                타미야 원본 페이지 보기
+              </Button>
+            )}
+            {rulesUrl && (
+              <Button
+                variant="text"
+                size="small"
+                endIcon={<OpenInNewIcon sx={{fontSize: 14}} />}
+                href={rulesUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{color: 'text.secondary', fontSize: '0.75rem', ml: 'auto'}}>
+                규정 보기
+              </Button>
+            )}
           </Box>
         )}
       </Box>

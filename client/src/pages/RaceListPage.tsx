@@ -27,6 +27,8 @@ import {usePageSettings} from '@/features/race-filter/model/usePageSettings'
 import {getRaceType, getRegion} from '@/shared/lib/raceMeta'
 import {useNaverCalendar, NaverCalendarDrawer} from '@/features/naver-calendar'
 import {useFavorites} from '@/features/race-favorite'
+import {AuthMenu, useSession} from '@/features/auth'
+import {useParticipations, makeParticipationMap, ScoreLayer} from '@/features/participation'
 
 function matchCategory(category: string, filter: string): boolean {
   return category.includes(filter.replace(' 클래스', ''))
@@ -48,6 +50,19 @@ export const RaceListPage = () => {
 
   const {favorites, count: favoriteCount, isReady: favoritesReady, clearAll: clearAllFavorites} = useFavorites()
   const [confirmClearOpen, setConfirmClearOpen] = useState(false)
+
+  // 로그인·참여 상태
+  const {user} = useSession()
+  const {data: participations} = useParticipations(user != null)
+  const [onlyParticipating, setOnlyParticipating] = useState(false)
+  const [scoreLayerOpen, setScoreLayerOpen] = useState(false)
+  const participationRaceIds = useMemo(() => new Set(participations.map(p => p.race_id)), [participations])
+  // 로그아웃되거나 참여 목록이 비면 onlyParticipating 자동 해제
+  useEffect(() => {
+    if (onlyParticipating && (user == null || participations.length === 0)) {
+      setOnlyParticipating(false)
+    }
+  }, [user, participations.length, onlyParticipating])
 
   const [filterAnchorEl, setFilterAnchorEl] = useState<HTMLElement | null>(null)
   const showFilter = Boolean(filterAnchorEl)
@@ -79,16 +94,17 @@ export const RaceListPage = () => {
   // 뷰·모드별 데이터 소스 선택
   //  - 리스트 뷰: active (아카이브가 무한히 쌓이는 것을 방지)
   //  - 캘린더 뷰: 전체 (지난달/미래월 자유 탐색)
-  //  - 즐겨찾기만 보기: 항상 전체 (히스토리 조회)
-  const useAllData = viewMode === 'calendar' || onlyFavorites
+  //  - 즐겨찾기만 보기 · 참여 경기만 보기: 항상 전체 (히스토리 조회)
+  const useAllData = viewMode === 'calendar' || onlyFavorites || onlyParticipating
   const activeQueryData = useAllData ? allQuery : activeQuery
   const {data, isLoading, isError, error} = activeQueryData
 
-  // ── 필터 적용 (즐겨찾기 게이팅 → 사용자 필터) ───────────────────────────
-  // onlyFavorites=true이면 favorites Set을 base로 좁힌 뒤 그 위에 기존 4축 필터를 적용한다.
+  // ── 필터 적용 (참여 → 즐겨찾기 → 사용자 필터) ─────────────────────────
+  // 상위 게이팅 순서: onlyParticipating > onlyFavorites > 4축 필터
   const filteredRaces = useMemo(() => {
     if (!data?.data) return []
     return data.data.filter(r => {
+      if (onlyParticipating && !participationRaceIds.has(r.id)) return false
       if (onlyFavorites && !favorites.has(r.id)) return false
       const venueOk = selectedVenues.length === 0 || selectedVenues.includes(r.venue)
       const catOk = selectedCategories.length === 0 || selectedCategories.some((c: string) => matchCategory(r.category, c))
@@ -96,7 +112,7 @@ export const RaceListPage = () => {
       const regionOk = selectedRegions.length === 0 || selectedRegions.includes(getRegion(r.venue))
       return venueOk && catOk && typeOk && regionOk
     })
-  }, [data, selectedVenues, selectedCategories, selectedRaceTypes, selectedRegions, onlyFavorites, favorites])
+  }, [data, selectedVenues, selectedCategories, selectedRaceTypes, selectedRegions, onlyFavorites, favorites, onlyParticipating, participationRaceIds])
 
   const showEmptyFavorites = onlyFavorites && favoritesReady && favorites.size === 0
 
@@ -275,6 +291,11 @@ export const RaceListPage = () => {
           {/* 그룹 3: 액션 — 외부로 나가는 조작 */}
           {/* TODO: 내 캘린더 — iCal 502 이슈 해결 후 활성화 */}
           <ShareButton settings={currentSettings} />
+          <AuthMenu
+            onShowParticipating={() => setOnlyParticipating(true)}
+            participationCount={participations.length}
+            onShowScores={() => setScoreLayerOpen(true)}
+          />
         </Toolbar>
       </AppBar>
 
@@ -370,6 +391,23 @@ export const RaceListPage = () => {
           </Alert>
         )}
 
+        {/* 참여 경기만 보기 활성 안내 */}
+        {onlyParticipating && (
+          <Stack direction="row" alignItems="center" spacing={1} sx={{mb: 1.5, px: 1.5, py: 0.75, bgcolor: 'action.hover', borderRadius: 1.5}}>
+            <Chip label="참여 경기만 보기" size="small" color="primary" sx={{height: 22, fontSize: '0.7rem'}} />
+            <Typography variant="caption" sx={{fontSize: '0.75rem', color: 'text.secondary', flex: 1}}>
+              참여로 체크한 경기 {participations.length}건
+            </Typography>
+            <Button
+              size="small"
+              variant="text"
+              onClick={() => setOnlyParticipating(false)}
+              sx={{fontSize: '0.72rem', py: 0, minWidth: 0}}>
+              해제
+            </Button>
+          </Stack>
+        )}
+
         {data != null && showEmptyFavorites && (
           <Stack alignItems="center" spacing={1.5} sx={{py: 8, color: 'text.secondary'}}>
             <TurnedInNotIcon sx={{fontSize: 48, opacity: 0.4}} />
@@ -382,6 +420,7 @@ export const RaceListPage = () => {
             </Button>
           </Stack>
         )}
+
 
         {data != null && !showEmptyFavorites && viewMode === 'list' && (
           <>
@@ -421,6 +460,9 @@ export const RaceListPage = () => {
         onAdd={naverCalendar.addSource}
         onRemove={naverCalendar.removeSource}
       />
+
+      {/* 스테이션 점수 레이어 */}
+      <ScoreLayer open={scoreLayerOpen} onClose={() => setScoreLayerOpen(false)} />
 
       {/* 즐겨찾기 전체 해제 confirm — destructive이므로 명시적 사용자 확인 */}
       <Dialog
