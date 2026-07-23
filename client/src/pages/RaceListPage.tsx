@@ -179,7 +179,7 @@ export const RaceListPage = () => {
           flexWrap: 'nowrap',
           overflow: 'hidden',
           width: '100%',
-          maxWidth: {xs: '100%', sm: viewMode === 'calendar' ? 1100 : 900},
+          maxWidth: {xs: '100%', sm: 1100},
           mx: 'auto',
           px: {xs: 2, sm: 2},
         }}>
@@ -344,7 +344,14 @@ export const RaceListPage = () => {
         </Box>
       </Popover>
 
-      <Box sx={{maxWidth: viewMode === 'calendar' ? 1100 : 900, mx: 'auto', px: 2, py: 3}}>
+      <Box sx={{
+        maxWidth: 1100,
+        mx: 'auto',
+        px: 2,
+        py: 3,
+        // 뷰 전환 시 body height 급변으로 스크롤 위치가 튀며 깜빡이는 것을 방지
+        minHeight: 'calc(100vh - 52px)',
+      }}>
         {isLoading && (
           <Stack alignItems="center" spacing={2} sx={{py: 8}}>
             <CircularProgress />
