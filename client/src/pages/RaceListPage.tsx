@@ -172,9 +172,9 @@ export const RaceListPage = () => {
   }, [viewMode, filteredRaces])
 
   return (
-    <Box sx={{minHeight: '100vh', bgcolor: 'background.default'}}>
+    <Box sx={{minHeight: '100vh', bgcolor: 'background.default', pt: '52px'}}>
       <AppBar
-        position="sticky"
+        position="fixed"
         elevation={0}
         sx={{bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider'}}>
         <Toolbar sx={{
