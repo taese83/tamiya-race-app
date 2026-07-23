@@ -1,6 +1,6 @@
 import {useState} from 'react'
 import {
-  Box, Button, IconButton, Menu, MenuItem, Select, Stack, Tooltip, Typography,
+  Box, Button, Checkbox, FormControlLabel, IconButton, Menu, MenuItem, Select, Stack, Tooltip, Typography,
 } from '@mui/material'
 import type {SelectChangeEvent} from '@mui/material'
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents'
@@ -20,11 +20,20 @@ import type {Participation} from '../model/useParticipations'
 interface ParticipationBoxProps {
   raceId: string
   wrId: string
-  /** race.date. 현재는 사용하지 않지만 시그니처 유지 (호출부 호환) */
-  raceDate?: string
+  raceDate: string
 }
 
-export const ParticipationBox = ({raceId, wrId}: ParticipationBoxProps) => {
+/** race.date (YYYY.MM.DD)가 오늘 이후인지. true면 아직 경기 안 시작 (실참여 체크 불가) */
+function isBeforeRaceDay(raceDate: string): boolean {
+  const [y, m, d] = raceDate.split('.').map(Number)
+  if (!y || !m || !d) return false
+  const race = new Date(y, m - 1, d)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return race.getTime() > today.getTime()
+}
+
+export const ParticipationBox = ({raceId, wrId, raceDate}: ParticipationBoxProps) => {
   const {user} = useSession()
   const {profiles} = useProfiles(user != null)
   const {data: list} = useParticipations(user != null)
@@ -64,31 +73,45 @@ export const ParticipationBox = ({raceId, wrId}: ParticipationBoxProps) => {
 
   const byRace = makeParticipationByRace(list)
   const perProfile = byRace.get(raceId) ?? new Map<number, Participation>()
+  const beforeRace = isBeforeRaceDay(raceDate)
   const isSaving = upsert.isPending || remove.isPending
 
-  // 참여한 프로필과 미참여 프로필 분리
-  const participatingProfiles = profiles.filter(p => perProfile.has(p.id))
+  const selectedProfiles = profiles.filter(p => perProfile.has(p.id))
   const availableProfiles = profiles.filter(p => !perProfile.has(p.id))
 
   const handleAdd = (profileId: number) => {
     setAddAnchorEl(null)
-    upsert.mutate({profileId, raceId, wrId, rank: null})
+    // 프로필 추가 = 선정 (attended=false, rank=null). 언제든지 가능.
+    upsert.mutate({profileId, raceId, wrId, rank: null, attended: false})
   }
 
   return (
     <Box>
       {SectionHeader}
       <Stack spacing={0.75} sx={{pl: 3}}>
-        {participatingProfiles.map(profile => {
+        {selectedProfiles.map(profile => {
           const current = perProfile.get(profile.id)!
           return (
             <ProfileRow
               key={profile.id}
               profile={profile}
               current={current}
+              beforeRace={beforeRace}
               isSaving={isSaving}
+              onAttendedChange={(nextAttended) => {
+                upsert.mutate({
+                  profileId: profile.id, raceId, wrId,
+                  // 실참여 해제 시 rank도 초기화
+                  rank: nextAttended ? current.rank : null,
+                  attended: nextAttended,
+                })
+              }}
               onRankChange={(nextRank) => {
-                upsert.mutate({profileId: profile.id, raceId, wrId, rank: nextRank})
+                upsert.mutate({
+                  profileId: profile.id, raceId, wrId,
+                  rank: nextRank,
+                  attended: current.attended,
+                })
               }}
               onRemove={() => {
                 remove.mutate({profileId: profile.id, raceId})
@@ -97,7 +120,6 @@ export const ParticipationBox = ({raceId, wrId}: ParticipationBoxProps) => {
           )
         })}
 
-        {/* 프로필 추가 버튼 — 프로필 이름 라인과 왼쪽 정렬 맞춤 */}
         {availableProfiles.length > 0 && (
           <>
             <Button
@@ -148,13 +170,37 @@ export const ParticipationBox = ({raceId, wrId}: ParticipationBoxProps) => {
 interface ProfileRowProps {
   profile: Profile
   current: Participation
+  beforeRace: boolean
   isSaving: boolean
+  onAttendedChange: (attended: boolean) => void
   onRankChange: (rank: number | null) => void
   onRemove: () => void
 }
 
-const ProfileRow = ({profile, current, isSaving, onRankChange, onRemove}: ProfileRowProps) => {
-  const rank = current.rank ?? null
+const ProfileRow = ({profile, current, beforeRace, isSaving, onAttendedChange, onRankChange, onRemove}: ProfileRowProps) => {
+  const attended = current.attended
+  const rank = current.rank
+  // 실참여 체크박스는 경기 당일부터, rank Select는 실참여 후에만
+  const attendedDisabled = isSaving || beforeRace
+  const rankDisabled = isSaving || !attended
+
+  const attendedCheckbox = (
+    <FormControlLabel
+      control={
+        <Checkbox
+          size="small"
+          checked={attended}
+          disabled={attendedDisabled}
+          onChange={(_, checked) => onAttendedChange(checked)}
+        />
+      }
+      label={
+        <Typography variant="body2" sx={{fontSize: '0.85rem', color: attendedDisabled ? 'text.disabled' : undefined}}>
+          참여
+        </Typography>
+      }
+    />
+  )
 
   return (
     <Stack direction="row" alignItems="center" spacing={1.5} flexWrap="wrap" useFlexGap>
@@ -163,8 +209,17 @@ const ProfileRow = ({profile, current, isSaving, onRankChange, onRemove}: Profil
         sx={{fontSize: '0.85rem', fontWeight: 600, minWidth: 60, color: profile.is_default ? 'primary.main' : 'text.primary'}}>
         {profile.name}
       </Typography>
+      {beforeRace ? (
+        <Tooltip title="경기 당일부터 참여 체크가 가능합니다">
+          <span>{attendedCheckbox}</span>
+        </Tooltip>
+      ) : attendedCheckbox}
       <Stack direction="row" alignItems="center" spacing={0.75}>
-        <Typography variant="body2" sx={{fontSize: '0.85rem'}}>결과</Typography>
+        <Typography
+          variant="body2"
+          sx={{fontSize: '0.85rem', color: rankDisabled ? 'text.disabled' : undefined}}>
+          결과
+        </Typography>
         <Select
           size="small"
           value={rank == null ? '' : String(rank)}
@@ -172,7 +227,7 @@ const ProfileRow = ({profile, current, isSaving, onRankChange, onRemove}: Profil
             const v = e.target.value
             onRankChange(v === '' ? null : Number(v))
           }}
-          disabled={isSaving}
+          disabled={rankDisabled}
           sx={{minWidth: 90, height: 28, fontSize: '0.78rem'}}
           displayEmpty>
           <MenuItem value=""><em>선택 안 함</em></MenuItem>
@@ -181,14 +236,14 @@ const ProfileRow = ({profile, current, isSaving, onRankChange, onRemove}: Profil
           <MenuItem value="3">3등</MenuItem>
         </Select>
       </Stack>
-      <Tooltip title="참여 취소">
+      <Tooltip title="프로필 제외">
         <span>
           <IconButton
             size="small"
             color="error"
             disabled={isSaving}
             onClick={onRemove}
-            aria-label={`${profile.name} 참여 취소`}
+            aria-label={`${profile.name} 프로필 제외`}
             sx={{ml: 'auto'}}>
             <RemoveIcon fontSize="small" />
           </IconButton>

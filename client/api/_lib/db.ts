@@ -117,13 +117,14 @@ export interface ParticipationRow {
   wr_id: string
   rank: number | null
   category: string | null
+  attended: boolean
 }
 
 /** 유저의 모든 프로필의 참여 목록 (프로필 join) */
 export async function getParticipationsByUser(userId: string): Promise<ParticipationRow[]> {
   const q = sql()
   const rows = await q`
-    SELECT p.profile_id, p.race_id, p.wr_id, p.rank, p.category
+    SELECT p.profile_id, p.race_id, p.wr_id, p.rank, p.category, p.attended
     FROM participations p
     INNER JOIN profiles pr ON pr.id = p.profile_id
     WHERE pr.user_id = ${userId}
@@ -134,7 +135,7 @@ export async function getParticipationsByUser(userId: string): Promise<Participa
 export async function getParticipationsByProfile(profileId: number): Promise<ParticipationRow[]> {
   const q = sql()
   const rows = await q`
-    SELECT profile_id, race_id, wr_id, rank, category FROM participations WHERE profile_id = ${profileId}
+    SELECT profile_id, race_id, wr_id, rank, category, attended FROM participations WHERE profile_id = ${profileId}
   ` as unknown as ParticipationRow[]
   return rows
 }
@@ -145,15 +146,17 @@ export async function upsertParticipation(
   wrId: string,
   rank: number | null,
   category: string | null,
+  attended: boolean,
 ): Promise<void> {
   const q = sql()
   await q`
-    INSERT INTO participations (profile_id, race_id, wr_id, rank, category)
-    VALUES (${profileId}, ${raceId}, ${wrId}, ${rank}, ${category})
+    INSERT INTO participations (profile_id, race_id, wr_id, rank, category, attended)
+    VALUES (${profileId}, ${raceId}, ${wrId}, ${rank}, ${category}, ${attended})
     ON CONFLICT (profile_id, race_id) DO UPDATE SET
       rank = EXCLUDED.rank,
       wr_id = EXCLUDED.wr_id,
       category = COALESCE(EXCLUDED.category, participations.category),
+      attended = EXCLUDED.attended,
       updated_at = NOW()
   `
 }

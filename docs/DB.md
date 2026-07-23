@@ -56,3 +56,15 @@ psql "$DATABASE_URL_UNPOOLED" -c 'SELECT * FROM profiles;'
 - 기존 manual_scores 테이블은 `manual_scores_archive`로 이름 변경 (데이터 보존). 새 사용자 UI에서 클래스별로 재입력 필요
 - 새 `manual_scores_by_class` 테이블 생성
 
+## 003 participations.attended (선정 vs 실참여 분리)
+
+```bash
+psql "$DATABASE_URL_UNPOOLED" -f migrations/003_attended.sql
+```
+
+### 003 영향
+- participations에 `attended` boolean 컬럼 추가
+- 기존 행은 모두 `attended=true`로 자동 채워짐 (기존 참여 기록 = 실참여로 간주)
+- 신규 행의 default는 `false` (프로필 추가 시 '선정' 상태로 시작, 사용자가 체크박스로 실참여 확정)
+- 점수 계산: `attended=true` 인 행만 반영
+

@@ -159,11 +159,22 @@ export async function computeAggregate(
     const ps = byProfile.get(part.profile_id)
     if (!ps) continue
     const meta = metaMap.get(part.race_id)
-    // 저장된 category > races.json meta > null (unknown)
     const cls: ClassKey | null = normalizeClass(part.category) ?? meta?.class ?? null
-    // meta가 없으면 (아카이브 등) station으로 가정하되 world/asia로 명시된 경우만 챌린지로 분기
     const raceType: RaceType = meta?.type ?? 'station'
     const isStation = raceType === 'station'
+
+    // attended=false는 '선정만' 상태 → 점수/카운트 반영 안 함
+    if (!part.attended) {
+      entries.push({
+        profile_id: part.profile_id,
+        race_id: part.race_id,
+        class: cls,
+        is_station: isStation,
+        rank: part.rank,
+        points: 0,
+      })
+      continue
+    }
 
     if (isStation && cls) {
       const stat = ps.byClass[cls]
@@ -174,7 +185,6 @@ export async function computeAggregate(
       else if (part.rank === 2) stat.rank2 += 1
       else if (part.rank === 3) stat.rank3 += 1
     } else if (raceType === 'world' || raceType === 'asia') {
-      // 챌린지 — 점수 계산에는 안 들어가고 별도 집계
       const summary = ps.challenges[raceType]
       summary.participate += 1
       if (part.rank === 1) summary.rank1 += 1

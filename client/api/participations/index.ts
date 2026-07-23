@@ -41,7 +41,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (req.method === 'PUT') {
-    let body: {profileId?: unknown; raceId?: unknown; wrId?: unknown; rank?: unknown; category?: unknown} = {}
+    let body: {profileId?: unknown; raceId?: unknown; wrId?: unknown; rank?: unknown; category?: unknown; attended?: unknown} = {}
     if (typeof req.body === 'object' && req.body != null) body = req.body as typeof body
     else {
       const raw = await readBody(req)
@@ -61,6 +61,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       res.status(400).json({error: 'rank must be 1|2|3|null'})
       return
     }
+    // attended: 기본 false (선정만). 클라이언트가 true를 명시하면 실참여
+    const attended = body.attended === true
 
     try {
       const ok = await assertProfileOwner(user.sub, profileId)
@@ -75,8 +77,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         category = await getCategoryForRace(raceId, host)
       }
 
-      await upsertParticipation(profileId, raceId, wrId, rank, category)
-      res.status(200).json({ok: true, profile_id: profileId, race_id: raceId, wr_id: wrId, rank, category})
+      await upsertParticipation(profileId, raceId, wrId, rank, category, attended)
+      res.status(200).json({ok: true, profile_id: profileId, race_id: raceId, wr_id: wrId, rank, category, attended})
     } catch (err) {
       res.status(500).json({error: err instanceof Error ? err.message : 'db error'})
     }

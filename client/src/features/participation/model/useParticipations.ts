@@ -7,6 +7,8 @@ export interface Participation {
   wr_id: string
   rank: number | null  // 1|2|3|null
   category: string | null
+  /** 실참여 여부. false면 '선정만' 상태 (점수 계산 X) */
+  attended: boolean
 }
 
 export const PARTICIPATIONS_QUERY_KEY = ['participations'] as const
@@ -52,17 +54,18 @@ interface UpsertPayload {
   wrId: string
   rank: number | null
   category?: string | null
+  attended: boolean
 }
 
 export function useUpsertParticipation() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async ({profileId, raceId, wrId, rank, category}: UpsertPayload) => {
+    mutationFn: async ({profileId, raceId, wrId, rank, category, attended}: UpsertPayload) => {
       const res = await fetch('/api/participations', {
         method: 'PUT',
         credentials: 'include',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({profileId, raceId, wrId, rank, category}),
+        body: JSON.stringify({profileId, raceId, wrId, rank, category, attended}),
       })
       if (!res.ok) {
         const body = await res.json().catch(() => ({error: `HTTP ${res.status}`}))
