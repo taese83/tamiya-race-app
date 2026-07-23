@@ -205,11 +205,10 @@ export const RegistrationDrawer = ({races, onClose}: RegistrationDrawerProps) =>
   // wrId별로 그룹핑 — 같은 공지(wrId)에 여러 클래스가 있을 수 있음
   const wrIdGroupMap = new Map<string, RaceEntry[]>()
   races.forEach(r => {
-    const wrId = r.id.split('-').find(p => p.length > 0) ?? ''
-    if (!wrId) return
-    const arr = wrIdGroupMap.get(wrId) ?? []
+    if (!r.wrId) return
+    const arr = wrIdGroupMap.get(r.wrId) ?? []
     arr.push(r)
-    wrIdGroupMap.set(wrId, arr)
+    wrIdGroupMap.set(r.wrId, arr)
   })
   const wrIdGroups = Array.from(wrIdGroupMap.entries())
 

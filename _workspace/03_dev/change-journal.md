@@ -162,3 +162,62 @@ EVIDENCE:
 - typecheck: PASS
 - build: PASS (1901 modules, 3.66s)
 
+## web-orchestrator — races.json 병합 갱신 + Stable race.id (feature)
+REQUEST_TYPE: feature
+CHANGE_MODE: existing-change
+EXTERNAL_DATA_INGESTION_MODE: true
+
+### Purpose
+크롤링 결과를 전체 덮어쓰기 대신 wrId 단위 upsert로 병합해 이전 경기 데이터·즐겨찾기 히스토리를 보존한다. race.id를 date+venue+time+category 기반 stable hash로 재설계해 관리자가 종목 순서를 바꿔도 즐겨찾기가 유실되지 않도록 한다.
+
+### Changes
+- MODIFIED: lib/crawler.ts
+  - RaceEntry에 `wrId: string` 필드 명시 추가
+  - `eventKeyHash(date, venue, time, category)` 유틸 export — sha1 앞 8자리
+  - race.id 생성 `${wrId}-${idx}` → `${wrId}-${eventKeyHash}` 로 변경
+- MODIFIED: scripts/crawl.ts
+  - `loadExisting()` — 기존 races.json 파싱, legacy 스키마(wrId 필드 없음)면 id.split('-')[0]으로 파생
+  - `mergePayload(existing, freshRaces, freshDetails)` — 이번 크롤 대상 wrId는 완전 교체, 나머지 wrId는 기존 유지
+  - count는 병합 후 실제 entries 수로 재계산, cachedAt은 이번 실행 시각
+  - main 로그에 "이번 크롤 N건, 기존 유지 M건" 표시
+- MODIFIED: client/src/entities/race/model/types.ts
+  - RaceEntry.wrId 필드 추가
+- MODIFIED: client/src/entities/race/api/queries.ts
+  - `race.wrId` 직접 사용, legacy fallback (r.id.split('-')[0])는 loadData 단계에서만 유지 (기존 races.json 호환)
+  - raw payload 타입을 optional wrId로 완화
+- MODIFIED: client/src/features/race-list/ui/RaceDetailDrawer.tsx
+  - `race.wrId` 직접 사용 (`race.id.split('-')` 제거)
+- MODIFIED: client/src/features/race-list/ui/RegistrationDrawer.tsx
+  - `race.wrId` 직접 사용, wrIdGroupMap 단순화
+
+### Merge policy
+- 이번 크롤에 등장한 wrId → 해당 wrId의 기존 entries·detail을 완전 교체 (게시글 편집을 신뢰)
+- 이번 크롤에 등장하지 않은 wrId → 기존 entries·detail 그대로 유지 (무제한 보존)
+- eventKeyHash 안정: 관리자가 종목 순서를 바꿔도 date+venue+time+category가 같으면 같은 race.id 재현 → 즐겨찾기 유지
+
+### Preserved contracts
+- data/races.json 최상위 스키마 (data/details/count/cachedAt) 변경 없음
+- details map의 key=wrId 구조 유지
+- 즐겨찾기 IndexedDB `favorites` store 스키마 (`{id, addedAt}`) 유지
+- .github/workflows/crawl.yml 변경 없음 (cron·git commit 로직 그대로)
+
+### Non-goals
+- server/ legacy 크롤러 정리 (dead code로 확인됐으나 이번 범위 밖)
+- RaceDetail.wrId value 필드 제거 (map key와 중복이지만 하위 호환)
+
+### Migration implication (즐겨찾기)
+- 기존 legacy 즐겨찾기 id 예: `"663-0"` (idx 기반)
+- 새 stable id 예: `"663-7bc97bba"` (hash 기반)
+- **이번 crawl 이후 기존 즐겨찾기는 IndexedDB에 남지만 새 race.id와 매칭되지 않아 UI에서 인디케이터가 안 뜬다** (데이터 손실은 아님)
+- 이후부터는 관리자가 종목 순서를 재배열해도 즐겨찾기 유지
+- 사용자에게는 release note로 안내 필요
+
+### Evidence
+- typecheck (client): PASS
+- build (client): PASS (1901 modules, 4.50s)
+- 실제 crawl 실행: 사용자가 로컬에서 `pnpm crawl` 수행
+  - 로그: `이번 크롤 98건, 기존 유지 0건, 총 98건 (detail 64건)`
+  - 결과 확인: data/races.json line 4-5 → id `"663-7bc97bba"`, wrId `"663"` 새 스키마 적용
+  - 병합 파이프라인 정상 동작 검증 (기존 파일 로드 → wrId 단위 upsert → 저장)
+- 기존 유지 0건인 이유: 현재 races.json의 모든 wrId가 사이트에 아직 살아있음. 추후 관리자가 지난 게시글을 삭제하기 시작하면 아카이브 축적 시작
+

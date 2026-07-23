@@ -3,6 +3,7 @@
  * 인메모리 캐시 없음: 캐시는 호출 측(KV 또는 Express 인메모리)이 담당
  */
 import axios from 'axios'
+import {createHash} from 'crypto'
 import * as cheerio from 'cheerio'
 
 const TAMIYA_URL = 'https://tamiya.co.kr/bbs/board.php?bo_table=club_race&ser=0'
@@ -11,7 +12,10 @@ const USER_AGENT =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 
 export interface RaceEntry {
+  /** race.id = `${wrId}-${eventKeyHash}` — event 단위 stable id (즐겨찾기 저장 key) */
   id: string
+  /** 게시글 wrId — details 맵 lookup 및 병합 단위 */
+  wrId: string
   title: string
   venue: string
   date: string       // YYYY.MM.DD
@@ -19,6 +23,16 @@ export interface RaceEntry {
   category: string   // () 제거된 순수 클래스명
   note: string       // () 안 부연설명 (예: 선착순 45명 / 매장 오픈 10:30)
   detailUrl: string
+}
+
+/**
+ * date + venue + time + category 조합으로 event 단위 안정 hash 생성.
+ * 관리자가 종목 순서를 바꾸거나 종목을 추가/삭제해도, 살아있는 event는 같은 id를 유지한다.
+ * 즐겨찾기와 React key 안정성 확보 목적.
+ */
+export function eventKeyHash(date: string, venue: string, time: string, category: string): string {
+  const key = `${date}|${venue}|${time}|${category}`
+  return createHash('sha1').update(key).digest('hex').slice(0, 8)
 }
 
 export interface RaceDetail {
@@ -146,11 +160,13 @@ export async function fetchRaces(): Promise<RaceEntry[]> {
 
     const events = parseEvents(eventText)
     if (events.length === 0) {
-      entries.push({id: `${wrId}-0`, title, venue, date, time: '', category: eventText, note: '', detailUrl})
+      const hash = eventKeyHash(date, venue, '', eventText)
+      entries.push({id: `${wrId}-${hash}`, wrId, title, venue, date, time: '', category: eventText, note: '', detailUrl})
       return
     }
-    events.forEach((ev, idx) => {
-      entries.push({id: `${wrId}-${idx}`, title, venue, date, time: ev.time, category: ev.category, note: ev.note, detailUrl})
+    events.forEach(ev => {
+      const hash = eventKeyHash(date, venue, ev.time, ev.category)
+      entries.push({id: `${wrId}-${hash}`, wrId, title, venue, date, time: ev.time, category: ev.category, note: ev.note, detailUrl})
     })
   })
 

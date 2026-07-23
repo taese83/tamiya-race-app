@@ -15,7 +15,7 @@ import TurnedInIcon from '@mui/icons-material/TurnedIn'
 import TurnedInNotIcon from '@mui/icons-material/TurnedInNot'
 import PermContactCalendarIcon from '@mui/icons-material/PermContactCalendar'
 import {format} from 'date-fns'
-import {RACES_QUERY_KEY, fetchRaces} from '@/entities/race'
+import {RACES_ACTIVE_QUERY_KEY, RACES_ALL_QUERY_KEY, fetchActiveRaces, fetchAllRaces} from '@/entities/race'
 import type {RacesResponse, RaceEntry} from '@/entities/race'
 import {RaceTable} from '@/features/race-list/ui/RaceTable'
 import {RaceDetailDrawer} from '@/features/race-list/ui/RaceDetailDrawer'
@@ -60,12 +60,29 @@ export const RaceListPage = () => {
   const [showCalendarDrawer, setShowCalendarDrawer] = useState(false)
   const naverCalendar = useNaverCalendar()
 
-  const {data, isLoading, isError, error} = useQuery<RacesResponse, Error>({
-    queryKey: RACES_QUERY_KEY,
-    queryFn: ({signal}) => fetchRaces(signal),
+  // 두 스냅샷을 병렬로 로드
+  //  - active: 사이트에 살아있는 게시글 (리스트 뷰 기본)
+  //  - all: 병합 아카이브 (캘린더 뷰, 즐겨찾기 히스토리)
+  const activeQuery = useQuery<RacesResponse, Error>({
+    queryKey: RACES_ACTIVE_QUERY_KEY,
+    queryFn: ({signal}) => fetchActiveRaces(signal),
     staleTime: Infinity,
     retry: 1,
   })
+  const allQuery = useQuery<RacesResponse, Error>({
+    queryKey: RACES_ALL_QUERY_KEY,
+    queryFn: ({signal}) => fetchAllRaces(signal),
+    staleTime: Infinity,
+    retry: 1,
+  })
+
+  // 뷰·모드별 데이터 소스 선택
+  //  - 리스트 뷰: active (아카이브가 무한히 쌓이는 것을 방지)
+  //  - 캘린더 뷰: 전체 (지난달/미래월 자유 탐색)
+  //  - 즐겨찾기만 보기: 항상 전체 (히스토리 조회)
+  const useAllData = viewMode === 'calendar' || onlyFavorites
+  const activeQueryData = useAllData ? allQuery : activeQuery
+  const {data, isLoading, isError, error} = activeQueryData
 
   // ── 필터 적용 (즐겨찾기 게이팅 → 사용자 필터) ───────────────────────────
   // onlyFavorites=true이면 favorites Set을 base로 좁힌 뒤 그 위에 기존 4축 필터를 적용한다.
@@ -122,6 +139,32 @@ export const RaceListPage = () => {
       setCalendarTodayKey(k => k + 1)
     }
   }, [])
+
+  // 리스트 뷰로 진입할 때마다 오늘(또는 가장 가까운 미래) 날짜로 자동 스크롤
+  // - 최초 mount: 데이터 로드 완료 시 실행
+  // - 캘린더 → 리스트로 전환: 전환 시점에 실행
+  // - 필터 변경 등으로 filteredRaces가 재계산돼도 이미 스크롤한 세션은 재실행하지 않음
+  //   (사용자가 스크롤한 위치를 필터 조작이 훼손하지 않도록)
+  const lastAutoScrolledViewRef = useRef<'list' | 'calendar' | null>(null)
+  useEffect(() => {
+    if (viewMode !== 'list') {
+      // 캘린더로 나가면 락 해제 — 다음 번 list 진입 시 다시 스크롤
+      if (viewMode === 'calendar') lastAutoScrolledViewRef.current = null
+      return
+    }
+    if (lastAutoScrolledViewRef.current === 'list') return
+    if (filteredRaces.length === 0) return
+    const dates = Array.from(new Set(filteredRaces.map(r => r.date))).sort()
+    const todayStr = format(new Date(), 'yyyy.MM.dd')
+    const target = dates.includes(todayStr)
+      ? todayStr
+      : dates.find(d => d >= todayStr) ?? null
+    if (!target) return
+    const el = document.getElementById(`race-date-${target}`)
+    if (!el) return
+    el.scrollIntoView({behavior: 'auto', block: 'start'})
+    lastAutoScrolledViewRef.current = 'list'
+  }, [viewMode, filteredRaces])
 
   return (
     <Box sx={{minHeight: '100vh', bgcolor: 'background.default'}}>

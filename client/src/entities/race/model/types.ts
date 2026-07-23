@@ -1,5 +1,8 @@
 export interface RaceEntry {
+  /** race.id = `${wrId}-${eventKeyHash}` — event 단위 stable id (즐겨찾기 저장 key) */
   id: string
+  /** 게시글 wrId — details 맵 lookup 키 */
+  wrId: string
   title: string
   venue: string
   date: string                        // YYYY.MM.DD

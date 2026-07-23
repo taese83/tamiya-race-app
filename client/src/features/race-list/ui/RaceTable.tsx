@@ -117,7 +117,7 @@ export const RaceTable = ({races, calendarEvents = []}: RaceTableProps) => {
           <Box
             key={date}
             id={`race-date-${date}`}
-            sx={{mb: 3, opacity: isPastDate ? 0.55 : 1}}>
+            sx={{mb: 3, opacity: isPastDate ? 0.55 : 1, scrollMarginTop: '60px'}}>
             <Stack direction="row" alignItems="center" spacing={1} sx={{mb: 1}}>
               <Typography variant="subtitle2" sx={{fontWeight: 700, color: isPastDate ? 'text.secondary' : 'primary.main'}}>
                 {formatKorDate(date)}

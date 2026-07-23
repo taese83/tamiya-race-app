@@ -124,7 +124,7 @@ const InquiryText = ({text}: {text: string}) => {
 // ─── 메인 컴포넌트 ────────────────────────────────────────────────────────────
 
 export const RaceDetailDrawer = ({race, onClose}: RaceDetailDrawerProps) => {
-  const wrId = race?.id.split('-')[0] ?? ''
+  const wrId = race?.wrId ?? ''
   const rulesUrl = race ? getRulesUrl(race.category) : null
   const {isFavorite, toggle, isReady: favoritesReady} = useFavorites()
 
