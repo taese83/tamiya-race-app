@@ -28,7 +28,8 @@ import {getRaceType, getRegion} from '@/shared/lib/raceMeta'
 import {useNaverCalendar, NaverCalendarDrawer} from '@/features/naver-calendar'
 import {useFavorites} from '@/features/race-favorite'
 import {AuthMenu, useSession} from '@/features/auth'
-import {useParticipations, makeParticipationMap, ScoreLayer} from '@/features/participation'
+import {useParticipations, ScoreLayer} from '@/features/participation'
+import {ProfileManagerDialog} from '@/features/participation/ui/ProfileManagerDialog'
 
 function matchCategory(category: string, filter: string): boolean {
   return category.includes(filter.replace(' 클래스', ''))
@@ -56,13 +57,14 @@ export const RaceListPage = () => {
   const {data: participations} = useParticipations(user != null)
   const [onlyParticipating, setOnlyParticipating] = useState(false)
   const [scoreLayerOpen, setScoreLayerOpen] = useState(false)
+  const [profileManagerOpen, setProfileManagerOpen] = useState(false)
   const participationRaceIds = useMemo(() => new Set(participations.map(p => p.race_id)), [participations])
   // 로그아웃되거나 참여 목록이 비면 onlyParticipating 자동 해제
   useEffect(() => {
-    if (onlyParticipating && (user == null || participations.length === 0)) {
+    if (onlyParticipating && (user == null || participationRaceIds.size === 0)) {
       setOnlyParticipating(false)
     }
-  }, [user, participations.length, onlyParticipating])
+  }, [user, participationRaceIds.size, onlyParticipating])
 
   const [filterAnchorEl, setFilterAnchorEl] = useState<HTMLElement | null>(null)
   const showFilter = Boolean(filterAnchorEl)
@@ -293,8 +295,9 @@ export const RaceListPage = () => {
           <ShareButton settings={currentSettings} />
           <AuthMenu
             onShowParticipating={() => setOnlyParticipating(true)}
-            participationCount={participations.length}
+            participationCount={participationRaceIds.size}
             onShowScores={() => setScoreLayerOpen(true)}
+            onManageProfiles={() => setProfileManagerOpen(true)}
           />
         </Toolbar>
       </AppBar>
@@ -396,7 +399,7 @@ export const RaceListPage = () => {
           <Stack direction="row" alignItems="center" spacing={1} sx={{mb: 1.5, px: 1.5, py: 0.75, bgcolor: 'action.hover', borderRadius: 1.5}}>
             <Chip label="참여 경기만 보기" size="small" color="primary" sx={{height: 22, fontSize: '0.7rem'}} />
             <Typography variant="caption" sx={{fontSize: '0.75rem', color: 'text.secondary', flex: 1}}>
-              참여로 체크한 경기 {participations.length}건
+              참여로 체크한 경기 {participationRaceIds.size}건
             </Typography>
             <Button
               size="small"
@@ -463,6 +466,9 @@ export const RaceListPage = () => {
 
       {/* 스테이션 점수 레이어 */}
       <ScoreLayer open={scoreLayerOpen} onClose={() => setScoreLayerOpen(false)} />
+
+      {/* 프로필 관리 Dialog */}
+      <ProfileManagerDialog open={profileManagerOpen} onClose={() => setProfileManagerOpen(false)} />
 
       {/* 즐겨찾기 전체 해제 confirm — destructive이므로 명시적 사용자 확인 */}
       <Dialog

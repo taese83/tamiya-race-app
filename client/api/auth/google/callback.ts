@@ -2,7 +2,7 @@ import type {VercelRequest, VercelResponse} from '@vercel/node'
 import {createRemoteJWKSet, jwtVerify} from 'jose'
 import {readStateCookie, verifyState, clearStateCookie} from '../../_lib/oauth.js'
 import {signSession, buildSessionCookie, isSecureRequest} from '../../_lib/session.js'
-import {upsertUser} from '../../_lib/db.js'
+import {upsertUser, ensureDefaultProfile} from '../../_lib/db.js'
 
 const TOKEN_URL = 'https://oauth2.googleapis.com/token'
 const JWKS = createRemoteJWKSet(new URL('https://www.googleapis.com/oauth2/v3/certs'))
@@ -97,11 +97,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return
   }
 
-  // DB에 user profile upsert (DB 스키마가 아직 없으면 무시 — Stage 1 호환)
+  // DB에 user profile upsert + default profile 보장 (DB 스키마가 아직 없으면 무시)
   try {
     await upsertUser({id: claims.sub, email: claims.email, name: claims.name, picture: claims.picture})
+    await ensureDefaultProfile(claims.sub, claims.name)
   } catch (err) {
-    console.warn('[auth] user upsert 실패 (DB 미초기화 가능):', err instanceof Error ? err.message : err)
+    console.warn('[auth] user/profile upsert 실패 (DB 미초기화 가능):', err instanceof Error ? err.message : err)
   }
 
   const session = await signSession({

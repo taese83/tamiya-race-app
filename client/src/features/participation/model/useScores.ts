@@ -1,25 +1,67 @@
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query'
 import {SCORES_QUERY_KEY} from './useParticipations'
 
-export interface ScoreBreakdown {
+export const CLASS_LIST = ['M.SPEED', 'M1', 'M2B', 'M2', 'M3', 'OPEN'] as const
+export type ClassKey = typeof CLASS_LIST[number]
+
+export interface ClassStat {
+  station: number
   manual: number
-  stationTotal: number
   total: number
+  participate: number
+  rank1: number
+  rank2: number
+  rank3: number
+}
+
+export interface ChallengeEntry {
+  race_id: string
+  wr_id: string
+  type: 'world' | 'asia'
+  class: ClassKey | null
+  rank: number | null
+}
+
+export interface ChallengeSummary {
+  participate: number
+  rank1: number
+  rank2: number
+  rank3: number
+}
+
+export interface ProfileScore {
+  profile_id: number
+  name: string
+  is_default: boolean
+  byClass: Record<ClassKey, ClassStat>
+  profileTotal: number
+  challenges: {
+    world: ChallengeSummary
+    asia: ChallengeSummary
+    entries: ChallengeEntry[]
+  }
+}
+
+export interface AggregateScore {
+  profiles: ProfileScore[]
+  grandTotal: number
   entries: Array<{
+    profile_id: number
     race_id: string
+    class: ClassKey | null
     is_station: boolean
     rank: number | null
     points: number
   }>
 }
 
-async function fetchScores(): Promise<ScoreBreakdown> {
+async function fetchScores(): Promise<AggregateScore> {
   const res = await fetch('/api/scores', {credentials: 'include'})
   if (res.status === 401) {
-    return {manual: 0, stationTotal: 0, total: 0, entries: []}
+    return {profiles: [], grandTotal: 0, entries: []}
   }
   if (!res.ok) throw new Error(`scores fetch 실패: ${res.status}`)
-  return res.json() as Promise<ScoreBreakdown>
+  return res.json() as Promise<AggregateScore>
 }
 
 export function useScores(enabled: boolean) {
@@ -31,21 +73,27 @@ export function useScores(enabled: boolean) {
   })
 }
 
+interface ManualPayload {
+  profileId: number
+  class: ClassKey
+  points: number
+}
+
 export function useSetManualScore() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (points: number) => {
+    mutationFn: async ({profileId, class: cls, points}: ManualPayload) => {
       const res = await fetch('/api/scores/manual', {
         method: 'PUT',
         credentials: 'include',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({points}),
+        body: JSON.stringify({profileId, class: cls, points}),
       })
       if (!res.ok) {
         const body = await res.json().catch(() => ({error: `HTTP ${res.status}`}))
         throw new Error(body.error ?? `manual score 저장 실패: ${res.status}`)
       }
-      return res.json() as Promise<{ok: boolean; points: number}>
+      return res.json() as Promise<{ok: boolean; profile_id: number; class: ClassKey; points: number}>
     },
     onSuccess: () => {
       void qc.invalidateQueries({queryKey: SCORES_QUERY_KEY})

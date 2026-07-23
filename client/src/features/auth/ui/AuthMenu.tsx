@@ -4,6 +4,7 @@ import PersonOutlineIcon from '@mui/icons-material/PersonOutline'
 import LogoutIcon from '@mui/icons-material/Logout'
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents'
 import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts'
 import {loginWithGoogle, useSession, useLogout} from '../model/useSession'
 
 export interface AuthMenuProps {
@@ -13,9 +14,11 @@ export interface AuthMenuProps {
   participationCount?: number
   /** '스테이션 점수 확인' 클릭 콜백 */
   onShowScores?: () => void
+  /** '프로필 관리' 클릭 콜백 */
+  onManageProfiles?: () => void
 }
 
-export const AuthMenu = ({onShowParticipating, participationCount = 0, onShowScores}: AuthMenuProps) => {
+export const AuthMenu = ({onShowParticipating, participationCount = 0, onShowScores, onManageProfiles}: AuthMenuProps) => {
   const {user, isLoading} = useSession()
   const logout = useLogout()
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
@@ -87,6 +90,12 @@ export const AuthMenu = ({onShowParticipating, participationCount = 0, onShowSco
           <MenuItem onClick={() => { handleClose(); onShowScores() }}>
             <ListItemIcon><EmojiEventsIcon fontSize="small" /></ListItemIcon>
             <ListItemText primary="스테이션 점수 확인" primaryTypographyProps={{fontSize: '0.85rem'}} />
+          </MenuItem>
+        )}
+        {onManageProfiles && (
+          <MenuItem onClick={() => { handleClose(); onManageProfiles() }}>
+            <ListItemIcon><ManageAccountsIcon fontSize="small" /></ListItemIcon>
+            <ListItemText primary="프로필 관리" primaryTypographyProps={{fontSize: '0.85rem'}} />
           </MenuItem>
         )}
         <MenuItem onClick={() => { handleClose(); void logout() }}>

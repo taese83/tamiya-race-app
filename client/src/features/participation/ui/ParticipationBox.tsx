@@ -1,36 +1,36 @@
-import {Box, Checkbox, FormControlLabel, MenuItem, Select, Stack, Tooltip, Typography} from '@mui/material'
+import {useState} from 'react'
+import {
+  Box, Button, IconButton, Menu, MenuItem, Select, Stack, Tooltip, Typography,
+} from '@mui/material'
 import type {SelectChangeEvent} from '@mui/material'
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents'
+import AddIcon from '@mui/icons-material/Add'
+import RemoveIcon from '@mui/icons-material/Remove'
 import {useSession, loginWithGoogle} from '@/features/auth'
+import {useProfiles} from '../model/useProfiles'
+import type {Profile} from '../model/useProfiles'
 import {
   useParticipations,
   useUpsertParticipation,
   useDeleteParticipation,
-  makeParticipationMap,
+  makeParticipationByRace,
 } from '../model/useParticipations'
+import type {Participation} from '../model/useParticipations'
 
 interface ParticipationBoxProps {
   raceId: string
   wrId: string
-  /** 경기 날짜 (YYYY.MM.DD). 오늘 미만이면 참여 체크 disable */
-  raceDate: string
+  /** race.date. 현재는 사용하지 않지만 시그니처 유지 (호출부 호환) */
+  raceDate?: string
 }
 
-/** race.date (YYYY.MM.DD)가 오늘 이후인지 (오늘 포함). true면 아직 시작 안 함. */
-function isBeforeRaceDay(raceDate: string): boolean {
-  const [y, m, d] = raceDate.split('.').map(Number)
-  if (!y || !m || !d) return false
-  const race = new Date(y, m - 1, d)
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  return race.getTime() > today.getTime()
-}
-
-export const ParticipationBox = ({raceId, wrId, raceDate}: ParticipationBoxProps) => {
+export const ParticipationBox = ({raceId, wrId}: ParticipationBoxProps) => {
   const {user} = useSession()
+  const {profiles} = useProfiles(user != null)
   const {data: list} = useParticipations(user != null)
   const upsert = useUpsertParticipation()
   const remove = useDeleteParticipation()
+  const [addAnchorEl, setAddAnchorEl] = useState<HTMLElement | null>(null)
 
   const SectionHeader = (
     <Stack direction="row" spacing={0.75} alignItems="center" sx={{mb: 0.75}}>
@@ -62,87 +62,138 @@ export const ParticipationBox = ({raceId, wrId, raceDate}: ParticipationBoxProps
     )
   }
 
-  const map = makeParticipationMap(list)
-  const current = map.get(raceId)
-  const isParticipating = current != null
-  const rank = current?.rank ?? null
-
-  const handleCheck = (checked: boolean) => {
-    if (checked) {
-      // 이미 참여 안 된 상태에서 체크 → rank null로 upsert
-      upsert.mutate({raceId, wrId, rank: null})
-    } else {
-      remove.mutate(raceId)
-    }
-  }
-
-  const handleRankChange = (e: SelectChangeEvent) => {
-    const v = e.target.value
-    const nextRank = v === '' ? null : Number(v) as 1 | 2 | 3
-    upsert.mutate({raceId, wrId, rank: nextRank})
-  }
-
+  const byRace = makeParticipationByRace(list)
+  const perProfile = byRace.get(raceId) ?? new Map<number, Participation>()
   const isSaving = upsert.isPending || remove.isPending
-  const beforeRace = isBeforeRaceDay(raceDate)
-  const checkDisabled = isSaving || beforeRace
-  const rankDisabled = isSaving || !isParticipating
 
-  const participateControl = (
-    <FormControlLabel
-      control={
-        <Checkbox
-          size="small"
-          checked={isParticipating}
-          disabled={checkDisabled}
-          onChange={(_, checked) => handleCheck(checked)}
-        />
-      }
-      label={
-        <Typography variant="body2" sx={{fontSize: '0.85rem', color: beforeRace ? 'text.disabled' : undefined}}>
-          참여
-        </Typography>
-      }
-    />
-  )
+  // 참여한 프로필과 미참여 프로필 분리
+  const participatingProfiles = profiles.filter(p => perProfile.has(p.id))
+  const availableProfiles = profiles.filter(p => !perProfile.has(p.id))
+
+  const handleAdd = (profileId: number) => {
+    setAddAnchorEl(null)
+    upsert.mutate({profileId, raceId, wrId, rank: null})
+  }
 
   return (
     <Box>
       {SectionHeader}
-      <Stack direction="row" alignItems="center" spacing={2} flexWrap="wrap" useFlexGap sx={{pl: 3}}>
-        {beforeRace ? (
-          <Tooltip title="경기 당일부터 참여 체크가 가능합니다">
-            <span>{participateControl}</span>
-          </Tooltip>
-        ) : (
-          participateControl
+      <Stack spacing={0.75} sx={{pl: 3}}>
+        {participatingProfiles.map(profile => {
+          const current = perProfile.get(profile.id)!
+          return (
+            <ProfileRow
+              key={profile.id}
+              profile={profile}
+              current={current}
+              isSaving={isSaving}
+              onRankChange={(nextRank) => {
+                upsert.mutate({profileId: profile.id, raceId, wrId, rank: nextRank})
+              }}
+              onRemove={() => {
+                remove.mutate({profileId: profile.id, raceId})
+              }}
+            />
+          )
+        })}
+
+        {/* 프로필 추가 버튼 — 프로필 이름 라인과 왼쪽 정렬 맞춤 */}
+        {availableProfiles.length > 0 && (
+          <>
+            <Button
+              size="small"
+              variant="text"
+              startIcon={<AddIcon fontSize="small" />}
+              disabled={isSaving}
+              onClick={(e) => setAddAnchorEl(e.currentTarget)}
+              sx={{
+                fontSize: '0.78rem',
+                color: 'primary.main',
+                alignSelf: 'flex-start',
+                minWidth: 0,
+                py: 0.25,
+                pl: 0,
+                '& .MuiButton-startIcon': {ml: 0},
+              }}>
+              프로필 추가
+            </Button>
+            <Menu
+              anchorEl={addAnchorEl}
+              open={Boolean(addAnchorEl)}
+              onClose={() => setAddAnchorEl(null)}>
+              {availableProfiles.map(p => (
+                <MenuItem key={p.id} onClick={() => handleAdd(p.id)} sx={{fontSize: '0.85rem'}}>
+                  {p.name}
+                  {p.is_default && (
+                    <Typography component="span" variant="caption" sx={{ml: 1, color: 'primary.main', fontSize: '0.7rem'}}>
+                      기본
+                    </Typography>
+                  )}
+                </MenuItem>
+              ))}
+            </Menu>
+          </>
         )}
 
-        <Stack direction="row" alignItems="center" spacing={1}>
-          <Typography
-            variant="body2"
-            sx={{fontSize: '0.85rem', color: rankDisabled ? 'text.disabled' : undefined}}>
-            결과
-          </Typography>
-          <Select
-            size="small"
-            value={rank == null ? '' : String(rank)}
-            onChange={handleRankChange}
-            disabled={rankDisabled}
-            sx={{minWidth: 100, height: 30, fontSize: '0.8rem'}}
-            displayEmpty>
-            <MenuItem value=""><em>선택 안 함</em></MenuItem>
-            <MenuItem value="1">1등</MenuItem>
-            <MenuItem value="2">2등</MenuItem>
-            <MenuItem value="3">3등</MenuItem>
-          </Select>
-        </Stack>
-
-        {upsert.error && (
+        {(upsert.error || remove.error) && (
           <Typography variant="caption" color="error" sx={{fontSize: '0.7rem'}}>
-            저장 실패
+            저장 실패: {(upsert.error ?? remove.error)?.message}
           </Typography>
         )}
       </Stack>
     </Box>
+  )
+}
+
+interface ProfileRowProps {
+  profile: Profile
+  current: Participation
+  isSaving: boolean
+  onRankChange: (rank: number | null) => void
+  onRemove: () => void
+}
+
+const ProfileRow = ({profile, current, isSaving, onRankChange, onRemove}: ProfileRowProps) => {
+  const rank = current.rank ?? null
+
+  return (
+    <Stack direction="row" alignItems="center" spacing={1.5} flexWrap="wrap" useFlexGap>
+      <Typography
+        variant="body2"
+        sx={{fontSize: '0.85rem', fontWeight: 600, minWidth: 60, color: profile.is_default ? 'primary.main' : 'text.primary'}}>
+        {profile.name}
+      </Typography>
+      <Stack direction="row" alignItems="center" spacing={0.75}>
+        <Typography variant="body2" sx={{fontSize: '0.85rem'}}>결과</Typography>
+        <Select
+          size="small"
+          value={rank == null ? '' : String(rank)}
+          onChange={(e: SelectChangeEvent) => {
+            const v = e.target.value
+            onRankChange(v === '' ? null : Number(v))
+          }}
+          disabled={isSaving}
+          sx={{minWidth: 90, height: 28, fontSize: '0.78rem'}}
+          displayEmpty>
+          <MenuItem value=""><em>선택 안 함</em></MenuItem>
+          <MenuItem value="1">1등</MenuItem>
+          <MenuItem value="2">2등</MenuItem>
+          <MenuItem value="3">3등</MenuItem>
+        </Select>
+      </Stack>
+      <Tooltip title="참여 취소">
+        <span>
+          <IconButton
+            size="small"
+            color="error"
+            disabled={isSaving}
+            onClick={onRemove}
+            aria-label={`${profile.name} 참여 취소`}
+            sx={{ml: 'auto'}}>
+            <RemoveIcon fontSize="small" />
+          </IconButton>
+        </span>
+      </Tooltip>
+    </Stack>
   )
 }
