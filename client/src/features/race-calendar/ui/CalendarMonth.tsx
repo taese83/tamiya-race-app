@@ -17,6 +17,7 @@ import type {RaceEntry} from '@/entities/race'
 import {CLASS_LIST, getCategoryColor, CategoryChip} from '@/entities/race'
 import type {CalendarEvent} from '@/entities/calendar-event'
 import {getRaceType, RACE_TYPE_LABEL, RACE_TYPE_COLOR, getRegistrationStatus, REGISTRATION_STATUS_LABEL, REGISTRATION_STATUS_COLOR} from '@/shared/lib/raceMeta'
+import {FavoriteIndicator, useFavorites} from '@/features/race-favorite'
 
 /** 월드/아시아 챌린지는 검은색, 스테이션은 클래스 색상 */
 function getRaceBoxColor(race: {title: string; category: string}): string {
@@ -51,9 +52,10 @@ function sortByTime(races: RaceEntry[]): RaceEntry[] {
 interface RaceRowProps {
   race: RaceEntry
   onClick: () => void
+  isFavorite?: boolean
 }
 
-const RaceRow = ({race, onClick}: RaceRowProps) => {
+const RaceRow = ({race, onClick, isFavorite = false}: RaceRowProps) => {
   const color = getRaceBoxColor(race)
   return (
     <Tooltip
@@ -72,6 +74,7 @@ const RaceRow = ({race, onClick}: RaceRowProps) => {
         onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); onClick() } }}
         aria-label={`${race.category} ${race.time} ${race.venue}`}
         sx={{
+          position: 'relative',
           cursor: 'pointer', mb: 0.3,
           px: 0.5, py: 0.3, borderRadius: 0.75,
           bgcolor: color,
@@ -79,6 +82,7 @@ const RaceRow = ({race, onClick}: RaceRowProps) => {
           transition: 'opacity 0.1s',
           overflow: 'hidden',
         }}>
+        <FavoriteIndicator isFavorite={isFavorite} size={10} tone="onColor" cornerAbsolute />
         {/* 장소 — 최대 2줄 */}
         {race.venue && (
           <Typography sx={{
@@ -108,7 +112,7 @@ const RaceRow = ({race, onClick}: RaceRowProps) => {
 
 // ─── 모바일: 하단 드로어의 대회 행 ────────────────────────────────────────────
 
-const MobileRaceRow = ({race, onClick}: RaceRowProps) => (
+const MobileRaceRow = ({race, onClick, isFavorite = false}: RaceRowProps) => (
   <Box
     role="button"
     tabIndex={0}
@@ -130,6 +134,7 @@ const MobileRaceRow = ({race, onClick}: RaceRowProps) => (
     <Box sx={{flex: 1, minWidth: 0}}>
       <Stack direction="row" alignItems="center" spacing={0.75} flexWrap="wrap" sx={{mb: 0.25}}>
         <CategoryChip category={race.category} />
+        <FavoriteIndicator isFavorite={isFavorite} size={14} />
         {(() => {
           const type = getRaceType(race.title)
           if (type === 'station') return null
@@ -158,9 +163,10 @@ const MobileRaceRow = ({race, onClick}: RaceRowProps) => (
 interface DrawerRaceMatrixProps {
   races: RaceEntry[]
   onRaceClick: (race: RaceEntry) => void
+  isFavorite: (id: string) => boolean
 }
 
-const DrawerRaceMatrix = ({races, onRaceClick}: DrawerRaceMatrixProps) => {
+const DrawerRaceMatrix = ({races, onRaceClick, isFavorite}: DrawerRaceMatrixProps) => {
   // 시간대 목록 (정렬됨, 빈 시간은 "-" 로 통합)
   const times = [...new Set(races.map(r => r.time || '-'))].sort((a, b) => {
     if (a === '-') return 1
@@ -176,7 +182,7 @@ const DrawerRaceMatrix = ({races, onRaceClick}: DrawerRaceMatrixProps) => {
     return (
       <>
         {races.map(race => (
-          <MobileRaceRow key={race.id} race={race} onClick={() => onRaceClick(race)} />
+          <MobileRaceRow key={race.id} race={race} onClick={() => onRaceClick(race)} isFavorite={isFavorite(race.id)} />
         ))}
       </>
     )
@@ -255,12 +261,14 @@ const DrawerRaceMatrix = ({races, onRaceClick}: DrawerRaceMatrixProps) => {
                         onClick={() => onRaceClick(race)}
                         onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); onRaceClick(race) } }}
                         sx={{
+                          position: 'relative',
                           px: 0.5, py: 0.4, borderRadius: 0.75, cursor: 'pointer',
                           bgcolor: getRaceBoxColor(race),
                           '&:hover': {opacity: 0.85},
                           '&:focus-visible': {outline: '2px solid', outlineColor: 'primary.main', outlineOffset: 1},
                           transition: 'opacity 0.1s',
                         }}>
+                        <FavoriteIndicator isFavorite={isFavorite(race.id)} size={9} tone="onColor" cornerAbsolute />
                         <Stack direction="row" alignItems="center" justifyContent="center" spacing={0.3}>
                           {(() => {
                             const type = getRaceType(race.title)
@@ -302,11 +310,16 @@ interface MobileRaceChipProps {
   race: RaceEntry
 }
 
-const MobileRaceChip = ({race}: MobileRaceChipProps) => {
+interface MobileRaceChipPropsWithFav extends MobileRaceChipProps {
+  isFavorite?: boolean
+}
+
+const MobileRaceChip = ({race, isFavorite = false}: MobileRaceChipPropsWithFav) => {
   const {category, time, venue} = race
   const color = getRaceBoxColor(race)
   return (
-    <Box sx={{px: 0.4, py: 0.2, borderRadius: 0.5, bgcolor: color, overflow: 'hidden'}}>
+    <Box sx={{position: 'relative', px: 0.4, py: 0.2, borderRadius: 0.5, bgcolor: color, overflow: 'hidden'}}>
+      <FavoriteIndicator isFavorite={isFavorite} size={8} tone="onColor" cornerAbsolute />
       {/* 장소 — 최대 2줄 */}
       {venue && (
         <Typography sx={{
@@ -348,13 +361,14 @@ interface DayCellDesktopProps {
   onSelect: () => void
   onRaceClick: (race: RaceEntry) => void
   onRegStartClick?: (races: RaceEntry[]) => void
+  isFavorite: (id: string) => boolean
 }
 
 const CELL_HEIGHT_DESKTOP = 140
 
 const DayCellDesktop = ({
   day, dayRaces, regStartRaces, dayEvents, inMonth, todayFlag, isPastDay, dayNum,
-  isSelected, onSelect, onRaceClick, onRegStartClick,
+  isSelected, onSelect, onRaceClick, onRegStartClick, isFavorite,
 }: DayCellDesktopProps) => {
   const visibleRaces = dayRaces.slice(0, MAX_SHOW)
   const overCount = dayRaces.length - MAX_SHOW
@@ -394,7 +408,7 @@ const DayCellDesktop = ({
       </Typography>
       <Box sx={{flex: 1, overflow: 'hidden'}}>
         {visibleRaces.map(race => (
-          <RaceRow key={race.id} race={race} onClick={() => onRaceClick(race)} />
+          <RaceRow key={race.id} race={race} onClick={() => onRaceClick(race)} isFavorite={isFavorite(race.id)} />
         ))}
       </Box>
       {hasMore && (
@@ -471,11 +485,12 @@ interface DayCellMobileProps {
   onSelect: () => void
   onRaceClick: (race: RaceEntry) => void
   onRegStartClick?: (races: RaceEntry[]) => void
+  isFavorite: (id: string) => boolean
 }
 
 const DayCellMobile = ({
   day, dayRaces, regStartRaces, dayEvents, inMonth, todayFlag, isPastDay, dayNum,
-  isSelected, onSelect, onRaceClick: _onRaceClick, onRegStartClick: _onRegStartClick,
+  isSelected, onSelect, onRaceClick: _onRaceClick, onRegStartClick: _onRegStartClick, isFavorite,
 }: DayCellMobileProps) => {
   const MAX_VISIBLE = 3
   const visible = dayRaces.slice(0, MAX_VISIBLE)
@@ -531,7 +546,7 @@ const DayCellMobile = ({
       {/* 종목 칩 — 가변 높이, 최대 3개 */}
       <Box sx={{display: 'flex', flexDirection: 'column', gap: 0.3}}>
         {visible.map(race => (
-          <MobileRaceChip key={race.id} race={race} />
+          <MobileRaceChip key={race.id} race={race} isFavorite={isFavorite(race.id)} />
         ))}
         {extra > 0 && (
           <Typography sx={{
@@ -622,6 +637,7 @@ const ColorLegend = () => (
 export const CalendarMonth = ({races, onRaceClick, onRegStartClick, calendarEvents = []}: CalendarMonthProps) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const {isFavorite} = useFavorites()
 
   const [current, setCurrent] = useState(() => new Date())
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
@@ -738,6 +754,7 @@ export const CalendarMonth = ({races, onRaceClick, onRegStartClick, calendarEven
                 }}
                 onRaceClick={onRaceClick}
                 onRegStartClick={onRegStartClick}
+                isFavorite={isFavorite}
               />
             )
           }
@@ -769,6 +786,7 @@ export const CalendarMonth = ({races, onRaceClick, onRegStartClick, calendarEven
               }}
               onRaceClick={onRaceClick}
               onRegStartClick={onRegStartClick}
+              isFavorite={isFavorite}
             />
           )
         })}
@@ -783,7 +801,16 @@ export const CalendarMonth = ({races, onRaceClick, onRegStartClick, calendarEven
           anchor="bottom"
           open={Boolean(selectedDate && (selectedRaces.length > 0 || selectedRegStartRaces.length > 0))}
           onClose={() => { setSelectedDate(null); setSelectedRegStartSnapshot([]) }}
-          slotProps={{paper: {sx: {borderRadius: '16px 16px 0 0', maxHeight: '60vh'}}}}>
+          slotProps={{paper: {sx: {
+            borderRadius: {xs: '16px 16px 0 0', sm: '16px 16px 0 0'},
+            maxHeight: '60vh',
+            width: '100%',
+            maxWidth: {xs: '100%', sm: 1100},
+            mx: 'auto',
+            left: {xs: 0, sm: '50%'},
+            right: {xs: 0, sm: 'auto'},
+            transform: {xs: 'none', sm: 'translateX(-50%)'},
+          }}}}>
           {/* 드로어 핸들 */}
           <Box sx={{display: 'flex', justifyContent: 'center', pt: 1, pb: 0.5}}>
             <Box sx={{width: 36, height: 4, borderRadius: 2, bgcolor: 'divider'}} />
@@ -885,6 +912,7 @@ export const CalendarMonth = ({races, onRaceClick, onRegStartClick, calendarEven
                 <DrawerRaceMatrix
                   races={selectedRaces}
                   onRaceClick={onRaceClick}
+                  isFavorite={isFavorite}
                 />
               </>
             )}

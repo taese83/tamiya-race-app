@@ -12,6 +12,7 @@ import {ko} from 'date-fns/locale'
 import type {RaceEntry} from '@/entities/race'
 import {CategoryChip} from '@/entities/race'
 import type {CalendarEvent} from '@/entities/calendar-event'
+import {FavoriteIndicator, useFavorites} from '@/features/race-favorite'
 
 interface CalendarWeekProps {
   races: RaceEntry[]
@@ -23,6 +24,7 @@ interface CalendarWeekProps {
 
 export const CalendarWeek = ({races, onRaceClick, onRegStartClick, calendarEvents = []}: CalendarWeekProps) => {
   const [current, setCurrent] = useState(() => new Date())
+  const {isFavorite} = useFavorites()
 
   const weekStart = startOfWeek(current, {weekStartsOn: 0})
   const weekEnd = endOfWeek(current, {weekStartsOn: 0})
@@ -116,7 +118,8 @@ export const CalendarWeek = ({races, onRaceClick, onRegStartClick, calendarEvent
                       aria-label={`${race.category} ${race.time} ${race.venue}`}
                       onClick={() => onRaceClick(race)}
                       onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) { e.preventDefault(); onRaceClick(race) } }}
-                      sx={{cursor: 'pointer', '&:focus-visible': {outline: '2px solid', outlineColor: 'primary.main', outlineOffset: 1}}}>
+                      sx={{position: 'relative', cursor: 'pointer', '&:focus-visible': {outline: '2px solid', outlineColor: 'primary.main', outlineOffset: 1}}}>
+                      <FavoriteIndicator isFavorite={isFavorite(race.id)} size={11} cornerAbsolute />
 
                       <Stack spacing={0.25}>
                         {race.time && (

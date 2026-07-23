@@ -62,20 +62,27 @@ function validCalendarView(v: string | undefined): CalendarViewType {
 export const usePageSettings = () => {
   // 초기값: localStorage 기반으로 ?s= 파람을 병합 (공유 파람의 키만 덮어씀)
   // ?? 대신 병합을 사용해 공유 파람에 없는 필드(venues, cats 등)는 localStorage 값을 유지한다
+  // onlyFavorites는 개인 기기 상태이므로 공유 파람으로 덮어쓰지 않는다.
   const [init] = useState<SavedSettings>(() => {
     const stored = loadFromStorage()
     const shared = readSharedParam()
-    return shared ? {...stored, ...shared} : stored
+    if (!shared) return stored
+    const {onlyFavorites: _sharedOnlyFavorites, ...sharedRest} = shared
+    return {...stored, ...sharedRest}
   })
 
   // 마운트 후 1회: ?s= 파람이 있으면 기존 localStorage에 병합 + URL clean (render phase 밖)
-  // saveToStorage(전체 교체) 대신 updateStorage(병합)을 사용해 기존 설정을 보존한다
+  // saveToStorage(전체 교체) 대신 updateStorage(병합)을 사용해 기존 설정을 보존한다.
+  // onlyFavorites는 개인 기기 상태이므로 공유값에서 제외한다.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const shared = params.get('s')
     if (!shared) return
     const decoded = decodeSettings(shared)
-    if (decoded) updateStorage(decoded)
+    if (decoded) {
+      const {onlyFavorites: _dropOnlyFavorites, ...rest} = decoded
+      updateStorage(rest)
+    }
     window.history.replaceState(null, '', window.location.pathname + window.location.hash)
   }, [])
 
@@ -89,6 +96,7 @@ export const usePageSettings = () => {
   const [selectedRegions, _setSelectedRegions] = useState<Region[]>(
     () => (init.regions ?? []) as Region[]
   )
+  const [onlyFavorites, _setOnlyFavorites] = useState<boolean>(() => init.onlyFavorites ?? false)
 
   const setViewMode = useCallback((v: 'list' | 'calendar') => {
     _setViewMode(v)
@@ -128,6 +136,12 @@ export const usePageSettings = () => {
     updateStorage({venues: undefined, cats: undefined, raceTypes: undefined, regions: undefined})
   }, [])
 
+  const setOnlyFavorites = useCallback((next: boolean) => {
+    _setOnlyFavorites(next)
+    updateStorage({onlyFavorites: next ? true : undefined})
+  }, [])
+
+  // currentSettings는 공유 URL 생성 대상 — onlyFavorites는 개인 기기 상태이므로 포함하지 않는다.
   const currentSettings: SavedSettings = {
     view: viewMode !== 'list' ? viewMode : undefined,
     cview: calendarView !== 'month' ? calendarView : undefined,
@@ -150,6 +164,8 @@ export const usePageSettings = () => {
     setSelectedRaceTypes,
     selectedRegions,
     setSelectedRegions,
+    onlyFavorites,
+    setOnlyFavorites,
     clearAllFilters,
     currentSettings,
   }

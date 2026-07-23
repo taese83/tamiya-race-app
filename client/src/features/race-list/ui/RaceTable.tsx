@@ -7,12 +7,12 @@ import {
 import {useTheme} from '@mui/material/styles'
 import {format, isPast, isToday, parseISO} from 'date-fns'
 import {ko} from 'date-fns/locale'
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import HowToRegIcon from '@mui/icons-material/HowToReg'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import type {RaceEntry} from '@/entities/race'
 import {CategoryChip} from '@/entities/race'
 import type {CalendarEvent} from '@/entities/calendar-event'
+import {FavoriteIndicator, useFavorites} from '@/features/race-favorite'
 import {RaceDetailDrawer} from './RaceDetailDrawer'
 import {RegistrationDrawer} from './RegistrationDrawer'
 
@@ -49,6 +49,7 @@ export const RaceTable = ({races, calendarEvents = []}: RaceTableProps) => {
   const [selectedRace, setSelectedRace] = useState<RaceEntry | null>(null)
   // 접수 상세 드로어 — venue별 경기 목록
   const [regDrawerRaces, setRegDrawerRaces] = useState<RaceEntry[]>([])
+  const {isFavorite} = useFavorites()
 
   const grouped = useMemo(() => groupByDate(races), [races])
 
@@ -99,7 +100,7 @@ export const RaceTable = ({races, calendarEvents = []}: RaceTableProps) => {
   return (
     <Box>
       <Typography variant="caption" color="text.secondary" sx={{mb: 1, display: 'block'}}>
-        총 {races.length}건 · 행 클릭 시 상세 정보(참가비·접수방법)를 확인할 수 있습니다
+        총 {races.length}건
       </Typography>
 
       {sortedDates.map(date => {
@@ -188,8 +189,11 @@ export const RaceTable = ({races, calendarEvents = []}: RaceTableProps) => {
                     onClick={() => setSelectedRace(race)}
                     sx={{borderRadius: 2, cursor: 'pointer', '&:active': {bgcolor: 'action.selected'}}}>
                     <CardContent sx={{p: '10px !important'}}>
-                      <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{mb: 0.5}}>
-                        <Typography variant="body2" sx={{fontWeight: 600, flex: 1}}>{race.title}</Typography>
+                      <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={0.75} sx={{mb: 0.5}}>
+                        <Stack direction="row" alignItems="center" spacing={0.5} sx={{flex: 1, minWidth: 0}}>
+                          <FavoriteIndicator isFavorite={isFavorite(race.id)} size={14} />
+                          <Typography variant="body2" sx={{fontWeight: 600}}>{race.title}</Typography>
+                        </Stack>
                         {race.time && (
                           <Typography variant="caption" sx={{fontWeight: 700, ml: 1, color: 'primary.main', whiteSpace: 'nowrap'}}>
                             {race.time}
@@ -199,13 +203,7 @@ export const RaceTable = ({races, calendarEvents = []}: RaceTableProps) => {
                       <Typography variant="caption" color="text.secondary" sx={{display: 'block', mb: 0.5}}>
                         📍 {race.venue}
                       </Typography>
-                      <Stack direction="row" justifyContent="space-between" alignItems="center">
-                        <CategoryChip category={race.category} />
-                        <Stack direction="row" alignItems="center" spacing={0.25}>
-                          <InfoOutlinedIcon sx={{fontSize: 12, color: 'text.disabled'}} />
-                          <Typography variant="caption" color="text.disabled" sx={{fontSize: '0.65rem'}}>상세보기</Typography>
-                        </Stack>
-                      </Stack>
+                      <CategoryChip category={race.category} />
                     </CardContent>
                   </Card>
                 ))}
@@ -247,7 +245,7 @@ export const RaceTable = ({races, calendarEvents = []}: RaceTableProps) => {
                           <TableCell>
                             <Stack direction="row" alignItems="center" spacing={1}>
                               <CategoryChip category={race.category} />
-                              <InfoOutlinedIcon sx={{fontSize: 14, color: 'text.disabled', ml: 'auto'}} />
+                              <FavoriteIndicator isFavorite={isFavorite(race.id)} size={14} />
                             </Stack>
                           </TableCell>
                         </TableRow>

@@ -1,9 +1,8 @@
 import {useMemo} from 'react'
 import {
   Box, Typography, Autocomplete, TextField, Chip,
-  Stack, ToggleButtonGroup, ToggleButton, Button, Divider,
+  Stack, ToggleButtonGroup, ToggleButton, Divider,
 } from '@mui/material'
-import ClearIcon from '@mui/icons-material/Clear'
 import type {RaceEntry} from '@/entities/race'
 import {
   RACE_TYPE_LABEL, RACE_TYPE_COLOR, REGION_LABEL,
@@ -50,19 +49,6 @@ export const RaceFilter = ({
 }: RaceFilterProps) => {
   const venues = useMemo(() => extractVenues(races), [races])
   const categories = useMemo(() => extractCategories(races), [races])
-
-  const hasFilter =
-    selectedVenues.length > 0 ||
-    selectedCategories.length > 0 ||
-    selectedRaceTypes.length > 0 ||
-    selectedRegions.length > 0
-
-  const clearAll = () => {
-    onVenuesChange([])
-    onCategoriesChange([])
-    onRaceTypesChange([])
-    onRegionsChange([])
-  }
 
   const toggleSx = {
     borderRadius: '16px !important',
@@ -177,19 +163,6 @@ export const RaceFilter = ({
         />
       </Box>
 
-      {/* 전체 초기화 */}
-      {hasFilter && (
-        <Box sx={{display: 'flex', justifyContent: 'flex-end'}}>
-          <Button
-            size="small"
-            variant="text"
-            startIcon={<ClearIcon sx={{fontSize: 13}} />}
-            onClick={clearAll}
-            sx={{fontSize: '0.72rem', py: 0.25, color: 'text.secondary'}}>
-            필터 전체 초기화
-          </Button>
-        </Box>
-      )}
     </Stack>
   )
 }

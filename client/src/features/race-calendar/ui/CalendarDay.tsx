@@ -4,7 +4,6 @@ import {
 } from '@mui/material'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import {format, isToday, isPast, startOfDay, addDays, subDays} from 'date-fns'
 import {ko} from 'date-fns/locale'
 import HowToRegIcon from '@mui/icons-material/HowToReg'
@@ -12,6 +11,7 @@ import type {RaceEntry} from '@/entities/race'
 import {CategoryChip} from '@/entities/race'
 import type {CalendarEvent} from '@/entities/calendar-event'
 import {CalendarEventChip} from '@/features/naver-calendar'
+import {FavoriteIndicator, useFavorites} from '@/features/race-favorite'
 
 interface CalendarDayProps {
   races: RaceEntry[]
@@ -22,6 +22,7 @@ interface CalendarDayProps {
 
 export const CalendarDay = ({races, onRaceClick, onRegStartClick, calendarEvents = []}: CalendarDayProps) => {
   const [current, setCurrent] = useState(() => new Date())
+  const {isFavorite} = useFavorites()
 
   const dateKey = format(current, 'yyyy.MM.dd')
   const dayEvents = calendarEvents.filter(e => e.date === dateKey)
@@ -189,18 +190,13 @@ export const CalendarDay = ({races, onRaceClick, onRegStartClick, calendarEvents
                 <Divider orientation="vertical" flexItem />
                 <Box sx={{flex: 1}}>
                   <Stack direction="row" alignItems="center" spacing={0.75} sx={{mb: 0.5}}>
+                    <FavoriteIndicator isFavorite={isFavorite(race.id)} size={14} />
                     <Typography variant="body2" sx={{fontWeight: 600}}>{race.title}</Typography>
                   </Stack>
                   <Typography variant="caption" color="text.secondary" sx={{display: 'block', mb: 0.5}}>
                     📍 {race.venue}
                   </Typography>
-                  <Stack direction="row" alignItems="center" justifyContent="space-between">
-                    <CategoryChip category={race.category} />
-                    <Stack direction="row" alignItems="center" spacing={0.25}>
-                      <InfoOutlinedIcon sx={{fontSize: 12, color: 'text.disabled'}} />
-                      <Typography variant="caption" sx={{fontSize: '0.65rem', color: 'text.disabled'}}>상세보기</Typography>
-                    </Stack>
-                  </Stack>
+                  <CategoryChip category={race.category} />
                 </Box>
               </Stack>
             </Paper>

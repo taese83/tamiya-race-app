@@ -13,6 +13,8 @@ export interface SavedSettings {
   cats?: string[]
   raceTypes?: string[]
   regions?: string[]
+  /** 즐겨찾기만 보기 — localStorage 전용 (공유 URL에는 포함하지 않는다) */
+  onlyFavorites?: boolean
 }
 
 /** 현재 설정을 base64로 인코딩 → ?s= 파람 값으로 사용 (한글 안전) */
@@ -58,5 +60,7 @@ export function sanitizeSettings(parsed: Record<string, unknown>): SavedSettings
     result.raceTypes = (parsed['raceTypes'] as unknown[]).filter((x): x is string => ['world', 'asia', 'station'].includes(x as string))
   if (Array.isArray(parsed['regions']))
     result.regions = (parsed['regions'] as unknown[]).filter((x): x is string => ['seoul', 'busan'].includes(x as string))
+  if (typeof parsed['onlyFavorites'] === 'boolean')
+    result.onlyFavorites = parsed['onlyFavorites']
   return result
 }

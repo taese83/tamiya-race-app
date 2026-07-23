@@ -20,6 +20,7 @@ import type {RaceEntry} from '@/entities/race'
 import {CategoryChip} from '@/entities/race'
 import {getRaceType, getRegion, RACE_TYPE_LABEL, RACE_TYPE_COLOR, REGION_LABEL} from '@/shared/lib/raceMeta'
 import {getRulesUrl} from '@/shared/lib/raceRules'
+import {FavoriteToggle, useFavorites} from '@/features/race-favorite'
 
 interface RaceDetailDrawerProps {
   race: RaceEntry | null
@@ -125,6 +126,7 @@ const InquiryText = ({text}: {text: string}) => {
 export const RaceDetailDrawer = ({race, onClose}: RaceDetailDrawerProps) => {
   const wrId = race?.id.split('-')[0] ?? ''
   const rulesUrl = race ? getRulesUrl(race.category) : null
+  const {isFavorite, toggle, isReady: favoritesReady} = useFavorites()
 
   const {data, isLoading, isError} = useQuery({
     queryKey: raceDetailQueryKey(wrId),
@@ -151,6 +153,13 @@ export const RaceDetailDrawer = ({race, onClose}: RaceDetailDrawerProps) => {
 
         {/* 헤더 */}
         <Box sx={{px: 2.5, py: 2, display: 'flex', alignItems: 'flex-start', gap: 1, borderBottom: '1px solid', borderColor: 'divider'}}>
+          {race && (
+            <FavoriteToggle
+              isFavorite={isFavorite(race.id)}
+              disabled={!favoritesReady}
+              onToggle={() => toggle(race.id)}
+            />
+          )}
           <Box sx={{flex: 1}}>
             <Stack direction="row" spacing={0.75} alignItems="center" flexWrap="wrap" sx={{mb: 0.5}}>
               {race && <CategoryChip category={race.category} />}

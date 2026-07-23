@@ -2,14 +2,17 @@ import {useMemo, useState, useCallback, useRef, useEffect} from 'react'
 import {useQuery} from '@tanstack/react-query'
 import {
   Box, Typography, AppBar, Toolbar, IconButton,
-  CircularProgress, Alert, Stack, Chip,
-  ToggleButtonGroup, ToggleButton, Paper, Collapse,
+  CircularProgress, Alert, Stack, Chip, Divider,
+  ToggleButtonGroup, ToggleButton, Popover,
   Button, Badge, Tooltip, Fab,
+  Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
 } from '@mui/material'
 import ViewListIcon from '@mui/icons-material/ViewList'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import TodayIcon from '@mui/icons-material/Today'
+import TurnedInIcon from '@mui/icons-material/TurnedIn'
+import TurnedInNotIcon from '@mui/icons-material/TurnedInNot'
 import PermContactCalendarIcon from '@mui/icons-material/PermContactCalendar'
 import {format} from 'date-fns'
 import {RACES_QUERY_KEY, fetchRaces} from '@/entities/race'
@@ -23,6 +26,7 @@ import {ShareButton} from '@/features/race-share/ui/ShareButton'
 import {usePageSettings} from '@/features/race-filter/model/usePageSettings'
 import {getRaceType, getRegion} from '@/shared/lib/raceMeta'
 import {useNaverCalendar, NaverCalendarDrawer} from '@/features/naver-calendar'
+import {useFavorites} from '@/features/race-favorite'
 
 function matchCategory(category: string, filter: string): boolean {
   return category.includes(filter.replace(' 클래스', ''))
@@ -37,11 +41,16 @@ export const RaceListPage = () => {
     selectedCategories, setSelectedCategories,
     selectedRaceTypes, setSelectedRaceTypes,
     selectedRegions, setSelectedRegions,
+    onlyFavorites, setOnlyFavorites,
     clearAllFilters,
     currentSettings,
   } = usePageSettings()
 
-  const [showFilter, setShowFilter] = useState(false)
+  const {favorites, count: favoriteCount, isReady: favoritesReady, clearAll: clearAllFavorites} = useFavorites()
+  const [confirmClearOpen, setConfirmClearOpen] = useState(false)
+
+  const [filterAnchorEl, setFilterAnchorEl] = useState<HTMLElement | null>(null)
+  const showFilter = Boolean(filterAnchorEl)
   const [calendarSelectedRace, setCalendarSelectedRace] = useState<RaceEntry | null>(null)
   // 캘린더: todayKey 증가 → CalendarDay/Week/Month remount → 오늘 날짜로 초기화
   const [calendarTodayKey, setCalendarTodayKey] = useState(0)
@@ -58,17 +67,21 @@ export const RaceListPage = () => {
     retry: 1,
   })
 
-  // ── 필터 적용 ────────────────────────────────────────────────────────────────
+  // ── 필터 적용 (즐겨찾기 게이팅 → 사용자 필터) ───────────────────────────
+  // onlyFavorites=true이면 favorites Set을 base로 좁힌 뒤 그 위에 기존 4축 필터를 적용한다.
   const filteredRaces = useMemo(() => {
     if (!data?.data) return []
     return data.data.filter(r => {
+      if (onlyFavorites && !favorites.has(r.id)) return false
       const venueOk = selectedVenues.length === 0 || selectedVenues.includes(r.venue)
       const catOk = selectedCategories.length === 0 || selectedCategories.some((c: string) => matchCategory(r.category, c))
       const typeOk = selectedRaceTypes.length === 0 || selectedRaceTypes.includes(getRaceType(r.title))
       const regionOk = selectedRegions.length === 0 || selectedRegions.includes(getRegion(r.venue))
       return venueOk && catOk && typeOk && regionOk
     })
-  }, [data, selectedVenues, selectedCategories, selectedRaceTypes, selectedRegions])
+  }, [data, selectedVenues, selectedCategories, selectedRaceTypes, selectedRegions, onlyFavorites, favorites])
+
+  const showEmptyFavorites = onlyFavorites && favoritesReady && favorites.size === 0
 
   // 오늘 날짜 경기 — filteredRaces 기반 (캘린더와 동일 로직, 필터 적용됨)
   const todayRaces = useMemo(() => {
@@ -119,9 +132,13 @@ export const RaceListPage = () => {
         <Toolbar sx={{
           minHeight: '52px !important',
           height: 52,
-          gap: 0.75,
+          gap: 1,
           flexWrap: 'nowrap',
           overflow: 'hidden',
+          width: '100%',
+          maxWidth: {xs: '100%', sm: viewMode === 'calendar' ? 1100 : 900},
+          mx: 'auto',
+          px: {xs: 2, sm: 2},
         }}>
           <Box
             component="img"
@@ -150,21 +167,47 @@ export const RaceListPage = () => {
             </Tooltip>
           )}
 
-          <Tooltip title={showFilter ? '필터 닫기' : '필터 열기'}>
-            <IconButton
-              size="small"
-              onClick={() => setShowFilter(v => !v)}
-              aria-label={showFilter ? '필터 닫기' : '필터 열기'}
-              color={activeFilterCount > 0 ? 'primary' : 'default'}>
-              <Badge
-                badgeContent={activeFilterCount}
-                color="primary"
-                sx={{'& .MuiBadge-badge': {fontSize: '0.6rem', height: 14, minWidth: 14, top: 2, right: 2}}}>
-                <FilterListIcon fontSize="small" />
-              </Badge>
-            </IconButton>
-          </Tooltip>
+          {/* 그룹 1: 스코프 (즐겨찾기 + 필터) — 데이터 집합을 좁히는 컨트롤 */}
+          <Stack direction="row" alignItems="center" sx={{gap: 0.25}}>
+            <Tooltip title={onlyFavorites ? '즐겨찾기만 보기 해제' : '즐겨찾기만 보기'}>
+              <IconButton
+                size="small"
+                onClick={() => setOnlyFavorites(!onlyFavorites)}
+                aria-label={onlyFavorites ? '즐겨찾기만 보기 해제' : '즐겨찾기만 보기'}
+                aria-pressed={onlyFavorites}
+                color={onlyFavorites ? 'primary' : 'default'}>
+                <Badge
+                  badgeContent={favoriteCount}
+                  color="primary"
+                  sx={{'& .MuiBadge-badge': {fontSize: '0.6rem', height: 14, minWidth: 14, top: 2, right: 2}}}>
+                  {onlyFavorites
+                    ? <TurnedInIcon fontSize="small" />
+                    : <TurnedInNotIcon fontSize="small" />}
+                </Badge>
+              </IconButton>
+            </Tooltip>
 
+            <Tooltip title={showFilter ? '필터 닫기' : '필터 열기'}>
+              <IconButton
+                size="small"
+                onClick={(e) => setFilterAnchorEl(prev => prev ? null : e.currentTarget)}
+                aria-label={showFilter ? '필터 닫기' : '필터 열기'}
+                aria-haspopup="dialog"
+                aria-expanded={showFilter}
+                color={activeFilterCount > 0 ? 'primary' : 'default'}>
+                <Badge
+                  badgeContent={activeFilterCount}
+                  color="primary"
+                  sx={{'& .MuiBadge-badge': {fontSize: '0.6rem', height: 14, minWidth: 14, top: 2, right: 2}}}>
+                  <FilterListIcon fontSize="small" />
+                </Badge>
+              </IconButton>
+            </Tooltip>
+          </Stack>
+
+          <Divider orientation="vertical" flexItem sx={{my: 1.25, borderColor: 'divider'}} />
+
+          {/* 그룹 2: 뷰 전환 — 표시 방식 */}
           <ToggleButtonGroup
             value={viewMode}
             exclusive
@@ -179,53 +222,84 @@ export const RaceListPage = () => {
             </ToggleButton>
           </ToggleButtonGroup>
 
+          <Divider orientation="vertical" flexItem sx={{my: 1.25, borderColor: 'divider'}} />
+
+          {/* 그룹 3: 액션 — 외부로 나가는 조작 */}
           {/* TODO: 내 캘린더 — iCal 502 이슈 해결 후 활성화 */}
           <ShareButton settings={currentSettings} />
         </Toolbar>
-
-        <Collapse in={showFilter}>
-          <Paper
-            square
-            elevation={0}
-            sx={{px: 2, py: 1.5, borderTop: '1px solid', borderColor: 'divider'}}>
-            <Stack direction={{xs: 'column', md: 'row'}} spacing={2} alignItems={{md: 'flex-start'}}>
-              <Box sx={{flex: 1}}>
-                <RaceFilter
-                  races={data?.data ?? []}
-                  selectedVenues={selectedVenues}
-                  selectedCategories={selectedCategories}
-                  selectedRaceTypes={selectedRaceTypes}
-                  selectedRegions={selectedRegions}
-                  onVenuesChange={setSelectedVenues}
-                  onCategoriesChange={setSelectedCategories}
-                  onRaceTypesChange={setSelectedRaceTypes}
-                  onRegionsChange={setSelectedRegions}
-                />
-              </Box>
-              {activeFilterCount > 0 && (
-                <Stack
-                  spacing={0.75}
-                  sx={{minWidth: 140, pt: {xs: 0, md: 3.5}, alignItems: {xs: 'flex-start', md: 'flex-end'}}}>
-                  <Chip
-                    label={`${filteredRaces.length}건 표시`}
-                    size="small"
-                    color="primary"
-                    variant="outlined"
-                    sx={{height: 22, fontSize: '0.7rem'}}
-                  />
-                  <Button
-                    size="small"
-                    variant="text"
-                    onClick={clearAllFilters}
-                    sx={{fontSize: '0.72rem', py: 0, color: 'text.secondary', minWidth: 0}}>
-                    전체 보기
-                  </Button>
-                </Stack>
-              )}
-            </Stack>
-          </Paper>
-        </Collapse>
       </AppBar>
+
+      {/* 필터 Popover — AppBar 밀어내리지 않고 오버레이로 표시 */}
+      <Popover
+        open={showFilter}
+        anchorEl={filterAnchorEl}
+        onClose={() => setFilterAnchorEl(null)}
+        anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}
+        transformOrigin={{vertical: 'top', horizontal: 'right'}}
+        slotProps={{paper: {sx: {mt: 0.5, width: {xs: 'calc(100vw - 16px)', sm: 480}, maxWidth: 520, maxHeight: 'calc(100vh - 80px)', overflow: 'auto'}}}}>
+        <Box sx={{p: 2}}>
+          {/* 즐겨찾기 섹션 — 필터 상위 개념, 개수와 전체 해제 접근 지점 */}
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+            sx={{mb: 1.5, pb: 1.5, borderBottom: '1px solid', borderColor: 'divider'}}>
+            <Stack direction="row" alignItems="center" spacing={0.75}>
+              <TurnedInIcon sx={{fontSize: 16, color: favoriteCount > 0 ? 'primary.main' : 'text.disabled'}} />
+              <Typography variant="caption" sx={{fontWeight: 700, fontSize: '0.72rem', color: 'text.secondary', letterSpacing: 0.3}}>
+                즐겨찾기 {favoriteCount}건
+              </Typography>
+            </Stack>
+            <Button
+              size="small"
+              variant="text"
+              color="error"
+              disabled={favoriteCount === 0}
+              onClick={() => setConfirmClearOpen(true)}
+              sx={{fontSize: '0.72rem', py: 0, minWidth: 0}}>
+              전체 해제
+            </Button>
+          </Stack>
+
+          {/* 필터 본체 */}
+          <RaceFilter
+            races={data?.data ?? []}
+            selectedVenues={selectedVenues}
+            selectedCategories={selectedCategories}
+            selectedRaceTypes={selectedRaceTypes}
+            selectedRegions={selectedRegions}
+            onVenuesChange={setSelectedVenues}
+            onCategoriesChange={setSelectedCategories}
+            onRaceTypesChange={setSelectedRaceTypes}
+            onRegionsChange={setSelectedRegions}
+          />
+
+          {/* 필터 요약 + 필터 해제 — 활성 필터가 있을 때만 */}
+          {activeFilterCount > 0 && (
+            <Stack
+              direction="row"
+              alignItems="center"
+              justifyContent="space-between"
+              sx={{mt: 1.5, pt: 1.5, borderTop: '1px solid', borderColor: 'divider'}}>
+              <Chip
+                label={`${filteredRaces.length}건 표시`}
+                size="small"
+                color="primary"
+                variant="outlined"
+                sx={{height: 22, fontSize: '0.7rem'}}
+              />
+              <Button
+                size="small"
+                variant="text"
+                onClick={clearAllFilters}
+                sx={{fontSize: '0.72rem', py: 0, color: 'text.secondary', minWidth: 0}}>
+                필터 전체 해제
+              </Button>
+            </Stack>
+          )}
+        </Box>
+      </Popover>
 
       <Box sx={{maxWidth: viewMode === 'calendar' ? 1100 : 900, mx: 'auto', px: 2, py: 3}}>
         {isLoading && (
@@ -241,7 +315,20 @@ export const RaceListPage = () => {
           </Alert>
         )}
 
-        {data != null && viewMode === 'list' && (
+        {data != null && showEmptyFavorites && (
+          <Stack alignItems="center" spacing={1.5} sx={{py: 8, color: 'text.secondary'}}>
+            <TurnedInNotIcon sx={{fontSize: 48, opacity: 0.4}} />
+            <Typography variant="body1" sx={{fontWeight: 600}}>즐겨찾기한 경기가 없습니다</Typography>
+            <Typography variant="body2" sx={{textAlign: 'center', maxWidth: 300, fontSize: '0.85rem'}}>
+              경기 상세 화면 왼쪽 상단의 깃발 아이콘을 눌러 즐겨찾기에 추가하세요.
+            </Typography>
+            <Button size="small" variant="text" onClick={() => setOnlyFavorites(false)}>
+              전체 경기 보기
+            </Button>
+          </Stack>
+        )}
+
+        {data != null && !showEmptyFavorites && viewMode === 'list' && (
           <>
             {todayRaces.length > 0 && (
               <TodayRaceHeader todayRaces={todayRaces} />
@@ -250,7 +337,7 @@ export const RaceListPage = () => {
           </>
         )}
 
-        {data != null && viewMode === 'calendar' && (
+        {data != null && !showEmptyFavorites && viewMode === 'calendar' && (
           <RaceCalendar
             races={filteredRaces}
             view={calendarView}
@@ -279,6 +366,28 @@ export const RaceListPage = () => {
         onAdd={naverCalendar.addSource}
         onRemove={naverCalendar.removeSource}
       />
+
+      {/* 즐겨찾기 전체 해제 confirm — destructive이므로 명시적 사용자 확인 */}
+      <Dialog
+        open={confirmClearOpen}
+        onClose={() => setConfirmClearOpen(false)}
+        aria-labelledby="clear-favorites-title">
+        <DialogTitle id="clear-favorites-title">즐겨찾기 전체 해제</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            즐겨찾기한 경기 {favoriteCount}건을 모두 해제합니다. 이 작업은 되돌릴 수 없습니다.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmClearOpen(false)}>취소</Button>
+          <Button
+            color="error"
+            variant="contained"
+            onClick={() => { clearAllFavorites(); setConfirmClearOpen(false) }}>
+            전체 해제
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* 오늘 날짜로 이동 FAB — 데이터 로드 후 항상 표시 */}
       {data != null && (
