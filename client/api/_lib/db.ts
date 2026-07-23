@@ -171,13 +171,16 @@ export async function deleteParticipation(profileId: number, raceId: string): Pr
 export interface ManualScoreRow {
   profile_id: number
   class: string
-  points: number
+  participate: number
+  rank1: number
+  rank2: number
+  rank3: number
 }
 
 export async function getManualScoresByProfile(profileId: number): Promise<ManualScoreRow[]> {
   const q = sql()
   const rows = await q`
-    SELECT profile_id, class, points FROM manual_scores_by_class WHERE profile_id = ${profileId}
+    SELECT profile_id, class, participate, rank1, rank2, rank3 FROM manual_scores_by_class WHERE profile_id = ${profileId}
   ` as unknown as ManualScoreRow[]
   return rows
 }
@@ -185,20 +188,27 @@ export async function getManualScoresByProfile(profileId: number): Promise<Manua
 export async function getManualScoresByUser(userId: string): Promise<ManualScoreRow[]> {
   const q = sql()
   const rows = await q`
-    SELECT m.profile_id, m.class, m.points FROM manual_scores_by_class m
+    SELECT m.profile_id, m.class, m.participate, m.rank1, m.rank2, m.rank3 FROM manual_scores_by_class m
     INNER JOIN profiles pr ON pr.id = m.profile_id
     WHERE pr.user_id = ${userId}
   ` as unknown as ManualScoreRow[]
   return rows
 }
 
-export async function setManualScore(profileId: number, cls: string, points: number): Promise<void> {
+export async function setManualScore(
+  profileId: number,
+  cls: string,
+  counts: {participate: number; rank1: number; rank2: number; rank3: number},
+): Promise<void> {
   const q = sql()
   await q`
-    INSERT INTO manual_scores_by_class (profile_id, class, points)
-    VALUES (${profileId}, ${cls}, ${points})
+    INSERT INTO manual_scores_by_class (profile_id, class, participate, rank1, rank2, rank3, points)
+    VALUES (${profileId}, ${cls}, ${counts.participate}, ${counts.rank1}, ${counts.rank2}, ${counts.rank3}, 0)
     ON CONFLICT (profile_id, class) DO UPDATE SET
-      points = EXCLUDED.points,
+      participate = EXCLUDED.participate,
+      rank1 = EXCLUDED.rank1,
+      rank2 = EXCLUDED.rank2,
+      rank3 = EXCLUDED.rank3,
       updated_at = NOW()
   `
 }

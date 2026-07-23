@@ -7,6 +7,12 @@ import type {ParticipationRow, ManualScoreRow, ProfileRow} from './db.js'
 export const CLASS_LIST = ['M.SPEED', 'M1', 'M2B', 'M2', 'M3', 'OPEN'] as const
 export type ClassKey = typeof CLASS_LIST[number]
 
+/** 누적 점수 계산에 포함되는 클래스. 나머지는 UI에 표시하되 total에서 제외. */
+export const SCORE_CLASSES: readonly ClassKey[] = ['M1', 'M2', 'M3']
+export function isScoreClass(cls: ClassKey): boolean {
+  return SCORE_CLASSES.includes(cls)
+}
+
 export type RaceType = 'world' | 'asia' | 'station'
 
 export function getRaceType(title: string): RaceType {
@@ -61,15 +67,20 @@ async function loadMetaMap(host: string): Promise<Map<string, RaceMeta>> {
   return map
 }
 
-/** 클래스별 세부 점수와 카운트 */
+/** 클래스별 세부 점수와 카운트. participate/rank1/rank2/rank3는 station+manual 합산. */
 export interface ClassStat {
-  station: number    // 자동 계산 (참여+순위)
-  manual: number     // 수동 입력
+  station: number    // 자동 계산 점수 (실참여 기준)
+  manual: number     // 수동 입력 카운트로부터 계산된 점수
   total: number      // station + manual
-  participate: number
-  rank1: number
+  participate: number  // 실참여 + 수동참여 합산
+  rank1: number        // 실1등 + 수동1등 합산
   rank2: number
   rank3: number
+  // 수동 카운트 원본 (편집 시 초기값)
+  manualParticipate: number
+  manualRank1: number
+  manualRank2: number
+  manualRank3: number
 }
 
 /** TMWC/TMAC 개별 참여 항목 (점수 계산 대상 아님, 히스토리 표시용) */
@@ -116,7 +127,11 @@ export interface AggregateScore {
 }
 
 function makeEmptyClassStat(): ClassStat {
-  return {station: 0, manual: 0, total: 0, participate: 0, rank1: 0, rank2: 0, rank3: 0}
+  return {
+    station: 0, manual: 0, total: 0,
+    participate: 0, rank1: 0, rank2: 0, rank3: 0,
+    manualParticipate: 0, manualRank1: 0, manualRank2: 0, manualRank3: 0,
+  }
 }
 
 function makeEmptyByClass(): Record<ClassKey, ClassStat> {
@@ -214,22 +229,32 @@ export async function computeAggregate(
     ps.challenges.entries.sort((a, b) => b.wr_id.localeCompare(a.wr_id))
   }
 
-  // 수동 점수 반영
+  // 수동 카운트 반영 — 원본 카운트 저장 + 합산 카운트에 반영 + manual 점수 계산
   for (const m of manuals) {
     const ps = byProfile.get(m.profile_id)
     if (!ps) continue
     const cls = m.class as ClassKey
-    if (ps.byClass[cls]) ps.byClass[cls].manual = m.points
+    const stat = ps.byClass[cls]
+    if (!stat) continue
+    stat.manualParticipate = m.participate
+    stat.manualRank1 = m.rank1
+    stat.manualRank2 = m.rank2
+    stat.manualRank3 = m.rank3
+    stat.participate += m.participate
+    stat.rank1 += m.rank1
+    stat.rank2 += m.rank2
+    stat.rank3 += m.rank3
+    stat.manual = m.participate * 1 + m.rank1 * 5 + m.rank2 * 3 + m.rank3 * 1
   }
 
-  // total, profileTotal, grandTotal 계산
+  // total 계산 (모든 클래스), profileTotal은 SCORE_CLASSES만 합산
   let grandTotal = 0
   for (const ps of byProfile.values()) {
     let profileTotal = 0
     for (const cls of CLASS_LIST) {
       const stat = ps.byClass[cls]
       stat.total = stat.station + stat.manual
-      profileTotal += stat.total
+      if (isScoreClass(cls)) profileTotal += stat.total
     }
     ps.profileTotal = profileTotal
     grandTotal += profileTotal

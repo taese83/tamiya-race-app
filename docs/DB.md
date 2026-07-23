@@ -68,3 +68,15 @@ psql "$DATABASE_URL_UNPOOLED" -f migrations/003_attended.sql
 - 신규 행의 default는 `false` (프로필 추가 시 '선정' 상태로 시작, 사용자가 체크박스로 실참여 확정)
 - 점수 계산: `attended=true` 인 행만 반영
 
+## 004 manual_scores_by_class 카운트 기반
+
+```bash
+psql "$DATABASE_URL_UNPOOLED" -f migrations/004_manual_counts.sql
+```
+
+### 004 영향
+- manual_scores_by_class에 `participate`, `rank1`, `rank2`, `rank3` 컬럼 추가 (모두 INTEGER >= 0)
+- 서버가 카운트로부터 점수 계산: `participate*1 + rank1*5 + rank2*3 + rank3*1`
+- 기존 `points` 컬럼 값은 모두 0으로 초기화 (재입력 필요). 컬럼 자체는 이후 사용 안 하나 삭제하지 않음
+- 클래스 카드의 chip에는 실참여 + 수동 카운트를 합산해 표시
+

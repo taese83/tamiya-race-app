@@ -89,7 +89,7 @@ export const AuthMenu = ({onShowParticipating, participationCount = 0, onShowSco
         {onShowScores && (
           <MenuItem onClick={() => { handleClose(); onShowScores() }}>
             <ListItemIcon><EmojiEventsIcon fontSize="small" /></ListItemIcon>
-            <ListItemText primary="스테이션 점수 확인" primaryTypographyProps={{fontSize: '0.85rem'}} />
+            <ListItemText primary="경기 기록" primaryTypographyProps={{fontSize: '0.85rem'}} />
           </MenuItem>
         )}
         {onManageProfiles && (

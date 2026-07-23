@@ -10,7 +10,7 @@ export {
 } from './model/useParticipations'
 export type {Participation} from './model/useParticipations'
 
-export {useScores, useSetManualScore, CLASS_LIST} from './model/useScores'
+export {useScores, useSetManualScore, CLASS_LIST, SCORE_CLASSES, isScoreClass} from './model/useScores'
 export type {ClassKey, ClassStat, ProfileScore, AggregateScore} from './model/useScores'
 
 export {ParticipationBox} from './ui/ParticipationBox'

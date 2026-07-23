@@ -44,7 +44,7 @@ export const ScoreLayer = ({open, onClose}: ScoreLayerProps) => {
     <>
       <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
         <DialogTitle sx={{fontSize: '1rem', fontWeight: 700, pb: 1}}>
-          스테이션 점수
+          경기 기록
         </DialogTitle>
         <DialogContent>
           {isLoading && (
@@ -136,7 +136,6 @@ const ProfilePanel = ({profile}: {profile: ProfileScore}) => {
                     {s.rank1 > 0 && <Chip label={`🥇${s.rank1}`} size="small" sx={{height: 18, fontSize: '0.68rem'}} />}
                     {s.rank2 > 0 && <Chip label={`🥈${s.rank2}`} size="small" sx={{height: 18, fontSize: '0.68rem'}} />}
                     {s.rank3 > 0 && <Chip label={`🥉${s.rank3}`} size="small" sx={{height: 18, fontSize: '0.68rem'}} />}
-                    {s.manual > 0 && <Chip label={`수동 ${s.manual}`} size="small" variant="outlined" sx={{height: 18, fontSize: '0.68rem'}} />}
                   </Stack>
                   <Typography variant="body2" sx={{fontWeight: 700, color: 'primary.main', fontSize: '0.9rem'}}>
                     {s.total}점
@@ -147,7 +146,7 @@ const ProfilePanel = ({profile}: {profile: ProfileScore}) => {
           </Stack>
         )}
         <Typography variant="caption" color="text.secondary" sx={{fontSize: '0.68rem', display: 'block', mt: 0.75}}>
-          참여 1점 + 순위 보너스 (1등 5, 2등 3, 3등 1). 스테이션 경기만 카운트.
+          참여 1점 + 순위 보너스 (1등 5, 2등 3, 3등 1). 스테이션 경기의 M1/M2/M3만 총점에 누적됩니다.
         </Typography>
       </Box>
 
@@ -192,7 +191,7 @@ const ProfilePanel = ({profile}: {profile: ProfileScore}) => {
 
       <Divider />
 
-      {/* 수동 누적 점수 (클래스별) */}
+      {/* 수동 점수 등록 (클래스별) */}
       <Box>
         <Button
           size="small"
@@ -203,23 +202,31 @@ const ProfilePanel = ({profile}: {profile: ProfileScore}) => {
             fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase',
             color: 'text.secondary', letterSpacing: 0.5, py: 0, minWidth: 0,
           }}>
-          수동 누적 점수 (클래스별)
+          수동 점수 등록 (클래스별)
         </Button>
         <Collapse in={manualOpen}>
           <Box sx={{mt: 1}}>
             <Typography variant="caption" color="text.secondary" sx={{fontSize: '0.7rem', display: 'block', mb: 1}}>
-              이전 경기 점수를 소급 적용할 때 사용합니다. 클래스별로 점수를 입력하면 해당 클래스 총점에 합산됩니다.
+              이전 경기 참여·순위 횟수를 입력하면 참여 1점 + 1등 5점 + 2등 3점 + 3등 1점 규칙으로 자동 계산해 클래스 총점과 카드 카운트에 합산됩니다.
             </Typography>
-            <Stack spacing={0.75}>
-              {CLASS_LIST.map(cls => (
-                <ManualScoreRow
-                  key={cls}
-                  cls={cls}
-                  currentManual={profile.byClass[cls].manual}
-                  onApply={(points) => setManual.mutate({profileId: profile.profile_id, class: cls, points})}
-                  disabled={setManual.isPending}
-                />
-              ))}
+            <Stack spacing={1.25}>
+              {CLASS_LIST.map(cls => {
+                const s = profile.byClass[cls]
+                return (
+                  <ManualCountRow
+                    key={cls}
+                    cls={cls}
+                    initial={{
+                      participate: s.manualParticipate,
+                      rank1: s.manualRank1,
+                      rank2: s.manualRank2,
+                      rank3: s.manualRank3,
+                    }}
+                    onApply={(counts) => setManual.mutate({profileId: profile.profile_id, class: cls, ...counts})}
+                    disabled={setManual.isPending}
+                  />
+                )
+              })}
             </Stack>
             {setManual.error && (
               <Typography variant="caption" color="error" sx={{fontSize: '0.7rem', mt: 0.5, display: 'block'}}>
@@ -233,46 +240,88 @@ const ProfilePanel = ({profile}: {profile: ProfileScore}) => {
   )
 }
 
-// ─── ManualScoreRow ───────────────────────────────────────────
+// ─── ManualCountRow ───────────────────────────────────────────
 
-interface ManualScoreRowProps {
+interface ManualCountRowProps {
   cls: ClassKey
-  currentManual: number
-  onApply: (points: number) => void
+  initial: {participate: number; rank1: number; rank2: number; rank3: number}
+  onApply: (counts: {participate: number; rank1: number; rank2: number; rank3: number}) => void
   disabled: boolean
 }
 
-const ManualScoreRow = ({cls, currentManual, onApply, disabled}: ManualScoreRowProps) => {
-  const [input, setInput] = useState<string>(String(currentManual))
+const ManualCountRow = ({cls, initial, onApply, disabled}: ManualCountRowProps) => {
+  const [participate, setParticipate] = useState<string>(String(initial.participate))
+  const [rank1, setRank1] = useState<string>(String(initial.rank1))
+  const [rank2, setRank2] = useState<string>(String(initial.rank2))
+  const [rank3, setRank3] = useState<string>(String(initial.rank3))
 
-  // 외부 currentManual이 바뀌면 입력값도 갱신 (다른 사용자가 저장 등)
-  useEffect(() => {
-    setInput(String(currentManual))
-  }, [currentManual])
+  // 외부 initial이 갱신되면 인풋도 갱신 (다른 세션 저장 반영)
+  useEffect(() => { setParticipate(String(initial.participate)) }, [initial.participate])
+  useEffect(() => { setRank1(String(initial.rank1)) }, [initial.rank1])
+  useEffect(() => { setRank2(String(initial.rank2)) }, [initial.rank2])
+  useEffect(() => { setRank3(String(initial.rank3)) }, [initial.rank3])
 
-  const n = Number(input)
-  const canApply =
-    input !== '' && Number.isFinite(n) && n >= 0 && n <= 100000 && Math.floor(n) !== currentManual
+  const parseCount = (s: string): number | null => {
+    if (s === '') return 0
+    const n = Number(s)
+    if (!Number.isFinite(n) || n < 0 || n > 10000) return null
+    return Math.floor(n)
+  }
+  const p = parseCount(participate)
+  const r1 = parseCount(rank1)
+  const r2 = parseCount(rank2)
+  const r3 = parseCount(rank3)
+  const allValid = p != null && r1 != null && r2 != null && r3 != null
+  const changed = allValid && (
+    p !== initial.participate || r1 !== initial.rank1 ||
+    r2 !== initial.rank2 || r3 !== initial.rank3
+  )
+  const computedPoints = allValid ? p * 1 + r1 * 5 + r2 * 3 + r3 * 1 : 0
 
   return (
-    <Stack direction="row" spacing={1} alignItems="center">
-      <Typography variant="body2" sx={{fontSize: '0.8rem', fontWeight: 600, minWidth: 70}}>{cls}</Typography>
-      <TextField
-        size="small"
-        type="number"
-        value={input}
-        onChange={e => setInput(e.target.value)}
-        inputProps={{min: 0, max: 100000, step: 1}}
-        sx={{flex: 1}}
-      />
-      <Button
-        variant="contained"
-        size="small"
-        disabled={!canApply || disabled}
-        onClick={() => onApply(Math.floor(n))}
-        sx={{minWidth: 56}}>
-        적용
-      </Button>
-    </Stack>
+    <Box sx={{px: 1, py: 0.75, borderRadius: 1, bgcolor: 'action.hover'}}>
+      <Stack direction="row" alignItems="center" spacing={1} sx={{mb: 0.5}}>
+        <Typography variant="body2" sx={{fontSize: '0.82rem', fontWeight: 700, minWidth: 70}}>{cls}</Typography>
+        <Typography variant="caption" color="text.secondary" sx={{fontSize: '0.7rem'}}>
+          {allValid ? `계산: ${computedPoints}점` : '숫자를 확인하세요'}
+        </Typography>
+      </Stack>
+      <Stack direction="row" spacing={0.75} alignItems="center" flexWrap="wrap" useFlexGap>
+        <CountField label="참여" value={participate} onChange={setParticipate} disabled={disabled} />
+        <CountField label="1등" value={rank1} onChange={setRank1} disabled={disabled} />
+        <CountField label="2등" value={rank2} onChange={setRank2} disabled={disabled} />
+        <CountField label="3등" value={rank3} onChange={setRank3} disabled={disabled} />
+        <Button
+          variant="contained"
+          size="small"
+          disabled={!allValid || !changed || disabled}
+          onClick={() => onApply({participate: p!, rank1: r1!, rank2: r2!, rank3: r3!})}
+          sx={{ml: 'auto', minWidth: 56, height: 32}}>
+          적용
+        </Button>
+      </Stack>
+    </Box>
   )
 }
+
+interface CountFieldProps {
+  label: string
+  value: string
+  onChange: (v: string) => void
+  disabled: boolean
+}
+
+const CountField = ({label, value, onChange, disabled}: CountFieldProps) => (
+  <Stack direction="row" alignItems="center" spacing={0.5}>
+    <Typography variant="caption" sx={{fontSize: '0.7rem', color: 'text.secondary', minWidth: 24}}>{label}</Typography>
+    <TextField
+      size="small"
+      type="number"
+      value={value}
+      onChange={e => onChange(e.target.value)}
+      disabled={disabled}
+      inputProps={{min: 0, max: 10000, step: 1, style: {padding: '4px 6px', width: 48, textAlign: 'center'}}}
+      sx={{'& .MuiOutlinedInput-root': {height: 32}}}
+    />
+  </Stack>
+)
