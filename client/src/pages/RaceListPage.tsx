@@ -111,7 +111,12 @@ export const RaceListPage = () => {
     : null
 
   const handleViewChange = (_: React.MouseEvent, v: 'list' | 'calendar' | null) => {
-    if (v != null) setViewMode(v)
+    if (v == null) return
+    // 뷰 전환 전에 스크롤을 상단으로 리셋
+    // 리스트에서 아래로 스크롤된 상태로 캘린더로 가면 컨텐츠 높이가 급감하며
+    // 스크롤 위치가 강제 조정되고 sticky AppBar가 detach/reattach하며 깜빡이는 것을 방지
+    window.scrollTo({top: 0, behavior: 'auto'})
+    setViewMode(v)
   }
 
   const activeFilterCount = selectedVenues.length + selectedCategories.length + selectedRaceTypes.length + selectedRegions.length
