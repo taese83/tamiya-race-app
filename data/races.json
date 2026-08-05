@@ -1260,15 +1260,6 @@
       "applyUrl": null,
       "applyButtonText": null
     },
-    "677": {
-      "wrId": "677",
-      "entranceFee": "종목당 10,000원(이용료 별도)",
-      "registrationDeadline": "현장 접수",
-      "registrationMethod": "현장 접수",
-      "inquiry": "010-6372-7111*자세한 문의 사항은 타미야 분당샤프트경기장에 전화주세요.",
-      "applyUrl": null,
-      "applyButtonText": null
-    },
     "679": {
       "wrId": "679",
       "entranceFee": "종목당 10,000원(이용료 별도)",
@@ -1296,30 +1287,12 @@
       "applyUrl": null,
       "applyButtonText": null
     },
-    "683": {
-      "wrId": "683",
-      "entranceFee": "종목당 5,000원씩",
-      "registrationDeadline": "레이스 시작 전까지",
-      "registrationMethod": "당일 현장 접수",
-      "inquiry": "02-362-2214*자세한 문의 사항은 타미야 홍대점에 전화주세요.",
-      "applyUrl": null,
-      "applyButtonText": null
-    },
     "684": {
       "wrId": "684",
       "entranceFee": "종목당 10,000원씩",
       "registrationDeadline": "당일현장접수",
       "registrationMethod": "당일현장접수",
       "inquiry": "1544-1391(평일 11:00~20:00)*자세한 문의 사항은 타미야 삼정타워점에 전화주세요.",
-      "applyUrl": null,
-      "applyButtonText": null
-    },
-    "685": {
-      "wrId": "685",
-      "entranceFee": "종목당 5,000원씩",
-      "registrationDeadline": "당일 현장 접수",
-      "registrationMethod": "당일 현장 접수",
-      "inquiry": "010-3599-4744*자세한 문의 사항은 타미야 센텀시티점에 전화주세요.",
       "applyUrl": null,
       "applyButtonText": null
     },
@@ -1419,15 +1392,6 @@
       "registrationDeadline": "당일 현장 접수",
       "registrationMethod": "당일 현장 접수",
       "inquiry": "010-9751-0142*자세한 문의 사항은 타미야 부산경기장에 전화주세요.",
-      "applyUrl": null,
-      "applyButtonText": null
-    },
-    "701": {
-      "wrId": "701",
-      "entranceFee": "종목당 5,000원씩",
-      "registrationDeadline": "레이스 시작 전까지",
-      "registrationMethod": "당일 현장 접수",
-      "inquiry": "010-3291-2214*자세한 문의 사항은 타미야 뉴코아아울렛 부천 팝업에 전화주세요.",
       "applyUrl": null,
       "applyButtonText": null
     },
@@ -1611,15 +1575,6 @@
       "applyUrl": null,
       "applyButtonText": null
     },
-    "729": {
-      "wrId": "729",
-      "entranceFee": "종목당 10,000원씩 (계좌이체: 카카오뱅크 3333-13-1152482 오석남)",
-      "registrationDeadline": "대회 전까지 사전 접수 가능",
-      "registrationMethod": "문자 접수 (※사전 접수자 이벤트 참가권 증정(현장접수 가능))",
-      "inquiry": "010-3020-8464*자세한 문의 사항은 타미야 인천SN미니카경기장에 전화주세요.",
-      "applyUrl": null,
-      "applyButtonText": null
-    },
     "730": {
       "wrId": "730",
       "entranceFee": "종목당 10,000원씩 (계좌이체: 카카오뱅크 3333-13-1152482 오석남)",
@@ -1646,17 +1601,8 @@
       "inquiry": "010-3291-2214*자세한 문의 사항은 타미야 뉴코아아울렛 부천 팝업에 전화주세요.",
       "applyUrl": null,
       "applyButtonText": null
-    },
-    "733": {
-      "wrId": "733",
-      "entranceFee": "종목당 5,000원씩",
-      "registrationDeadline": "레이스 시작 전까지",
-      "registrationMethod": "당일 현장 접수",
-      "inquiry": "010-3291-2214*자세한 문의 사항은 타미야 뉴코아아울렛 부천 팝업에 전화주세요.",
-      "applyUrl": null,
-      "applyButtonText": null
     }
   },
   "count": 98,
-  "cachedAt": "2026-08-04T16:50:54.909Z"
+  "cachedAt": "2026-08-05T16:43:01.058Z"
 }
