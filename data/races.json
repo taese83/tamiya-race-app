@@ -1,6 +1,270 @@
 {
   "data": [
     {
+      "id": "723-cd056243",
+      "wrId": "723",
+      "title": "스테이션 챌린지",
+      "venue": "홍대점",
+      "date": "2026.07.31",
+      "time": "19:30",
+      "category": "M3 클래스",
+      "note": "",
+      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=723"
+    },
+    {
+      "id": "696-94c36215",
+      "wrId": "696",
+      "title": "스테이션 챌린지",
+      "venue": "광복점",
+      "date": "2026.07.28",
+      "time": "21:00",
+      "category": "M1 클래스",
+      "note": "",
+      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=696"
+    },
+    {
+      "id": "725-6b473fd8",
+      "wrId": "725",
+      "title": "스테이션 챌린지",
+      "venue": "삼정타워점",
+      "date": "2026.07.26",
+      "time": "18:30",
+      "category": "M2 클래스",
+      "note": "",
+      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=725"
+    },
+    {
+      "id": "689-0bb42691",
+      "wrId": "689",
+      "title": "스테이션 챌린지",
+      "venue": "인천SN미니카경기장",
+      "date": "2026.07.26",
+      "time": "11:30",
+      "category": "M2B 클래스",
+      "note": "",
+      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=689"
+    },
+    {
+      "id": "689-d7f6871f",
+      "wrId": "689",
+      "title": "스테이션 챌린지",
+      "venue": "인천SN미니카경기장",
+      "date": "2026.07.26",
+      "time": "13:00",
+      "category": "M3 클래스",
+      "note": "",
+      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=689"
+    },
+    {
+      "id": "689-8a7f3ffe",
+      "wrId": "689",
+      "title": "스테이션 챌린지",
+      "venue": "인천SN미니카경기장",
+      "date": "2026.07.26",
+      "time": "15:00",
+      "category": "M2 클래스",
+      "note": "",
+      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=689"
+    },
+    {
+      "id": "689-35b50a1f",
+      "wrId": "689",
+      "title": "스테이션 챌린지",
+      "venue": "인천SN미니카경기장",
+      "date": "2026.07.26",
+      "time": "16:30",
+      "category": "M1 클래스",
+      "note": "",
+      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=689"
+    },
+    {
+      "id": "689-985fb4e5",
+      "wrId": "689",
+      "title": "스테이션 챌린지",
+      "venue": "인천SN미니카경기장",
+      "date": "2026.07.26",
+      "time": "18:00",
+      "category": "OPEN 클래스",
+      "note": "",
+      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=689"
+    },
+    {
+      "id": "691-27e32a83",
+      "wrId": "691",
+      "title": "스테이션 챌린지",
+      "venue": "수원VXR경기장",
+      "date": "2026.07.26",
+      "time": "11:00",
+      "category": "M3 클래스",
+      "note": "선착순 60명",
+      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=691"
+    },
+    {
+      "id": "691-9b3c57f7",
+      "wrId": "691",
+      "title": "스테이션 챌린지",
+      "venue": "수원VXR경기장",
+      "date": "2026.07.26",
+      "time": "13:00",
+      "category": "M2B 클래스",
+      "note": "선착순 60명",
+      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=691"
+    },
+    {
+      "id": "691-796789c2",
+      "wrId": "691",
+      "title": "스테이션 챌린지",
+      "venue": "수원VXR경기장",
+      "date": "2026.07.26",
+      "time": "15:00",
+      "category": "M2 클래스",
+      "note": "선착순 70명",
+      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=691"
+    },
+    {
+      "id": "691-e9bc07fe",
+      "wrId": "691",
+      "title": "스테이션 챌린지",
+      "venue": "수원VXR경기장",
+      "date": "2026.07.26",
+      "time": "17:00",
+      "category": "M1 클래스",
+      "note": "선착순 70명",
+      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=691"
+    },
+    {
+      "id": "704-8aff5986",
+      "wrId": "704",
+      "title": "스테이션 챌린지",
+      "venue": "마리오점",
+      "date": "2026.07.26",
+      "time": "16:00",
+      "category": "M1 클래스",
+      "note": "",
+      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=704"
+    },
+    {
+      "id": "709-6fda2f62",
+      "wrId": "709",
+      "title": "스테이션 챌린지",
+      "venue": "하남점",
+      "date": "2026.07.26",
+      "time": "13:00",
+      "category": "M2 클래스",
+      "note": "",
+      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=709"
+    },
+    {
+      "id": "709-5dd90d3b",
+      "wrId": "709",
+      "title": "스테이션 챌린지",
+      "venue": "하남점",
+      "date": "2026.07.26",
+      "time": "15:00",
+      "category": "M3 클래스",
+      "note": "각 선착순 20명",
+      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=709"
+    },
+    {
+      "id": "526-ab24d93a",
+      "wrId": "526",
+      "title": "스테이션 챌린지",
+      "venue": "센텀시티점",
+      "date": "2026.07.26",
+      "time": "13:00",
+      "category": "M3 클래스",
+      "note": "",
+      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=526"
+    },
+    {
+      "id": "715-dcefc773",
+      "wrId": "715",
+      "title": "TMWC 예선",
+      "venue": "부산경기장",
+      "date": "2026.07.26",
+      "time": "14:00",
+      "category": "OPEN 클래스",
+      "note": "선착순 45명 / 매장 오픈 10:30",
+      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=715"
+    },
+    {
+      "id": "637-315f4876",
+      "wrId": "637",
+      "title": "스테이션 챌린지",
+      "venue": "뉴코아아울렛 부천 팝업",
+      "date": "2026.07.25",
+      "time": "11:00",
+      "category": "M2B 클래스",
+      "note": "",
+      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=637"
+    },
+    {
+      "id": "637-87369dca",
+      "wrId": "637",
+      "title": "스테이션 챌린지",
+      "venue": "뉴코아아울렛 부천 팝업",
+      "date": "2026.07.25",
+      "time": "13:30",
+      "category": "M2 클래스",
+      "note": "",
+      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=637"
+    },
+    {
+      "id": "637-1103e22b",
+      "wrId": "637",
+      "title": "스테이션 챌린지",
+      "venue": "뉴코아아울렛 부천 팝업",
+      "date": "2026.07.25",
+      "time": "14:30",
+      "category": "M1 클래스",
+      "note": "",
+      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=637"
+    },
+    {
+      "id": "680-e1c88cfb",
+      "wrId": "680",
+      "title": "스테이션 챌린지",
+      "venue": "부산챔피언서킷",
+      "date": "2026.07.25",
+      "time": "21:00",
+      "category": "OPEN 클래스",
+      "note": "",
+      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=680"
+    },
+    {
+      "id": "721-3199494c",
+      "wrId": "721",
+      "title": "스테이션 챌린지",
+      "venue": "홍대점",
+      "date": "2026.07.24",
+      "time": "19:30",
+      "category": "M2 클래스",
+      "note": "",
+      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=721"
+    },
+    {
+      "id": "679-4e5cfb45",
+      "wrId": "679",
+      "title": "스테이션 챌린지",
+      "venue": "분당샤프트경기장",
+      "date": "2026.07.24",
+      "time": "21:30",
+      "category": "M1 클래스",
+      "note": "",
+      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=679"
+    },
+    {
+      "id": "630-0530f0f3",
+      "wrId": "630",
+      "title": "스테이션 챌린지",
+      "venue": "김해놀방",
+      "date": "2026.07.22",
+      "time": "21:00",
+      "category": "M3 클래스",
+      "note": "",
+      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=630"
+    },
+    {
       "id": "663-7bc97bba",
       "wrId": "663",
       "title": "스테이션 챌린지",
@@ -813,270 +1077,6 @@
       "category": "M2B 클래스",
       "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=714"
-    },
-    {
-      "id": "723-cd056243",
-      "wrId": "723",
-      "title": "스테이션 챌린지",
-      "venue": "홍대점",
-      "date": "2026.07.31",
-      "time": "19:30",
-      "category": "M3 클래스",
-      "note": "",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=723"
-    },
-    {
-      "id": "696-94c36215",
-      "wrId": "696",
-      "title": "스테이션 챌린지",
-      "venue": "광복점",
-      "date": "2026.07.28",
-      "time": "21:00",
-      "category": "M1 클래스",
-      "note": "",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=696"
-    },
-    {
-      "id": "725-6b473fd8",
-      "wrId": "725",
-      "title": "스테이션 챌린지",
-      "venue": "삼정타워점",
-      "date": "2026.07.26",
-      "time": "18:30",
-      "category": "M2 클래스",
-      "note": "",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=725"
-    },
-    {
-      "id": "689-0bb42691",
-      "wrId": "689",
-      "title": "스테이션 챌린지",
-      "venue": "인천SN미니카경기장",
-      "date": "2026.07.26",
-      "time": "11:30",
-      "category": "M2B 클래스",
-      "note": "",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=689"
-    },
-    {
-      "id": "689-d7f6871f",
-      "wrId": "689",
-      "title": "스테이션 챌린지",
-      "venue": "인천SN미니카경기장",
-      "date": "2026.07.26",
-      "time": "13:00",
-      "category": "M3 클래스",
-      "note": "",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=689"
-    },
-    {
-      "id": "689-8a7f3ffe",
-      "wrId": "689",
-      "title": "스테이션 챌린지",
-      "venue": "인천SN미니카경기장",
-      "date": "2026.07.26",
-      "time": "15:00",
-      "category": "M2 클래스",
-      "note": "",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=689"
-    },
-    {
-      "id": "689-35b50a1f",
-      "wrId": "689",
-      "title": "스테이션 챌린지",
-      "venue": "인천SN미니카경기장",
-      "date": "2026.07.26",
-      "time": "16:30",
-      "category": "M1 클래스",
-      "note": "",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=689"
-    },
-    {
-      "id": "689-985fb4e5",
-      "wrId": "689",
-      "title": "스테이션 챌린지",
-      "venue": "인천SN미니카경기장",
-      "date": "2026.07.26",
-      "time": "18:00",
-      "category": "OPEN 클래스",
-      "note": "",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=689"
-    },
-    {
-      "id": "691-27e32a83",
-      "wrId": "691",
-      "title": "스테이션 챌린지",
-      "venue": "수원VXR경기장",
-      "date": "2026.07.26",
-      "time": "11:00",
-      "category": "M3 클래스",
-      "note": "선착순 60명",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=691"
-    },
-    {
-      "id": "691-9b3c57f7",
-      "wrId": "691",
-      "title": "스테이션 챌린지",
-      "venue": "수원VXR경기장",
-      "date": "2026.07.26",
-      "time": "13:00",
-      "category": "M2B 클래스",
-      "note": "선착순 60명",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=691"
-    },
-    {
-      "id": "691-796789c2",
-      "wrId": "691",
-      "title": "스테이션 챌린지",
-      "venue": "수원VXR경기장",
-      "date": "2026.07.26",
-      "time": "15:00",
-      "category": "M2 클래스",
-      "note": "선착순 70명",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=691"
-    },
-    {
-      "id": "691-e9bc07fe",
-      "wrId": "691",
-      "title": "스테이션 챌린지",
-      "venue": "수원VXR경기장",
-      "date": "2026.07.26",
-      "time": "17:00",
-      "category": "M1 클래스",
-      "note": "선착순 70명",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=691"
-    },
-    {
-      "id": "704-8aff5986",
-      "wrId": "704",
-      "title": "스테이션 챌린지",
-      "venue": "마리오점",
-      "date": "2026.07.26",
-      "time": "16:00",
-      "category": "M1 클래스",
-      "note": "",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=704"
-    },
-    {
-      "id": "709-6fda2f62",
-      "wrId": "709",
-      "title": "스테이션 챌린지",
-      "venue": "하남점",
-      "date": "2026.07.26",
-      "time": "13:00",
-      "category": "M2 클래스",
-      "note": "",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=709"
-    },
-    {
-      "id": "709-5dd90d3b",
-      "wrId": "709",
-      "title": "스테이션 챌린지",
-      "venue": "하남점",
-      "date": "2026.07.26",
-      "time": "15:00",
-      "category": "M3 클래스",
-      "note": "각 선착순 20명",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=709"
-    },
-    {
-      "id": "526-ab24d93a",
-      "wrId": "526",
-      "title": "스테이션 챌린지",
-      "venue": "센텀시티점",
-      "date": "2026.07.26",
-      "time": "13:00",
-      "category": "M3 클래스",
-      "note": "",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=526"
-    },
-    {
-      "id": "715-dcefc773",
-      "wrId": "715",
-      "title": "TMWC 예선",
-      "venue": "부산경기장",
-      "date": "2026.07.26",
-      "time": "14:00",
-      "category": "OPEN 클래스",
-      "note": "선착순 45명 / 매장 오픈 10:30",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=715"
-    },
-    {
-      "id": "637-315f4876",
-      "wrId": "637",
-      "title": "스테이션 챌린지",
-      "venue": "뉴코아아울렛 부천 팝업",
-      "date": "2026.07.25",
-      "time": "11:00",
-      "category": "M2B 클래스",
-      "note": "",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=637"
-    },
-    {
-      "id": "637-87369dca",
-      "wrId": "637",
-      "title": "스테이션 챌린지",
-      "venue": "뉴코아아울렛 부천 팝업",
-      "date": "2026.07.25",
-      "time": "13:30",
-      "category": "M2 클래스",
-      "note": "",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=637"
-    },
-    {
-      "id": "637-1103e22b",
-      "wrId": "637",
-      "title": "스테이션 챌린지",
-      "venue": "뉴코아아울렛 부천 팝업",
-      "date": "2026.07.25",
-      "time": "14:30",
-      "category": "M1 클래스",
-      "note": "",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=637"
-    },
-    {
-      "id": "680-e1c88cfb",
-      "wrId": "680",
-      "title": "스테이션 챌린지",
-      "venue": "부산챔피언서킷",
-      "date": "2026.07.25",
-      "time": "21:00",
-      "category": "OPEN 클래스",
-      "note": "",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=680"
-    },
-    {
-      "id": "721-3199494c",
-      "wrId": "721",
-      "title": "스테이션 챌린지",
-      "venue": "홍대점",
-      "date": "2026.07.24",
-      "time": "19:30",
-      "category": "M2 클래스",
-      "note": "",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=721"
-    },
-    {
-      "id": "679-4e5cfb45",
-      "wrId": "679",
-      "title": "스테이션 챌린지",
-      "venue": "분당샤프트경기장",
-      "date": "2026.07.24",
-      "time": "21:30",
-      "category": "M1 클래스",
-      "note": "",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=679"
-    },
-    {
-      "id": "630-0530f0f3",
-      "wrId": "630",
-      "title": "스테이션 챌린지",
-      "venue": "김해놀방",
-      "date": "2026.07.22",
-      "time": "21:00",
-      "category": "M3 클래스",
-      "note": "",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=630"
     }
   ],
   "details": {
@@ -1260,6 +1260,15 @@
       "applyUrl": null,
       "applyButtonText": null
     },
+    "677": {
+      "wrId": "677",
+      "entranceFee": "종목당 10,000원(이용료 별도)",
+      "registrationDeadline": "현장 접수",
+      "registrationMethod": "현장 접수",
+      "inquiry": "010-6372-7111*자세한 문의 사항은 타미야 분당샤프트경기장에 전화주세요.",
+      "applyUrl": null,
+      "applyButtonText": null
+    },
     "679": {
       "wrId": "679",
       "entranceFee": "종목당 10,000원(이용료 별도)",
@@ -1287,12 +1296,30 @@
       "applyUrl": null,
       "applyButtonText": null
     },
+    "683": {
+      "wrId": "683",
+      "entranceFee": "종목당 5,000원씩",
+      "registrationDeadline": "레이스 시작 전까지",
+      "registrationMethod": "당일 현장 접수",
+      "inquiry": "02-362-2214*자세한 문의 사항은 타미야 홍대점에 전화주세요.",
+      "applyUrl": null,
+      "applyButtonText": null
+    },
     "684": {
       "wrId": "684",
       "entranceFee": "종목당 10,000원씩",
       "registrationDeadline": "당일현장접수",
       "registrationMethod": "당일현장접수",
       "inquiry": "1544-1391(평일 11:00~20:00)*자세한 문의 사항은 타미야 삼정타워점에 전화주세요.",
+      "applyUrl": null,
+      "applyButtonText": null
+    },
+    "685": {
+      "wrId": "685",
+      "entranceFee": "종목당 5,000원씩",
+      "registrationDeadline": "당일 현장 접수",
+      "registrationMethod": "당일 현장 접수",
+      "inquiry": "010-3599-4744*자세한 문의 사항은 타미야 센텀시티점에 전화주세요.",
       "applyUrl": null,
       "applyButtonText": null
     },
@@ -1392,6 +1419,15 @@
       "registrationDeadline": "당일 현장 접수",
       "registrationMethod": "당일 현장 접수",
       "inquiry": "010-9751-0142*자세한 문의 사항은 타미야 부산경기장에 전화주세요.",
+      "applyUrl": null,
+      "applyButtonText": null
+    },
+    "701": {
+      "wrId": "701",
+      "entranceFee": "종목당 5,000원씩",
+      "registrationDeadline": "레이스 시작 전까지",
+      "registrationMethod": "당일 현장 접수",
+      "inquiry": "010-3291-2214*자세한 문의 사항은 타미야 뉴코아아울렛 부천 팝업에 전화주세요.",
       "applyUrl": null,
       "applyButtonText": null
     },
@@ -1575,6 +1611,15 @@
       "applyUrl": null,
       "applyButtonText": null
     },
+    "729": {
+      "wrId": "729",
+      "entranceFee": "종목당 10,000원씩 (계좌이체: 카카오뱅크 3333-13-1152482 오석남)",
+      "registrationDeadline": "대회 전까지 사전 접수 가능",
+      "registrationMethod": "문자 접수 (※사전 접수자 이벤트 참가권 증정(현장접수 가능))",
+      "inquiry": "010-3020-8464*자세한 문의 사항은 타미야 인천SN미니카경기장에 전화주세요.",
+      "applyUrl": null,
+      "applyButtonText": null
+    },
     "730": {
       "wrId": "730",
       "entranceFee": "종목당 10,000원씩 (계좌이체: 카카오뱅크 3333-13-1152482 오석남)",
@@ -1601,8 +1646,17 @@
       "inquiry": "010-3291-2214*자세한 문의 사항은 타미야 뉴코아아울렛 부천 팝업에 전화주세요.",
       "applyUrl": null,
       "applyButtonText": null
+    },
+    "733": {
+      "wrId": "733",
+      "entranceFee": "종목당 5,000원씩",
+      "registrationDeadline": "레이스 시작 전까지",
+      "registrationMethod": "당일 현장 접수",
+      "inquiry": "010-3291-2214*자세한 문의 사항은 타미야 뉴코아아울렛 부천 팝업에 전화주세요.",
+      "applyUrl": null,
+      "applyButtonText": null
     }
   },
   "count": 98,
-  "cachedAt": "2026-08-05T16:43:01.058Z"
+  "cachedAt": "2026-08-07T15:54:55.511Z"
 }
