@@ -5,6 +5,6 @@ export {
   fetchRaces, fetchActiveRaces, fetchAllRaces, fetchRaceDetail,
   refreshRaces,
 } from './api/queries'
-export {CLASS_LIST, getCategoryColor} from './model/categoryColors'
+export {CLASS_LIST, getCategoryColor, classKeyOf} from './model/categoryColors'
 export type {ClassKey} from './model/categoryColors'
 export {CategoryChip} from './ui/CategoryChip'

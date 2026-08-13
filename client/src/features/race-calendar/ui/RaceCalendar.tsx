@@ -7,7 +7,7 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents'
 import {format} from 'date-fns'
 import type {RaceEntry} from '@/entities/race'
-import {CLASS_LIST} from '@/entities/race'
+import {CLASS_LIST, classKeyOf} from '@/entities/race'
 import type {CalendarEvent} from '@/entities/calendar-event'
 import type {CalendarViewType} from '@/shared/lib/raceSettings'
 import {CalendarDay} from './CalendarDay'
@@ -43,7 +43,7 @@ export const TodayRaceHeader = ({todayRaces}: TodayRaceHeaderProps) => (
     </Stack>
     <Stack direction="row" flexWrap="wrap" gap={0.75}>
       {CLASS_LIST.map(cls => {
-        const races = todayRaces.filter(r => r.category.includes(cls.key))
+        const races = todayRaces.filter(r => classKeyOf(r.category) === cls.key)
         const isActive = races.length > 0
         const isMulti = races.length > 1
 

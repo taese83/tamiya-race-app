@@ -12,7 +12,17 @@ export const CLASS_LIST = [
 
 export type ClassKey = (typeof CLASS_LIST)[number]['key']
 
+/**
+ * category 문자열("M2 클래스", "M2B 클래스", "OPEN 클래스" 등)에서 **정확한 클래스 토큰**을
+ * 추출한다. substring 매칭("M2".includes)은 M2가 M2B의 접두사라 M2B를 M2로 오인식하므로,
+ * 토큰을 뽑아 동치 비교한다. 정규식은 M2B의 [AB]를 탐욕적으로 먹어 M2B를 온전히 잡는다.
+ */
+export function classKeyOf(category: string): ClassKey | null {
+  const token = category.match(/M\.SPEED|M[0-9][AB]?|OPEN/)?.[0]
+  return CLASS_LIST.find(c => c.key === token)?.key ?? null
+}
+
 export function getCategoryColor(category: string): string {
-  const entry = CLASS_LIST.find(c => category.includes(c.key))
-  return entry?.color ?? '#546e7a'
+  const key = classKeyOf(category)
+  return CLASS_LIST.find(c => c.key === key)?.color ?? '#546e7a'
 }

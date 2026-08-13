@@ -15,7 +15,7 @@ import TurnedInIcon from '@mui/icons-material/TurnedIn'
 import TurnedInNotIcon from '@mui/icons-material/TurnedInNot'
 import PermContactCalendarIcon from '@mui/icons-material/PermContactCalendar'
 import {format} from 'date-fns'
-import {RACES_ACTIVE_QUERY_KEY, RACES_ALL_QUERY_KEY, fetchActiveRaces, fetchAllRaces} from '@/entities/race'
+import {RACES_ACTIVE_QUERY_KEY, RACES_ALL_QUERY_KEY, fetchActiveRaces, fetchAllRaces, classKeyOf} from '@/entities/race'
 import type {RacesResponse, RaceEntry} from '@/entities/race'
 import {RaceTable} from '@/features/race-list/ui/RaceTable'
 import {RaceDetailDrawer} from '@/features/race-list/ui/RaceDetailDrawer'
@@ -32,7 +32,8 @@ import {useParticipations, ScoreLayer} from '@/features/participation'
 import {ProfileManagerDialog} from '@/features/participation/ui/ProfileManagerDialog'
 
 function matchCategory(category: string, filter: string): boolean {
-  return category.includes(filter.replace(' 클래스', ''))
+  // 정확한 클래스 토큰 동치 비교 — substring("M2".includes)은 M2B를 M2로 오인식
+  return classKeyOf(category) !== null && classKeyOf(category) === classKeyOf(filter)
 }
 
 export const RaceListPage = () => {
