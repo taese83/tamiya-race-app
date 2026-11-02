@@ -441,50 +441,6 @@
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=692"
     },
     {
-      "id": "675-b55c8c0b",
-      "wrId": "675",
-      "title": "스테이션 챌린지",
-      "venue": "수원VXR경기장",
-      "date": "2026.09.13",
-      "time": "11:00",
-      "category": "M3 클래스",
-      "note": "선착순 50명",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=675"
-    },
-    {
-      "id": "675-1d67decc",
-      "wrId": "675",
-      "title": "스테이션 챌린지",
-      "venue": "수원VXR경기장",
-      "date": "2026.09.13",
-      "time": "13:00",
-      "category": "M2B 클래스",
-      "note": "선착순 70명",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=675"
-    },
-    {
-      "id": "675-922ef911",
-      "wrId": "675",
-      "title": "스테이션 챌린지",
-      "venue": "수원VXR경기장",
-      "date": "2026.09.13",
-      "time": "15:00",
-      "category": "M2 클래스",
-      "note": "선착순 70명",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=675"
-    },
-    {
-      "id": "675-88647321",
-      "wrId": "675",
-      "title": "스테이션 챌린지",
-      "venue": "수원VXR경기장",
-      "date": "2026.09.13",
-      "time": "17:00",
-      "category": "M1 클래스",
-      "note": "선착순 70명",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=675"
-    },
-    {
       "id": "482-cf3beb1d",
       "wrId": "482",
       "title": "스테이션 챌린지",
@@ -560,17 +516,6 @@
       "category": "M3 클래스",
       "note": "각 선착순 20명",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=734"
-    },
-    {
-      "id": "698-1a59260b",
-      "wrId": "698",
-      "title": "스테이션 챌린지",
-      "venue": "부산경기장",
-      "date": "2026.09.12",
-      "time": "13:00",
-      "category": "M1 클래스",
-      "note": "",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=698"
     },
     {
       "id": "707-4c4514b2",
@@ -736,50 +681,6 @@
       "category": "M2 클래스",
       "note": "각 선착순 20명",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=668"
-    },
-    {
-      "id": "728-ee9e6b66",
-      "wrId": "728",
-      "title": "스테이션 챌린지",
-      "venue": "인천SN미니카경기장",
-      "date": "2026.09.06",
-      "time": "11:00",
-      "category": "M3 클래스",
-      "note": "",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=728"
-    },
-    {
-      "id": "728-1f7133c1",
-      "wrId": "728",
-      "title": "스테이션 챌린지",
-      "venue": "인천SN미니카경기장",
-      "date": "2026.09.06",
-      "time": "13:00",
-      "category": "M1 클래스",
-      "note": "",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=728"
-    },
-    {
-      "id": "728-6cb08b2d",
-      "wrId": "728",
-      "title": "스테이션 챌린지",
-      "venue": "인천SN미니카경기장",
-      "date": "2026.09.06",
-      "time": "15:00",
-      "category": "OPEN 클래스",
-      "note": "",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=728"
-    },
-    {
-      "id": "728-38621d75",
-      "wrId": "728",
-      "title": "스테이션 챌린지",
-      "venue": "인천SN미니카경기장",
-      "date": "2026.09.06",
-      "time": "18:00",
-      "category": "M.SPEED 클래스",
-      "note": "",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=728"
     },
     {
       "id": "718-77de4d00",
@@ -1176,6 +1077,39 @@
       "category": "M.SPEED 클래스",
       "note": "",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=676"
+    },
+    {
+      "id": "675-e827b32a",
+      "wrId": "675",
+      "title": "TMAC 예선",
+      "venue": "수원VXR경기장",
+      "date": "2026.11.29",
+      "time": "11:30",
+      "category": "OPEN 클래스",
+      "note": "선착순 80명",
+      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=675"
+    },
+    {
+      "id": "728-3e31ab29",
+      "wrId": "728",
+      "title": "TMAC 예선",
+      "venue": "인천SN미니카경기장",
+      "date": "2026.11.15",
+      "time": "19:00",
+      "category": "OPEN 클래스",
+      "note": "",
+      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=728"
+    },
+    {
+      "id": "698-2147f879",
+      "wrId": "698",
+      "title": "TMAC 예선",
+      "venue": "부산경기장",
+      "date": "2026.11.14",
+      "time": "13:00",
+      "category": "OPEN 클래스",
+      "note": "선착순 45명",
+      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=698"
     }
   ],
   "details": {
@@ -1343,9 +1277,9 @@
     },
     "675": {
       "wrId": "675",
-      "entranceFee": "종목당 10,000원씩 (10:00 입장, 10:30~11:30 연습주행 / 별도의 경기장 이용료 없음 / 계좌이체: 농협은행 302-8491-7600-61 이성원(브이엑스알))",
-      "registrationDeadline": "9월 1일(화) 13:00 ~ 12일(토) 마감",
-      "registrationMethod": "방문 / 전화(031-295-8491) 또는 문자(010-8491-7600) 접수 (13:00 ~ 00:00 연락 가능)",
+      "entranceFee": "종목당 10,000원씩 (별도의 경기장 이용료 없음 / 10:30~11:30 연습주행 / 계좌이체: 농협은행 302-8491-7600-61 이성원(브이엑스알))",
+      "registrationDeadline": "11월 24일(화) 13:00 ~ 27일(금) 20:00 마감 (접수 마감 후 참가비 환불은 불가합니다.)",
+      "registrationMethod": "11월 24일(화) 13:00 이후부터 입금순 접수 (입금 후 참가 종목과 참가자 이름을 전화 또는 문자로 연락)",
       "inquiry": "031-295-8491 / 010-8491-7600 (평일 13:00 이후 연락 가능)*자세한 문의 사항은 타미야 수원VXR경기장에 전화주세요.",
       "applyUrl": null,
       "applyButtonText": null
@@ -1506,8 +1440,8 @@
     "698": {
       "wrId": "698",
       "entranceFee": "종목당 10,000원씩",
-      "registrationDeadline": "당일 현장 접수",
-      "registrationMethod": "당일 현장 접수",
+      "registrationDeadline": "11월 9일(월) 14:00 ~ 11월 13일(금) 18:00 마감",
+      "registrationMethod": "문자 접수 후 입금 선착순 (문자 접수: 010-9751-0142 / 계좌이체: 농협 356-0301-5621-13 임은옥)",
       "inquiry": "010-9751-0142*자세한 문의 사항은 타미야 부산경기장에 전화주세요.",
       "applyUrl": null,
       "applyButtonText": null
@@ -1704,8 +1638,8 @@
     "728": {
       "wrId": "728",
       "entranceFee": "종목당 10,000원씩 (계좌이체: 카카오뱅크 3333-13-1152482 오석남)",
-      "registrationDeadline": "9월 5일(토)까지 사전 접수 가능(이용료 별도)",
-      "registrationMethod": "문자 접수 (※사전 접수자 이벤트 참가권 증정(현장접수 가능))",
+      "registrationDeadline": "11월 9일(월) 10:00 ~ 18:00 마감",
+      "registrationMethod": "문자 접수 / 당일 현장 접수(※사전 접수자 종일권 이용 시 이용료 할인 / 접수 마감 후 참가비 환불은 불가합니다.)",
       "inquiry": "010-3020-8464*자세한 문의 사항은 타미야 인천SN미니카경기장에 전화주세요.",
       "applyUrl": null,
       "applyButtonText": null
@@ -1792,6 +1726,6 @@
       "applyButtonText": null
     }
   },
-  "count": 107,
-  "cachedAt": "2026-11-01T19:22:05.482Z"
+  "count": 101,
+  "cachedAt": "2026-11-02T22:59:23.055Z"
 }
