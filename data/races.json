@@ -1079,25 +1079,25 @@
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=676"
     },
     {
-      "id": "675-e827b32a",
+      "id": "675-7dd9a082",
       "wrId": "675",
       "title": "TMAC 예선",
       "venue": "수원VXR경기장",
-      "date": "2026.11.29",
+      "date": "2026.12.20",
       "time": "11:30",
       "category": "OPEN 클래스",
       "note": "선착순 80명",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=675"
     },
     {
-      "id": "728-3e31ab29",
+      "id": "728-80c752e4",
       "wrId": "728",
       "title": "TMAC 예선",
       "venue": "인천SN미니카경기장",
-      "date": "2026.11.15",
+      "date": "2026.12.13",
       "time": "19:00",
       "category": "OPEN 클래스",
-      "note": "",
+      "note": "선착순 40명",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=728"
     },
     {
@@ -1277,9 +1277,9 @@
     },
     "675": {
       "wrId": "675",
-      "entranceFee": "종목당 10,000원씩 (별도의 경기장 이용료 없음 / 10:30~11:30 연습주행 / 계좌이체: 농협은행 302-8491-7600-61 이성원(브이엑스알))",
-      "registrationDeadline": "11월 24일(화) 13:00 ~ 27일(금) 20:00 마감 (접수 마감 후 참가비 환불은 불가합니다.)",
-      "registrationMethod": "11월 24일(화) 13:00 이후부터 입금순 접수 (입금 후 참가 종목과 참가자 이름을 전화 또는 문자로 연락)",
+      "entranceFee": "종목당 10,000원씩 (별도의 경기장 이용료 없음 / 10:00 입장, 10:30~11:30 연습주행 / 계좌이체: 농협은행 302-8491-7600-61 이성원(브이엑스알))",
+      "registrationDeadline": "12월 15일(화) 13:00 ~ 18일(금) 20:00 마감 (접수 마감 후 참가비 환불은 불가합니다.)",
+      "registrationMethod": "12월 15일(화) 13:00 이후부터 입금순 접수 (입금 후 참가 종목과 참가자 이름을 전화 또는 문자로 연락)",
       "inquiry": "031-295-8491 / 010-8491-7600 (평일 13:00 이후 연락 가능)*자세한 문의 사항은 타미야 수원VXR경기장에 전화주세요.",
       "applyUrl": null,
       "applyButtonText": null
@@ -1638,8 +1638,8 @@
     "728": {
       "wrId": "728",
       "entranceFee": "종목당 10,000원씩 (계좌이체: 카카오뱅크 3333-13-1152482 오석남)",
-      "registrationDeadline": "11월 9일(월) 10:00 ~ 18:00 마감",
-      "registrationMethod": "문자 접수 / 당일 현장 접수(※사전 접수자 종일권 이용 시 이용료 할인 / 접수 마감 후 참가비 환불은 불가합니다.)",
+      "registrationDeadline": "12월 8일(화) 11:00 ~ 11일(금) 18:00 마감",
+      "registrationMethod": "문자 접수 (※ 접수 마감 후 참가비 환불은 불가합니다. / 대회 코스는 화요일 설치 후 공개합니다.)",
       "inquiry": "010-3020-8464*자세한 문의 사항은 타미야 인천SN미니카경기장에 전화주세요.",
       "applyUrl": null,
       "applyButtonText": null
@@ -1727,5 +1727,5 @@
     }
   },
   "count": 101,
-  "cachedAt": "2026-11-24T01:59:53.439Z"
+  "cachedAt": "2026-11-24T23:45:32.093Z"
 }
