@@ -1090,6 +1090,17 @@
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=675"
     },
     {
+      "id": "698-dd03f415",
+      "wrId": "698",
+      "title": "TMAC 예선",
+      "venue": "부산경기장",
+      "date": "2026.12.19",
+      "time": "11:00",
+      "category": "OPEN 클래스",
+      "note": "선착순 45명",
+      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=698"
+    },
+    {
       "id": "728-80c752e4",
       "wrId": "728",
       "title": "TMAC 예선",
@@ -1099,17 +1110,6 @@
       "category": "OPEN 클래스",
       "note": "선착순 40명",
       "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=728"
-    },
-    {
-      "id": "698-2147f879",
-      "wrId": "698",
-      "title": "TMAC 예선",
-      "venue": "부산경기장",
-      "date": "2026.11.14",
-      "time": "13:00",
-      "category": "OPEN 클래스",
-      "note": "선착순 45명",
-      "detailUrl": "https://tamiya.co.kr/bbs/board.php?bo_table=club_race&wr_id=698"
     }
   ],
   "details": {
@@ -1439,8 +1439,8 @@
     },
     "698": {
       "wrId": "698",
-      "entranceFee": "종목당 10,000원씩",
-      "registrationDeadline": "11월 9일(월) 14:00 ~ 11월 13일(금) 18:00 마감",
+      "entranceFee": "종목당 10,000원씩 (매장 오픈 10:30)",
+      "registrationDeadline": "12월 14일(월) 14:00 ~ 18일(금) 18:00 마감",
       "registrationMethod": "문자 접수 후 입금 선착순 (문자 접수: 010-9751-0142 / 계좌이체: 농협 356-0301-5621-13 임은옥)",
       "inquiry": "010-9751-0142*자세한 문의 사항은 타미야 부산경기장에 전화주세요.",
       "applyUrl": null,
@@ -1727,5 +1727,5 @@
     }
   },
   "count": 101,
-  "cachedAt": "2026-11-25T23:28:11.933Z"
+  "cachedAt": "2026-11-26T23:29:00.165Z"
 }
